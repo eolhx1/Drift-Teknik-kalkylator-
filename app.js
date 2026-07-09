@@ -122,15 +122,7 @@ function renderCalc(category, calcId) {
     <div class="calc-page">
         <button id="backBtn" class="back-btn">← Tillbaka</button>
         <h2>${calc.namn} <button id="favoriteBtn" class="favorite-btn">${isFavorite(calcId) ? "⭐": "☆"}</button></h2>
-        
-        <div class="calc-info-title" onclick="toggleInfo()">
-            <span>Tips och riktvärden</span>
-            <span id="infoIcon">▼</span>
-        </div>
-        <div id="calcInfo" class="calc-info-content">
-            ${calc.info || ""}
-        </div>
-        
+    
         ${calc.inputs.map(i => i.unit ? `
             <div class="input-group">
                 <label>${i.label}</label>
@@ -142,6 +134,15 @@ function renderCalc(category, calcId) {
         
         <button id="resetBtn" class="reset-btn">Nollställ</button>
         <div class="result"></div>
+
+        <div class="calc-info-title" onclick="toggleInfo()">
+            <span>Tips och riktvärden</span>
+            <span id="infoIcon">▼</span>
+        </div>
+        <div id="calcInfo" class="calc-info-content">
+            ${calc.info || ""}
+        </div>
+        
     </div>`;
     
     // Event listeners
