@@ -118,16 +118,19 @@ function renderCalc(category, calcId) {
     const calc = findCalc(calcId);
     if (!calc) return;
 
-    // Här renderas kalkyl-sidan
     state.container.innerHTML = `
     <div class="calc-page">
         <button id="backBtn" class="back-btn">← Tillbaka</button>
         <h2>${calc.namn} <button id="favoriteBtn" class="favorite-btn">${isFavorite(calcId) ? "⭐": "☆"}</button></h2>
         
-        <div class="info-box" style="display: none; font-size: 0.9em; color: #666; margin-bottom: 15px; padding: 10px; border: 1px solid #ccc;">
+        <div class="calc-info-title" onclick="toggleInfo()">
+            <span>Tips och riktvärden</span>
+            <span id="infoIcon">▼</span>
+        </div>
+        <div id="calcInfo" class="calc-info-content">
             ${calc.info || ""}
         </div>
-            
+        
         ${calc.inputs.map(i => i.unit ? `
             <div class="input-group">
                 <label>${i.label}</label>
@@ -140,15 +143,6 @@ function renderCalc(category, calcId) {
         <button id="resetBtn" class="reset-btn">Nollställ</button>
         <div class="result"></div>
     </div>`;
-
-    // Skapa och lägg till info-knapp dynamiskt
-    const infoBox = state.container.querySelector(".info-box");
-    const infoBtn = document.createElement("button");
-    infoBtn.textContent = "ℹ️ Info";
-    infoBtn.className = "info-toggle";
-    infoBtn.style.marginLeft = "10px";
-    infoBtn.onclick = () => infoBox.style.display = (infoBox.style.display === "none") ? "block" : "none";
-    state.container.querySelector("h2").appendChild(infoBtn);
     
     // Event listeners
     document.getElementById("backBtn").addEventListener("click", showMainMenu);
@@ -156,7 +150,6 @@ function renderCalc(category, calcId) {
     document.getElementById("resetBtn").addEventListener("click", () => smartReset(calcId));
     state.container.querySelectorAll("input, select").forEach(el => el.addEventListener("input", () => runCalc(category, calcId)));
 }
-
 
 // --- 5. HJÄLPFUNKTIONER ---
 function clear(el) {
@@ -215,3 +208,22 @@ function searchCalculations() {
         state.subNav.appendChild(createButton(calc.namn, "sub-btn", () => renderCalc(calc.kategorier[0], calc.id)));
     });
 }
+// Info onclick
+window.toggleInfo = function() {
+    const info = document.getElementById("calcInfo");
+    const icon = document.getElementById("infoIcon");
+    if (!info || !icon) return;
+
+    if (info.style.display === "block") {
+        info.style.display = "none";
+        icon.textContent = "▼";
+    } else {
+        info.style.display = "block";
+        icon.textContent = "▲";
+    }
+};
+
+
+
+
+
