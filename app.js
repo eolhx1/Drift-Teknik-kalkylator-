@@ -140,6 +140,15 @@ function renderCalc(category, calcId) {
     <div class="result"></div>
     </div>`;
 
+// Lägg till detta i renderCalc efter att du skapat HTML:en:
+const infoBox = state.container.querySelector(".info-box");
+const infoBtn = document.createElement("button");
+infoBtn.textContent = "ℹ️ Info";
+infoBtn.className = "info-toggle";
+infoBtn.onclick = () => infoBox.style.display = (infoBox.style.display === "none") ? "block" : "none";
+state.container.querySelector("h2").appendChild(infoBtn);
+
+    
     document.getElementById("backBtn").addEventListener("click", showMainMenu);
     document.getElementById("favoriteBtn").addEventListener("click", () => toggleFavorite(calcId));
     document.getElementById("resetBtn").addEventListener("click", () => smartReset(calcId));
