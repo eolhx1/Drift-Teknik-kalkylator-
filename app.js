@@ -123,6 +123,11 @@ function renderCalc(category, calcId) {
     <div class="calc-page">
     <button id="backBtn" class="back-btn">← Tillbaka</button>
     <h2>${calc.namn} <button id="favoriteBtn" class="favorite-btn">${isFavorite(calcId) ? "⭐": "☆"}</button></h2>
+    
+    <div class="info-box" style="font-size: 0.9em; color: #666; margin-bottom: 15px;">
+        ${calc.info || ""}
+    </div>
+        
     ${calc.inputs.map(i => i.unit ? `
         <div class="input-group">
         <label>${i.label}</label>
