@@ -121,39 +121,42 @@ function renderCalc(category, calcId) {
     // Här renderas kalkyl-sidan
     state.container.innerHTML = `
     <div class="calc-page">
-    <button id="backBtn" class="back-btn">← Tillbaka</button>
-    <h2>${calc.namn} <button id="favoriteBtn" class="favorite-btn">${isFavorite(calcId) ? "⭐": "☆"}</button></h2>
-    
-    <div class="info-box" style="font-size: 0.9em; color: #666; margin-bottom: 15px;">
-        ${calc.info || ""}
-    </div>
+        <button id="backBtn" class="back-btn">← Tillbaka</button>
+        <h2>${calc.namn} <button id="favoriteBtn" class="favorite-btn">${isFavorite(calcId) ? "⭐": "☆"}</button></h2>
         
-    ${calc.inputs.map(i => i.unit ? `
-        <div class="input-group">
-        <label>${i.label}</label>
-        <div style="display:flex; gap:8px;">
-        <input type="text" data-id="${i.id}">
-        <select data-unit="${i.id}">${i.unit.map(u => `<option value="${u}">${u}</option>`).join("")}</select>
+        <div class="info-box" style="display: none; font-size: 0.9em; color: #666; margin-bottom: 15px; padding: 10px; border: 1px solid #ccc;">
+            ${calc.info || ""}
         </div>
-        </div>`: `<div class="input-group"><label>${i.label}</label><input type="text" data-id="${i.id}"></div>`).join("")}
-    <button id="resetBtn" class="reset-btn">Nollställ</button>
-    <div class="result"></div>
+            
+        ${calc.inputs.map(i => i.unit ? `
+            <div class="input-group">
+                <label>${i.label}</label>
+                <div style="display:flex; gap:8px;">
+                    <input type="text" data-id="${i.id}">
+                    <select data-unit="${i.id}">${i.unit.map(u => `<option value="${u}">${u}</option>`).join("")}</select>
+                </div>
+            </div>`: `<div class="input-group"><label>${i.label}</label><input type="text" data-id="${i.id}"></div>`).join("")}
+        
+        <button id="resetBtn" class="reset-btn">Nollställ</button>
+        <div class="result"></div>
     </div>`;
 
-// Lägg till detta i renderCalc efter att du skapat HTML:en:
-const infoBox = state.container.querySelector(".info-box");
-const infoBtn = document.createElement("button");
-infoBtn.textContent = "ℹ️ Info";
-infoBtn.className = "info-toggle";
-infoBtn.onclick = () => infoBox.style.display = (infoBox.style.display === "none") ? "block" : "none";
-state.container.querySelector("h2").appendChild(infoBtn);
-
+    // Skapa och lägg till info-knapp dynamiskt
+    const infoBox = state.container.querySelector(".info-box");
+    const infoBtn = document.createElement("button");
+    infoBtn.textContent = "ℹ️ Info";
+    infoBtn.className = "info-toggle";
+    infoBtn.style.marginLeft = "10px";
+    infoBtn.onclick = () => infoBox.style.display = (infoBox.style.display === "none") ? "block" : "none";
+    state.container.querySelector("h2").appendChild(infoBtn);
     
+    // Event listeners
     document.getElementById("backBtn").addEventListener("click", showMainMenu);
     document.getElementById("favoriteBtn").addEventListener("click", () => toggleFavorite(calcId));
     document.getElementById("resetBtn").addEventListener("click", () => smartReset(calcId));
     state.container.querySelectorAll("input, select").forEach(el => el.addEventListener("input", () => runCalc(category, calcId)));
 }
+
 
 // --- 5. HJÄLPFUNKTIONER ---
 function clear(el) {
