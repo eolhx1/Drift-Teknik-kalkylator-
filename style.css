@@ -194,26 +194,30 @@ input:focus {
 /* ==========================================================================
    5. INFORMATION & HJÄLPTEXTER
    ========================================================================== */
-.calc-info-title {
-    margin-top: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-}
-
 .calc-info-content {
     display: none;
     padding: 10px;
     background: #f8f9fa;
-    border-left: 4px solid var(--primary-color);
+    border-left: 4px solid #0066cc;
     border-radius: 8px;
     margin-top: 5px;
     white-space: pre-line;
     line-height: 1.4;
     color: #444;
     overflow: hidden;
+    transition: all 0.2s ease;
 }
+
+.calc-info-title {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    color: #0066cc;
+}
+
 
 /* Toast-behållaren */
 .toast {
