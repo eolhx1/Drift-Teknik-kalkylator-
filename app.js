@@ -209,7 +209,7 @@ function searchCalculations() {
         state.subNav.appendChild(createButton(calc.namn, "sub-btn", () => renderCalc(calc.kategorier[0], calc.id)));
     });
 }
-// Info onclick
+// "Info" onclick
 window.toggleInfo = function() {
     const info = document.getElementById("calcInfo");
     const icon = document.getElementById("infoIcon");
