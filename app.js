@@ -17,6 +17,7 @@ const state = {
 
 // --- 2. INITIALISERING ---
 document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("settingsBtn").addEventListener("click", showSettings);
     if (state.searchBox) {
         state.searchBox.addEventListener("input", debounce(searchCalculations, 200));
     }
@@ -151,6 +152,32 @@ function renderCalc(category, calcId) {
     document.getElementById("resetBtn").addEventListener("click", () => smartReset(calcId));
     state.container.querySelectorAll("input, select").forEach(el => el.addEventListener("input", () => runCalc(category, calcId)));
 }
+
+
+
+// Skapar showSettings-funktionen
+function showSettings() {
+    clear(state.container);
+        state.mainNav.classList.add("hidden");
+            state.subNav.classList.add("hidden");
+                if (state.searchBox) state.searchBox.style.display = "none";
+
+                    state.container.innerHTML = `
+                        <div class="calc-page">
+                                <button id="backBtn" class="back-btn">← Tillbaka</button>
+                                        <h2>Inställningar</h2>
+                                                <div class="settings-list">
+                                                            <div class="setting-item">
+                                                                            <p>Version: 1.0.0</p>
+                                                                                        </div>
+                                                                                                    <div class="setting-item">
+                                                                                                                    <button onclick="localStorage.clear(); alert('Data rensad!'); location.reload();">Rensa all data</button>
+                                                                                                                                </div>
+                                                                                                                                        </div>
+                                                                                                                                            </div>`;
+
+                                                                                                                                                document.getElementById("backBtn").addEventListener("click", showMainMenu);
+                                                                                                                                                }
 
 // --- 5. HJÄLPFUNKTIONER ---
 function clear(el) {
