@@ -278,5 +278,23 @@ input:focus {
                 color: #0066cc;
                 }
 
-
+.app-header {
+        display: flex;
+            justify-content: space-between; /* Skjuter isär text och knapp */
+                align-items: center;
+                    padding: 10px 15px;
+                        background: #0066cc; /* Snyggt med en färg här */
+                            color: white;
+                            }
+                            .app-title {
+                                font-size: 1.2rem; /* Mindre text för att spara plats */
+                                    margin: 0;
+                                    }
+                                    .settings-btn {
+                                        background: none;
+                                            border: none;
+                                                font-size: 20px;
+                                                    color: white; /* Matchar rubriken */
+                                                        cursor: pointer;
+                                                        }
 
