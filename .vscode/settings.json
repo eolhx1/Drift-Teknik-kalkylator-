@@ -1,0 +1,6 @@
+{
+    "editor.formatOnSave": true,
+    "workbench.colorTheme": "Dark Modern",
+    "editor.formatOnPaste": true,
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+}

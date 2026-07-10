@@ -90,8 +90,8 @@ function showSubMenu(categoryKey) {
     clear(state.subNav);
     state.subNav.classList.add("active");
 
-    const list = (categoryKey === "recent") ? getRecent():
-    (categoryKey === "favoriter") ? getFavorites(): null;
+    const list = (categoryKey === "recent") ? getRecent() :
+        (categoryKey === "favoriter") ? getFavorites() : null;
 
     if (list) {
         if (list.length === 0) {
@@ -122,7 +122,7 @@ function renderCalc(category, calcId) {
     state.container.innerHTML = `
     <div class="calc-page">
         <button id="backBtn" class="back-btn">← Tillbaka</button>
-        <h2>${calc.namn} <button id="favoriteBtn" class="favorite-btn">${isFavorite(calcId) ? "⭐": "☆"}</button></h2>
+        <h2>${calc.namn} <button id="favoriteBtn" class="favorite-btn">${isFavorite(calcId) ? "⭐" : "☆"}</button></h2>
     
         ${calc.inputs.map(i => i.unit ? `
             <div class="input-group">
@@ -145,7 +145,7 @@ function renderCalc(category, calcId) {
         </div>
         
     </div>`;
-    
+
     // Event listeners
     document.getElementById("backBtn").addEventListener("click", showMainMenu);
     document.getElementById("favoriteBtn").addEventListener("click", () => toggleFavorite(calcId));
@@ -156,28 +156,37 @@ function renderCalc(category, calcId) {
 
 
 // Skapar showSettings-funktionen
+
 function showSettings() {
     clear(state.container);
-        state.mainNav.classList.add("hidden");
-            state.subNav.classList.add("hidden");
-                if (state.searchBox) state.searchBox.style.display = "none";
+    state.mainNav.classList.add("hidden");
+    state.subNav.classList.add("hidden");
+    if (state.searchBox) state.searchBox.style.display = "none";
 
-                    state.container.innerHTML = `
-                        <div class="calc-page">
-                                <button id="backBtn" class="back-btn">← Tillbaka</button>
-                                        <h2>Inställningar</h2>
-                                                <div class="settings-list">
-                                                            <div class="setting-item">
-                                                                            <p>Version: 1.0.0</p>
-                                                                                        </div>
-                                                                                                    <div class="setting-item">
-                                                                                                                    <button onclick="localStorage.clear(); alert('Data rensad!'); location.reload();">Rensa all data</button>
-                                                                                                                                </div>
-                                                                                                                                        </div>
-                                                                                                                                            </div>`;
+    state.container.innerHTML = `
+    <div class="calc-page">
+        <button id="backBtn" class="back-btn">← Tillbaka</button>
+        <h2>Inställningar & Om</h2>
+        
+        <div class="settings-section">
+            <h3>App-inställningar</h3>
+            <button class="nav-btn" onclick="localStorage.clear(); alert('All data (favoriter/senaste) är nu rensad.'); location.reload();">
+                Rensa all sparad data
+            </button>
+        </div>
 
-                                                                                                                                                document.getElementById("backBtn").addEventListener("click", showMainMenu);
-                                                                                                                                                }
+        <div class="settings-section" style="margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
+            <h3>Om Drift Teknik</h3>
+            <p style="font-size: 0.9em; color: #555;">
+                <strong>Version:</strong> 1.0.0<br>
+                Detta verktyg är utvecklat för snabba tekniska beräkningar inom ventilation, VS, el och styrteknik.<br><br>
+                Syftet är att underlätta vardagen för tekniker genom att tillhandahålla korrekta formler och snabba svar direkt i mobilen.
+            </p>
+        </div>
+    </div>`;
+
+    document.getElementById("backBtn").addEventListener("click", showMainMenu);
+}
 
 // --- 5. HJÄLPFUNKTIONER ---
 function clear(el) {
@@ -201,7 +210,7 @@ function isFavorite(calcId) {
 }
 function toggleFavorite(calcId) {
     let fav = getFavorites();
-    fav = fav.includes(calcId) ? fav.filter(id => id !== calcId): [...fav,
+    fav = fav.includes(calcId) ? fav.filter(id => id !== calcId) : [...fav,
         calcId];
     localStorage.setItem("favorites", JSON.stringify(fav));
     renderCalc("favoriter", calcId); // Uppdatera ikon
@@ -237,7 +246,7 @@ function searchCalculations() {
     });
 }
 // "Info" onclick
-window.toggleInfo = function() {
+window.toggleInfo = function () {
     const info = document.getElementById("calcInfo");
     const icon = document.getElementById("infoIcon");
     if (!info || !icon) return;

@@ -270,3 +270,13 @@ input:focus {
     cursor: pointer;
 }
 
+.settings-section {
+        margin-bottom: 20px;
+        }
+        .settings-section h3 {
+            margin-bottom: 10px;
+                color: #0066cc;
+                }
+
+
+
