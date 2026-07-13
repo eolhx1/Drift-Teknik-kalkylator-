@@ -16,7 +16,7 @@ const state = {
 };
 
 // --- 2. INITIALISERING ---
-// Kör detta när appen laddas för att komma ihåg läget
+// Körs när appen laddas för att komma ihåg läget
 document.addEventListener("DOMContentLoaded", () => {
     if (localStorage.getItem("darkMode") === "enabled") {
         document.body.classList.add("dark-mode");
@@ -24,8 +24,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (state.searchBox) {
         state.searchBox.addEventListener("input", debounce(searchCalculations, 200));
     }
+    
+    // Koppla kugghjulet här
+    const settingsBtn = document.getElementById("settingsBtn");
+    if (settingsBtn) {
+        settingsBtn.addEventListener("click", showSettings);
+    }
+    
     showMainMenu();
 });
+
 
 // Hantera webbläsarens bakåt-knapp
 window.addEventListener("popstate", (e) => {
