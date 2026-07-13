@@ -9,12 +9,12 @@ const toLs = (val, unit) => (unit === "m3h" ? val / 3.6: val);
 
 // 2. KATEGORIER
 export const KATEGORIER = {
+    styr: "Styr & Regler",
     vent: "Ventilation",
     vs: "VS & Värme",
     el: "Elkraft",
     tele: "Tele & Data",
     gas: "Gas",
-    styr: "Styr & Regler",
     bygg: "Bygg & Energi"
 };
 
