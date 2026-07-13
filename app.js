@@ -16,8 +16,11 @@ const state = {
 };
 
 // --- 2. INITIALISERING ---
+// Kör detta när appen laddas för att komma ihåg läget
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("settingsBtn").addEventListener("click", showSettings);
+    if (localStorage.getItem("darkMode") === "enabled") {
+        document.body.classList.add("dark-mode");
+    }
     if (state.searchBox) {
         state.searchBox.addEventListener("input", debounce(searchCalculations, 200));
     }
@@ -275,13 +278,7 @@ function toggleDarkMode() {
     }
 }
 
-// Kör detta när appen laddas för att komma ihåg läget
-document.addEventListener("DOMContentLoaded", () => {
-    if (localStorage.getItem("darkMode") === "enabled") {
-        document.body.classList.add("dark-mode");
-    }
-    // ... din övriga kod
-});
+
 
 
 
