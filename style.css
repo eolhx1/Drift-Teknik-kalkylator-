@@ -3,17 +3,26 @@
    ========================================================================== */
 :root {
     --primary-color: #0066cc;
-    /* Appens signaturfärg */
     --bg-color: #f2f4f7;
-    /* Bakgrundsfärg för skärmen */
     --card-bg: #ffffff;
-    /* Bakgrundsfärg för kort och ytor */
     --border-color: #e5e7eb;
-    /* Standardfärg för ramar */
     --text-dark: #333333;
-    /* Primär textfärg */
     --text-muted: #666666;
-    /* Sekundär textfärg */
+    --btn-secondary: #adb5bd;
+    --result-bg: #eef6ff;
+    --header-bg: #0066cc;
+    --header-text: #ffffff;
+}
+
+body.dark-mode {
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-dark: #e0e0e0;
+    --text-muted: #aaaaaa;
+    --border-color: #333;
+    --btn-secondary: #4a4a4a;
+    --result-bg: #1a2a3a;
+    --header-bg: #004488;
 }
 
 * {
@@ -27,273 +36,62 @@ body {
     color: var(--text-dark);
     margin: 0;
     padding: 0;
+    transition: background-color 0.3s, color 0.3s;
 }
 
-.wrapper {
-    max-width: 500px;
-    margin: auto;
-    padding: 12px;
-}
-
-h1 {
-    text-align: center;
-    font-size: 22px;
-    margin: 15px 0;
-    color: var(--primary-color);
-    font-weight: 700;
-}
+.wrapper { max-width: 500px; margin: auto; padding: 12px; }
 
 /* ==========================================================================
    2. NAVIGERING & MENYER
    ========================================================================== */
-.main-nav {
+.app-header {
     display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 5px;
-    scrollbar-width: none;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: var(--header-bg);
+    color: var(--header-text);
 }
+.app-title { font-size: 1.2rem; margin: 0; }
+.settings-btn { background: none; border: none; font-size: 20px; color: var(--header-text); cursor: pointer; }
 
-.main-nav::-webkit-scrollbar {
-    display: none;
-}
+.main-nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+.main-nav::-webkit-scrollbar { display: none; }
+.nav-btn { background: var(--card-bg); border-radius: 20px; padding: 10px 16px; border: 1px solid var(--border-color); color: var(--text-dark); font-weight: 500; white-space: nowrap; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+.nav-btn:active { background: var(--result-bg); transform: scale(0.97); }
 
-.nav-btn {
-    background: var(--card-bg);
-    border-radius: 20px;
-    padding: 10px 16px;
-    border: 1px solid #ddd;
-    font-weight: 500;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-}
-
-.nav-btn:active {
-    background: #eef6ff;
-    transform: scale(0.97);
-}
-
-.sub-nav {
-    display: none;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 10px;
-}
-
-.sub-nav.active {
-    display: flex;
-}
-
-.sub-btn {
-    text-align: left;
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 14px;
-    border: 1px solid var(--border-color);
-    font-size: 16px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.sub-btn:active {
-    background: #f8f9fa;
-}
+.sub-nav { display: none; flex-direction: column; gap: 8px; margin-top: 10px; }
+.sub-nav.active { display: flex; }
+.sub-btn { text-align: left; background: var(--card-bg); border-radius: 12px; padding: 14px; border: 1px solid var(--border-color); color: var(--text-dark); font-size: 16px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+.sub-btn:active { background: var(--bg-color); }
 
 /* ==========================================================================
    3. KALKYLSIDOR & INMATNING
    ========================================================================== */
-.calc-page {
-    background: var(--card-bg);
-    border-radius: 16px;
-    padding: 18px;
-    margin-top: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-
-.input-group {
-    margin-bottom: 14px;
-}
-
-input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-    background: var(--card-bg);
-    appearance: none;
-    -webkit-appearance: none;
-}
-
-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
-}
+.calc-page { background: var(--card-bg); border-radius: 16px; padding: 18px; margin-top: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); font-size: 16px; background: var(--card-bg); color: var(--text-dark); appearance: none; }
+input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1); }
 
 /* ==========================================================================
    4. RESULTAT & KNAPPAR
    ========================================================================== */
-.result {
-    min-height: 50px;
-    /* Gör att rutan finns kvar även när den är tom */
-    margin-top: 15px;
-    padding: 10px;
-    background: #eef6ff;
-    border-left: 4px solid var(--primary-color);
-    border-radius: 10px;
-    font-weight: 600;
-    color: #004499;
-    font-size: 16px;
-    white-space: pre-line;
-    line-height: 1.4;
-}
-
-.back-btn {
-    background: none;
-    border: none;
-    color: var(--primary-color);
-    font-size: 15px;
-    font-weight: 500;
-    padding: 5px 0;
-    cursor: pointer;
-}
-
-.reset-btn {
-    background: #adb5bd;
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    width: 100%;
-    font-size: 16px;
-    font-weight: 500;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-.reset-btn:active {
-    background: #6c757d;
-    transform: scale(0.98);
-    /* Knappen "trycks in" lite */
-    transition: transform 0.1s;
-}
-
-
-.favorite-btn {
-    border: none;
-    background: none;
-    font-size: 24px;
-    cursor: pointer;
-    padding: 0;
-    float: right;
-}
+.result { min-height: 50px; margin-top: 15px; padding: 10px; background: var(--result-bg); border-left: 4px solid var(--primary-color); border-radius: 10px; font-weight: 600; color: var(--primary-color); font-size: 16px; white-space: pre-line; line-height: 1.4; }
+.back-btn { background: none; border: none; color: var(--primary-color); font-size: 15px; font-weight: 500; padding: 5px 0; cursor: pointer; }
+.reset-btn { background: var(--btn-secondary); color: white; padding: 12px; border: none; border-radius: 10px; width: 100%; font-size: 16px; font-weight: 500; cursor: pointer; margin-top: 10px; }
+.reset-btn:active { background: #6c757d; transform: scale(0.98); }
+.favorite-btn { border: none; background: none; font-size: 24px; cursor: pointer; padding: 0; float: right; color: var(--text-dark); }
 
 /* ==========================================================================
    5. INFORMATION & HJÄLPTEXTER
    ========================================================================== */
-.calc-info-content {
-    display: none;
-    padding: 10px;
-    background: #f8f9fa;
-    border-left: 4px solid #0066cc;
-    border-radius: 8px;
-    margin-top: 5px;
-    white-space: pre-line;
-    line-height: 1.4;
-    color: #444;
-    overflow: hidden;
-    transition: all 0.2s ease;
-}
-
-.calc-info-title {
-    margin-top: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    font-weight: bold;
-    color: #0066cc;
-}
-
-
-/* Toast-behållaren */
-.toast {
-    position: fixed;
-    bottom: 60px;
-    /* Ligger precis ovanför tangentbordet/skärmkanten */
-    left: 50%;
-    transform: translateX(-50%);
-    background: #333;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 25px;
-    font-size: 14px;
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-    z-index: 1000;
-    pointer-events: none;
-    /* Gör att den inte blockerar tryck på knappar under */
-}
+.calc-info-content { display: none; padding: 10px; background: var(--bg-color); border-left: 4px solid var(--primary-color); border-radius: 8px; margin-top: 5px; white-space: pre-line; color: var(--text-muted); transition: all 0.2s ease; }
+.calc-info-title { margin-top: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: bold; color: var(--primary-color); }
+.toast { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 25px; opacity: 0; transition: opacity 0.3s; z-index: 1000; pointer-events: none; }
 
 /* ==========================================================================
    6. SPECIALSÖK & SYSTEMKLASSER
    ========================================================================== */
-#searchBox {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    font-size: 16px;
-    background: var(--card-bg);
-}
-
-.hidden {
-    display: none !important;
-}
-
-.app-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background: #fff;
-    border-bottom: 1px solid #ddd;
-}
-.settings-btn {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-}
-
-.settings-section {
-        margin-bottom: 20px;
-        }
-        .settings-section h3 {
-            margin-bottom: 10px;
-                color: #0066cc;
-                }
-
-.app-header {
-        display: flex;
-            justify-content: space-between; /* Skjuter isär text och knapp */
-                align-items: center;
-                    padding: 10px 15px;
-                            color: white;
-                            }
-                            .app-title {
-                                font-size: 1.2rem; /* Mindre text för att spara plats */
-                                    margin: 0;
-                                    }
-                                    .settings-btn {
-                                        background: none;
-                                            border: none;
-                                                font-size: 20px;
-                                                    color: white; /* Matchar rubriken */
-                                                        cursor: pointer;
-                                                        }
-
+#searchBox { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border-color); border-radius: 10px; font-size: 16px; background: var(--card-bg); color: var(--text-dark); }
+.hidden { display: none !important; }
+.settings-section { margin-bottom: 20px; }
+.settings-section h3 { margin-bottom: 10px; color: var(--primary-color); }

@@ -170,10 +170,14 @@ function showSettings() {
         
         <div class="settings-section">
             <h3>App-inställningar</h3>
-            <button class="nav-btn" onclick="localStorage.clear(); alert('All data (favoriter/senaste) är nu rensad.'); location.reload();">
+            <button class="nav-btn" onclick="toggleDarkMode()">
+                🌙 Växla mörkt läge
+            </button>
+            <button class="nav-btn" style="margin-top: 10px;" onclick="localStorage.clear(); alert('All data (favoriter/senaste) är nu rensad.'); location.reload();">
                 Rensa all sparad data
             </button>
         </div>
+
 
         <div class="settings-section" style="margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
             <h3>Om Drift Teknik</h3>
@@ -260,6 +264,24 @@ window.toggleInfo = function () {
     }
 };
 
+function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+    
+    // Spara inställningen så den kommer ihåg valet nästa gång appen öppnas
+    if (document.body.classList.contains("dark-mode")) {
+        localStorage.setItem("darkMode", "enabled");
+    } else {
+        localStorage.setItem("darkMode", "disabled");
+    }
+}
+
+// Kör detta när appen laddas för att komma ihåg läget
+document.addEventListener("DOMContentLoaded", () => {
+    if (localStorage.getItem("darkMode") === "enabled") {
+        document.body.classList.add("dark-mode");
+    }
+    // ... din övriga kod
+});
 
 
 
