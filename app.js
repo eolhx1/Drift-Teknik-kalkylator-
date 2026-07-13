@@ -181,9 +181,9 @@ function showSettings() {
         
         <div class="settings-section">
             <h3>App-inställningar</h3>
-            <button class="nav-btn" onclick="toggleDarkMode()">
-                🌙 Växla mörkt läge
-            </button>
+<button id="darkModeToggle" class="nav-btn">
+    🌙 Växla mörkt läge
+</button>
             <button class="nav-btn" style="margin-top: 10px;" onclick="localStorage.clear(); alert('All data (favoriter/senaste) är nu rensad.'); location.reload();">
                 Rensa all sparad data
             </button>
@@ -201,6 +201,8 @@ function showSettings() {
     </div>`;
 
     document.getElementById("backBtn").addEventListener("click", showMainMenu);
+    document.getElementById("darkModeToggle").addEventListener("click", toggleDarkMode);
+
 }
 
 // --- 5. HJÄLPFUNKTIONER ---
