@@ -185,7 +185,7 @@ function renderCalc(category, calcId) {
         <div class="input-group">
         <label>${i.label}</label>
         <div style="display:flex; gap:8px;">
-        <input type="text" data-id="${i.id}">
+        <input type="number" inputmode="decimal" step="any" data-id="${i.id}">
         <select data-unit="${i.id}">${i.unit.map(u => `<option value="${u}">${u}</option>`).join("")}</select>
         </div>
         </div>`: `<div class="input-group"><label>${i.label}</label><input type="text" data-id="${i.id}"></div>`).join("")}
