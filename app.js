@@ -316,15 +316,27 @@ function toggleDarkMode() {
 
 // --- HAPTISK HJÄLPFUNKTION ---
 // Kollar om webbläsaren stöder vibration och om användaren valt att ha det på
-function triggerHaptic(duration = 20) {
+//function triggerHaptic(duration = 20) {
     // Hämtar inställning från localStorage, standard är "enabled"
-    const hapticSetting = localStorage.getItem("hapticEnabled") || "enabled";
-
+//
     // Om inställningen är på OCH telefonen stöder vibration
-    if (hapticSetting === "enabled" && navigator.vibrate) {
+//    if (hapticSetting === "enabled" && navigator.vibrate) {
+//        navigator.vibrate(duration);
+//    }
+//}
+
+function triggerHaptic(duration = 20) {
+    // Förenklad testversion
+    if ("vibrate" in navigator) {
+        console.log("Försöker vibrera i", duration, "ms");
         navigator.vibrate(duration);
+    } else {
+        console.warn("Vibration stöds inte i denna webbläsare.");
     }
 }
+
+
+
 
 // --- LÄGG TILL FUNKTION FÖR ATT VÄXLA INSTÄLLNING ---
 function toggleHaptic() {
