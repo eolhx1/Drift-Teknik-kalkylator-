@@ -181,14 +181,24 @@ function renderCalc(category, calcId) {
     </button>
     </h2>
 
-    ${calc.inputs.map(i => i.unit ? `
-        <div class="input-group">
+${calc.inputs.map(i => i.unit ? `
+    <div class="input-group">
         <label>${i.label}</label>
         <div style="display:flex; gap:8px;">
-        <input type="number" inputmode="decimal" step="any" data-id="${i.id}">
-        <select data-unit="${i.id}">${i.unit.map(u => `<option value="${u}">${u}</option>`).join("")}</select>
+            <input type="number" inputmode="decimal" step="any" data-id="${i.id}">
+            <select data-unit="${i.id}">
+                ${i.unit.map(u => {
+                    // Skapa en snyggare visning men behåll originalvärdet för kalkylen
+                    let display = u;
+                    if (u === "ls") display = "l/s";
+                    if (u === "m3h") display = "m³/h";
+                    return `<option value="${u}">${display}</option>`;
+                }).join("")}
+            </select>
         </div>
-        </div>`: `<div class="input-group"><label>${i.label}</label><input type="text" data-id="${i.id}"></div>`).join("")}
+    </div>` : `<div class="input-group"><label>${i.label}</label><input type="number" inputmode="decimal" step="any" data-id="${i.id}"></div>`
+).join("")}
+
 
     <button id="resetBtn" class="reset-btn" data-calc-id="${calcId}">Nollställ</button>
     <div class="result"></div>
@@ -322,7 +332,7 @@ function triggerHaptic(duration = 20) {
 
     // 2. Kontrollera inställning OCH om navigator.vibrate finns
     if (hapticSetting === "enabled" && navigator.vibrate) {
-        navigator.vibrate(duration);
+        navigator.vibrate([duration]);
     }
 }
 
