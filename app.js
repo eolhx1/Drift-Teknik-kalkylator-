@@ -16,29 +16,71 @@ const state = {
 };
 
 // --- 2. INITIALISERING ---
-// Körs när appen laddas för att komma ihåg läget
 document.addEventListener("DOMContentLoaded", () => {
+    // 2.1 Inställningar vid start
     if (localStorage.getItem("darkMode") === "enabled") {
         document.body.classList.add("dark-mode");
     }
+
+    // 2.2 Sökfunktion (behåller vi som den är då den är unik)
     if (state.searchBox) {
         state.searchBox.addEventListener("input", debounce(searchCalculations, 200));
     }
-    
-    // Koppla kugghjulet här
+
+    // 2.3 Koppla kugghjulet (statiskt element i headern)
     const settingsBtn = document.getElementById("settingsBtn");
     if (settingsBtn) {
-        settingsBtn.addEventListener("click", showSettings);
+        settingsBtn.addEventListener("click", () => {
+            triggerHaptic(20);
+            showSettings();
+        });
     }
-    
+
+    // 2.4 GLOBAL LYSSNARE för alla dynamiska knappar
+    state.container.addEventListener("click", (event) => {
+        const id = event.target.id;
+        const calcId = event.target.dataset.calcId; // Hämtar värdet från data-calc-id
+
+        if (!id) return; // Om man klickar utanför en knapp
+
+        triggerHaptic(20); // Haptik på ALLA klick i containern
+
+        // Routa klick baserat på ID
+        if (id === "backBtn") showMainMenu();
+        if (id === "darkModeToggle") toggleDarkMode();
+        if (id === "hapticToggle") toggleHaptic();
+        if (id === "clearDataBtn") {
+            if (confirm("Rensa all data?")) {
+                localStorage.clear(); location.reload();
+            }
+        }
+        if (id === "favoriteBtn") {
+            toggleFavorite(calcId);
+            renderCalc("favoriter", calcId); // Uppdatera stjärnan
+        }
+
+        if (id === "resetBtn") {
+            smartReset(calcId);
+        }
+    });
+
+
+    state.container.addEventListener("input",
+        (e) => {
+            if (e.target.matches("input, select")) {
+                const calcId = state.container.querySelector("[data-calc-id]")?.dataset.calcId;
+                if (calcId) runCalc(null, calcId); // 'category' behövs oftast inte för själva uträkningen
+            }
+        });
+
     showMainMenu();
 });
 
 
 // Hantera webbläsarens bakåt-knapp
-window.addEventListener("popstate", (e) => {
-    if (!e.state || e.state.page === "home") showMainMenu();
-    else if (e.state.category && e.state.calcId) renderCalc(e.state.category, e.state.calcId);
+window.addEventListener("popstate", (event) => {
+    if (!event.state || event.state.page === "home") showMainMenu();
+    else if (event.state.category && event.state.calcId) renderCalc(event.state.category, event.state.calcId);
 });
 
 // --- 3. BERÄKNINGSMOTOR ---
@@ -101,8 +143,8 @@ function showSubMenu(categoryKey) {
     clear(state.subNav);
     state.subNav.classList.add("active");
 
-    const list = (categoryKey === "recent") ? getRecent() :
-        (categoryKey === "favoriter") ? getFavorites() : null;
+    const list = (categoryKey === "recent") ? getRecent():
+    (categoryKey === "favoriter") ? getFavorites(): null;
 
     if (list) {
         if (list.length === 0) {
@@ -132,90 +174,74 @@ function renderCalc(category, calcId) {
 
     state.container.innerHTML = `
     <div class="calc-page">
-        <button id="backBtn" class="back-btn">← Tillbaka</button>
-        <h2>${calc.namn} <button id="favoriteBtn" class="favorite-btn">${isFavorite(calcId) ? "⭐" : "☆"}</button></h2>
-    
-        ${calc.inputs.map(i => i.unit ? `
-            <div class="input-group">
-                <label>${i.label}</label>
-                <div style="display:flex; gap:8px;">
-                    <input type="text" data-id="${i.id}">
-                    <select data-unit="${i.id}">${i.unit.map(u => `<option value="${u}">${u}</option>`).join("")}</select>
-                </div>
-            </div>`: `<div class="input-group"><label>${i.label}</label><input type="text" data-id="${i.id}"></div>`).join("")}
-        
-        <button id="resetBtn" class="reset-btn">Nollställ</button>
-        <div class="result"></div>
+    <button id="backBtn" class="back-btn">← Tillbaka</button>
+    <h2>${calc.namn}
+    <button id="favoriteBtn" class="favorite-btn" data-calc-id="${calcId}">
+    ${isFavorite(calcId) ? "⭐": "☆"}
+    </button>
+    </h2>
 
-        <div class="calc-info-title" onclick="toggleInfo()">
-            <span>Tips och riktvärden</span>
-            <span id="infoIcon">▼</span>
+    ${calc.inputs.map(i => i.unit ? `
+        <div class="input-group">
+        <label>${i.label}</label>
+        <div style="display:flex; gap:8px;">
+        <input type="text" data-id="${i.id}">
+        <select data-unit="${i.id}">${i.unit.map(u => `<option value="${u}">${u}</option>`).join("")}</select>
         </div>
-        <div id="calcInfo" class="calc-info-content">
-            ${calc.info || ""}
-        </div>
-        
+        </div>`: `<div class="input-group"><label>${i.label}</label><input type="text" data-id="${i.id}"></div>`).join("")}
+
+    <button id="resetBtn" class="reset-btn" data-calc-id="${calcId}">Nollställ</button>
+    <div class="result"></div>
+
+    <div class="calc-info-title" onclick="toggleInfo()">
+    <span>Tips och riktvärden</span>
+    <span id="infoIcon">▼</span>
+    </div>
+    <div id="calcInfo" class="calc-info-content">
+    ${calc.info || ""}
+    </div>
     </div>`;
 
-    // Event listeners
-    document.getElementById("backBtn").addEventListener("click", showMainMenu);
-    document.getElementById("favoriteBtn").addEventListener("click", () => toggleFavorite(calcId));
-    document.getElementById("resetBtn").addEventListener("click", () => smartReset(calcId));
-    state.container.querySelectorAll("input, select").forEach(el => el.addEventListener("input", () => runCalc(category, calcId)));
 }
 
-
-
-// Skapar showSettings-funktionen
-
+// ShowSettings-funktionen
 function showSettings() {
     clear(state.container);
     state.mainNav.classList.add("hidden");
     state.subNav.classList.add("hidden");
     if (state.searchBox) state.searchBox.style.display = "none";
 
+    const hapticStatus = localStorage.getItem("hapticEnabled") || "enabled";
+
     state.container.innerHTML = `
     <div class="calc-page">
-        <button id="backBtn" class="back-btn">← Tillbaka</button>
-        <h2>Inställningar & Om</h2>
-        
-        <div class="settings-section">
-            <h3>App-inställningar</h3>
-<button id="darkModeToggle" class="nav-btn">
-    🌙 Växla mörkt läge
-</button>
-            <button class="nav-btn" style="margin-top: 10px;" onclick="localStorage.clear(); alert('All data (favoriter/senaste) är nu rensad.'); location.reload();">
-                Rensa all sparad data
-            </button>
-        </div>
-
-
-        <div class="settings-section" style="margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
-            <h3>Om Drift Teknik</h3>
-            <p style="font-size: 0.9em; color: #555;">
-                <strong>Version:</strong> 1.0.0<br>
-                Detta verktyg är utvecklat för snabba tekniska beräkningar inom ventilation, VS, el och styrteknik.<br><br>
-                Syftet är att underlätta vardagen för tekniker genom att tillhandahålla korrekta formler och snabba svar direkt i mobilen.
-            </p>
-        </div>
+    <button id="backBtn" class="back-btn">← Tillbaka</button>
+    <h2>Inställningar</h2>
+    <div class="settings-section">
+    <button id="darkModeToggle" class="nav-btn">🌙 Växla mörkt läge</button>
+    <button id="hapticToggle" class="nav-btn">📳 Haptik: ${hapticStatus === "enabled" ? "PÅ": "AV"}</button>
+    <button id="clearDataBtn" class="nav-btn">Rensa all sparad data</button>
+    </div>
     </div>`;
-
-    document.getElementById("backBtn").addEventListener("click", showMainMenu);
-    document.getElementById("darkModeToggle").addEventListener("click", toggleDarkMode);
-
 }
+
 
 // --- 5. HJÄLPFUNKTIONER ---
 function clear(el) {
     if (el) el.innerHTML = "";
 }
+
 function createButton(text, className, onClick) {
     const btn = document.createElement("button");
     btn.textContent = text;
     btn.className = className;
-    btn.onclick = onClick;
+    btn.onclick = () => {
+        triggerHaptic(20); // Vibrera lite lätt vid varje klick
+        onClick(); // Kör den vanliga funktionen
+    };
     return btn;
 }
+
 function findCalc(calcId) {
     return ALLA_KALKYLER.find(c => c.id === calcId);
 }
@@ -227,7 +253,7 @@ function isFavorite(calcId) {
 }
 function toggleFavorite(calcId) {
     let fav = getFavorites();
-    fav = fav.includes(calcId) ? fav.filter(id => id !== calcId) : [...fav,
+    fav = fav.includes(calcId) ? fav.filter(id => id !== calcId): [...fav,
         calcId];
     localStorage.setItem("favorites", JSON.stringify(fav));
     renderCalc("favoriter", calcId); // Uppdatera ikon
@@ -279,7 +305,7 @@ window.toggleInfo = function () {
 
 function toggleDarkMode() {
     document.body.classList.toggle("dark-mode");
-    
+
     // Spara inställningen så den kommer ihåg valet nästa gång appen öppnas
     if (document.body.classList.contains("dark-mode")) {
         localStorage.setItem("darkMode", "enabled");
@@ -288,8 +314,27 @@ function toggleDarkMode() {
     }
 }
 
+// --- HAPTISK HJÄLPFUNKTION ---
+// Kollar om webbläsaren stöder vibration och om användaren valt att ha det på
+function triggerHaptic(duration = 20) {
+    // Hämtar inställning från localStorage, standard är "enabled"
+    const hapticSetting = localStorage.getItem("hapticEnabled") || "enabled";
 
+    // Om inställningen är på OCH telefonen stöder vibration
+    if (hapticSetting === "enabled" && navigator.vibrate) {
+        navigator.vibrate(duration);
+    }
+}
 
+// --- LÄGG TILL FUNKTION FÖR ATT VÄXLA INSTÄLLNING ---
+function toggleHaptic() {
+    const current = localStorage.getItem("hapticEnabled") || "enabled";
+    const next = current === "enabled" ? "disabled": "enabled";
+    localStorage.setItem("hapticEnabled", next);
 
+    // Ge feedback direkt när man ändrar inställningen
+    triggerHaptic(50);
 
-
+    // Uppdatera inställningssidan (vi kör showSettings igen för att rita om knappen)
+    showSettings();
+}
