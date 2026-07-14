@@ -340,24 +340,3 @@ function toggleHaptic() {
 }
 
 
-function showStatusMessage(text) {
-    const msg = document.createElement("div");
-    msg.textContent = text;
-    msg.style.position = "fixed";
-    msg.style.bottom = "20px";
-    msg.style.left = "50%";
-    msg.style.transform = "translateX(-50%)";
-    msg.style.backgroundColor = "rgba(0,0,0,0.8)";
-    msg.style.color = "white";
-    msg.style.padding = "10px 20px";
-    msg.style.borderRadius = "20px";
-    msg.style.zIndex = "1000";
-    msg.style.fontSize = "14px";
-    
-    document.body.appendChild(msg);
-    
-    // Ta bort meddelandet efter 2 sekunder
-    setTimeout(() => {
-        msg.remove();
-    }, 2000);
-}
