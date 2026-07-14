@@ -326,19 +326,17 @@ function toggleDarkMode() {
 //}
 
 function triggerHaptic(duration = 20) {
-    // Förenklad testversion
     if ("vibrate" in navigator) {
-        console.log("Försöker vibrera i", duration, "ms");
         navigator.vibrate(duration);
+        // Visa på skärmen att vi vibrerar
+        showStatusMessage("Vibration: " + duration + "ms");
     } else {
-        console.warn("Vibration stöds inte i denna webbläsare.");
+        showStatusMessage("Vibration stöds inte!");
     }
 }
 
 
-
-
-// --- LÄGG TILL FUNKTION FÖR ATT VÄXLA INSTÄLLNING ---
+// --- Funktin för att växla mellan Vibration och inte Vibration ---
 function toggleHaptic() {
     const current = localStorage.getItem("hapticEnabled") || "enabled";
     const next = current === "enabled" ? "disabled": "enabled";
@@ -349,4 +347,27 @@ function toggleHaptic() {
 
     // Uppdatera inställningssidan (vi kör showSettings igen för att rita om knappen)
     showSettings();
+}
+
+
+function showStatusMessage(text) {
+    const msg = document.createElement("div");
+    msg.textContent = text;
+    msg.style.position = "fixed";
+    msg.style.bottom = "20px";
+    msg.style.left = "50%";
+    msg.style.transform = "translateX(-50%)";
+    msg.style.backgroundColor = "rgba(0,0,0,0.8)";
+    msg.style.color = "white";
+    msg.style.padding = "10px 20px";
+    msg.style.borderRadius = "20px";
+    msg.style.zIndex = "1000";
+    msg.style.fontSize = "14px";
+    
+    document.body.appendChild(msg);
+    
+    // Ta bort meddelandet efter 2 sekunder
+    setTimeout(() => {
+        msg.remove();
+    }, 2000);
 }
