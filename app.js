@@ -333,7 +333,7 @@ function toggleHaptic() {
     localStorage.setItem("hapticEnabled", next);
 
     // Ge feedback direkt när man ändrar inställningen
-    triggerHaptic(50);
+    triggerHaptic([50]);
 
     // Uppdatera inställningssidan (vi kör showSettings igen för att rita om knappen)
     showSettings();
