@@ -4,7 +4,8 @@
 */
 import {
     ALLA_KALKYLER,
-    KATEGORIER
+    KATEGORIER,
+    UNIT_MAP
 } from './kalkyler.js';
 
 // --- 1. GLOBAL STATE & DOM-REFERENSER ---
@@ -17,6 +18,11 @@ const state = {
 
 // --- 2. INITIALISERING ---
 document.addEventListener("DOMContentLoaded", () => {
+    // 2.0 Definierar debounce funktionen
+    const debouncedRunCalc = debounce((calcId) => {
+        runCalc(null, calcId);
+    }, 250);
+
     // 2.1 Inställningar vid start
     if (localStorage.getItem("darkMode") === "enabled") {
         document.body.classList.add("dark-mode");
@@ -64,18 +70,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-
+    // 2.5 UPPDATERAD INPUT-LYSSNARE
     state.container.addEventListener("input",
         (e) => {
             if (e.target.matches("input, select")) {
+                // Vi hämtar calcId från det element som har attributet
                 const calcId = state.container.querySelector("[data-calc-id]")?.dataset.calcId;
-                if (calcId) runCalc(null, calcId); // 'category' behövs oftast inte för själva uträkningen
+                if (calcId) {
+                    debouncedRunCalc(calcId); // Använd den debounced-versionen här!
+                }
             }
         });
 
     showMainMenu();
 });
-
 
 // Hantera webbläsarens bakåt-knapp
 window.addEventListener("popstate", (event) => {
@@ -172,8 +180,11 @@ function renderCalc(category, calcId) {
     const calc = findCalc(calcId);
     if (!calc) return;
 
+    // HÄMTA SPARAD DATA: Försöker hämta objektet för denna kalkyl, annars tomt objekt
+    const savedData = JSON.parse(localStorage.getItem(`calc_${calcId}`) || "{}");
+
     state.container.innerHTML = `
-    <div class="calc-page">
+    <div class="calc-page" data-calc-id="${calcId}">
     <button id="backBtn" class="back-btn">← Tillbaka</button>
     <h2>${calc.namn}
     <button id="favoriteBtn" class="favorite-btn" data-calc-id="${calcId}">
@@ -181,28 +192,34 @@ function renderCalc(category, calcId) {
     </button>
     </h2>
 
-${calc.inputs.map(i => i.unit ? `
-    <div class="input-group">
+    ${calc.inputs.map(i => {
+        // Hämta sparade värden för just denna input
+        const savedValue = savedData[i.id] || "";
+        const savedUnit = savedData[i.id + "_unit"] || (i.unit ? i.unit[0]: "");
+
+        return i.unit ? `
+        <div class="input-group">
         <label>${i.label}</label>
         <div style="display:flex; gap:8px;">
-            <input type="number" inputmode="decimal" step="any" data-id="${i.id}">
-            <select data-unit="${i.id}">
-                ${i.unit.map(u => {
-                    // Skapa en snyggare visning men behåll originalvärdet för kalkylen
-                    let display = u;
-                    if (u === "ls") display = "l/s";
-                    if (u === "m3h") display = "m³/h";
-                    return `<option value="${u}">${display}</option>`;
-                }).join("")}
-            </select>
-        </div>
-    </div>` : `<div class="input-group"><label>${i.label}</label><input type="number" inputmode="decimal" step="any" data-id="${i.id}"></div>`
-).join("")}
+        <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
+        <select data-unit="${i.id}">
+        ${i.unit.map(u => {
+            // Om nyckeln 'u' inte finns i UNIT_MAP, fall tillbaka på 'u' själv
+            const display = UNIT_MAP[u] || u;
+            return `<option value="${u}" ${savedUnit === u ? "selected": ""}>${display}</option>`;
+        }).join("")}
+        </select>
 
+        </div>
+        </div>`: `
+        <div class="input-group">
+        <label>${i.label}</label>
+        <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
+        </div>`;
+    }).join("")}
 
     <button id="resetBtn" class="reset-btn" data-calc-id="${calcId}">Nollställ</button>
     <div class="result"></div>
-
     <div class="calc-info-title" onclick="toggleInfo()">
     <span>Tips och riktvärden</span>
     <span id="infoIcon">▼</span>
@@ -212,6 +229,8 @@ ${calc.inputs.map(i => i.unit ? `
     </div>
     </div>`;
 
+    // Kör en beräkning direkt när sidan laddats så att resultatet visas omedelbart
+    runCalc(null, calcId);
 }
 
 // ShowSettings-funktionen
@@ -235,7 +254,6 @@ function showSettings() {
     </div>`;
 }
 
-
 // --- 5. HJÄLPFUNKTIONER ---
 function clear(el) {
     if (el) el.innerHTML = "";
@@ -255,12 +273,15 @@ function createButton(text, className, onClick) {
 function findCalc(calcId) {
     return ALLA_KALKYLER.find(c => c.id === calcId);
 }
+
 function getFavorites() {
     return JSON.parse(localStorage.getItem("favorites") || "[]");
 }
+
 function isFavorite(calcId) {
     return getFavorites().includes(calcId);
 }
+
 function toggleFavorite(calcId) {
     let fav = getFavorites();
     fav = fav.includes(calcId) ? fav.filter(id => id !== calcId): [...fav,
@@ -268,19 +289,23 @@ function toggleFavorite(calcId) {
     localStorage.setItem("favorites", JSON.stringify(fav));
     renderCalc("favoriter", calcId); // Uppdatera ikon
 }
+
 function getRecent() {
     return JSON.parse(localStorage.getItem("recent") || "[]");
 }
+
 function addRecent(calcId) {
     let recent = getRecent().filter(id => id !== calcId);
     recent.unshift(calcId);
     localStorage.setItem("recent", JSON.stringify(recent.slice(0, 10)));
 }
+
 function smartReset(calcId) {
     state.container.querySelectorAll("input").forEach(i => i.value = "");
     state.container.querySelector(".result").innerHTML = "";
     localStorage.removeItem(`calc_${calcId}`);
 }
+
 function debounce(func, delay) {
     let timeoutId;
     return (...args) => {
@@ -288,6 +313,7 @@ function debounce(func, delay) {
         timeoutId = setTimeout(() => func.apply(this, args), delay);
     };
 }
+
 function searchCalculations() {
     const search = state.searchBox.value.toLowerCase();
     clear(state.container);
@@ -298,6 +324,7 @@ function searchCalculations() {
         state.subNav.appendChild(createButton(calc.namn, "sub-btn", () => renderCalc(calc.kategorier[0], calc.id)));
     });
 }
+
 // "Info" onclick
 window.toggleInfo = function () {
     const info = document.getElementById("calcInfo");
@@ -348,5 +375,3 @@ function toggleHaptic() {
     // Uppdatera inställningssidan (vi kör showSettings igen för att rita om knappen)
     showSettings();
 }
-
-

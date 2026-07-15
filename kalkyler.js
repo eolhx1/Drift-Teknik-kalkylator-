@@ -7,6 +7,18 @@ const calcFlodeFranEffekt = (effekt_kW, dT) => (effekt_kW * 1000) / (1.2 * dT);
 const toM3h = (val, unit) => (unit === "ls" ? val * 3.6: val);
 const toLs = (val, unit) => (unit === "m3h" ? val / 3.6: val);
 
+export const UNIT_MAP = {
+    "ls": "l/s",
+    "m3h": "m³/h",
+    "kw": "kW",
+    "kpa": "kPa",
+    "pa": "Pa",
+    "mm": "mm",
+    "celsius": "°C"
+};
+
+
+
 // 2. KATEGORIER
 export const KATEGORIER = {
     styr: "Styr & Regler",
