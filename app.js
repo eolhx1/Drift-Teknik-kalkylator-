@@ -13,7 +13,8 @@ const state = {
     container: document.getElementById("calcContainer"),
     mainNav: document.getElementById("mainNav"),
     subNav: document.getElementById("subNav"),
-    searchBox: document.getElementById("searchBox")
+    searchBox: document.getElementById("searchBox"),
+    activeCategory: null // 
 };
 
 // --- 2. INITIALISERING ---
@@ -128,6 +129,7 @@ function runCalc(category, calcId) {
 
 // --- 4. MENYHANTERING & RENDERING ---
 function showMainMenu() {
+        state.activeCategory = null; // Nollställ när vi är på huvudmenyn
     clear(state.container);
     clear(state.subNav);
     state.mainNav.classList.remove("hidden");
@@ -147,6 +149,7 @@ function showMainMenu() {
 }
 
 function showSubMenu(categoryKey) {
+        state.activeCategory = categoryKey; // Spara kategorin!
     clear(state.container);
     clear(state.subNav);
     state.subNav.classList.add("active");
@@ -314,14 +317,32 @@ function debounce(func, delay) {
     };
 }
 
+
 function searchCalculations() {
+        // Om sökfältet saknas så, avbryt
+    if (!state.searchBox) return; 
+    
     const search = state.searchBox.value.toLowerCase();
     clear(state.container);
     clear(state.subNav);
-    if (!search) return showMainMenu();
+    
+    if (!search) {
+        // Om sökfältet är tomt, återgå till det normala menyläget
+        state.activeCategory ? showSubMenu(state.activeCategory) : showMainMenu();
+        return;
+    }
+
     state.subNav.classList.add("active");
-    ALLA_KALKYLER.filter(c => c.namn.toLowerCase().includes(search)).forEach(calc => {
-        state.subNav.appendChild(createButton(calc.namn, "sub-btn", () => renderCalc(calc.kategorier[0], calc.id)));
+    
+    // Filtrera baserat på både söksträng OCH aktiv kategori
+    ALLA_KALKYLER.filter(c => {
+        const matchesSearch = c.namn.toLowerCase().includes(search);
+        const matchesCategory = state.activeCategory ? c.kategorier.includes(state.activeCategory) : true;
+        return matchesSearch && matchesCategory;
+    }).forEach(calc => {
+        state.subNav.appendChild(createButton(calc.namn, "sub-btn", () => {
+            renderCalc(state.activeCategory || calc.kategorier[0], calc.id);
+        }));
     });
 }
 
