@@ -14,7 +14,8 @@ const state = {
     mainNav: document.getElementById("mainNav"),
     subNav: document.getElementById("subNav"),
     searchBox: document.getElementById("searchBox"),
-    activeCategory: null // 
+    activeCategory: null, // 
+    clearSearchBtn: document.getElementById("clearSearchBtn")
 };
 
 // --- 2. INITIALISERING ---
@@ -29,9 +30,22 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.classList.add("dark-mode");
     }
 
-    // 2.2 Sökfunktion (behåller vi som den är då den är unik)
-    if (state.searchBox) {
-        state.searchBox.addEventListener("input", debounce(searchCalculations, 200));
+    // 2.2 Sökfunktion (med rensa-knapp logik)
+    if (state.searchBox && state.clearSearchBtn) {
+        state.searchBox.addEventListener("input", () => {
+            // Visa/dölj X baserat på om fältet är tomt
+            state.clearSearchBtn.classList.toggle("hidden", state.searchBox.value === "");
+            // Kör sökningen med debounce
+            debounce(searchCalculations, 200)();
+        });
+
+        state.clearSearchBtn.addEventListener("click", () => {
+            state.searchBox.value = "";
+            state.clearSearchBtn.classList.add("hidden");
+            // Återgå till menyn för aktuell kategori eller huvudmenyn
+            state.activeCategory ? showSubMenu(state.activeCategory) : showMainMenu();
+            state.searchBox.focus();
+        });
     }
 
     // 2.3 Koppla kugghjulet (statiskt element i headern)
@@ -150,6 +164,12 @@ function showMainMenu() {
 
 function showSubMenu(categoryKey) {
         state.activeCategory = categoryKey; // Spara kategorin!
+        
+            // Töm sökfältet och dölj eventuella sökresultat
+    if (state.searchBox) {
+        state.searchBox.value = ""; 
+    }
+        
     clear(state.container);
     clear(state.subNav);
     state.subNav.classList.add("active");

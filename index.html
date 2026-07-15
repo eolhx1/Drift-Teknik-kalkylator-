@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#ffffff">
-    
-<link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="style.css">
-    
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0066cc">
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0066cc">
 
     <title>Drift Teknik</title>
 
@@ -19,21 +19,19 @@
 
 <body>
     <div class="wrapper">
-        
-    <header class="app-header">
-    <h1 class="app-title">Drift Teknik</h1>
-    <button id="settingsBtn" class="settings-btn">⚙️</button>
-</header>
 
-    <div class="wrapper">
-    </div>
-    <script type="module" src="app.js"></script>
+        <header class="app-header">
+            <h1 class="app-title">Drift Teknik</h1>
+            <button id="settingsBtn" class="settings-btn">⚙️</button>
+        </header>
 
-        <input
-        id="searchBox"
-        type="text"
-        placeholder="🔍 Sök beräkning..."
-        aria-label="Sök efter beräkning">
+        <div class="wrapper">
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="searchBox" placeholder="🔍 Sök...">
+            <button id="clearSearchBtn" class="clear-search-btn hidden">✕</button>
+        </div>
 
         <nav id="mainNav" class="main-nav" aria-label="Huvudkategorier"></nav>
         <nav id="subNav" class="sub-nav" aria-label="Underkategorier"></nav>

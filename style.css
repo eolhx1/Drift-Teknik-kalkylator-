@@ -95,3 +95,12 @@ input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0
 .hidden { display: none !important; }
 .settings-section { margin-bottom: 20px; }
 .settings-section h3 { margin-bottom: 10px; color: var(--primary-color); }
+
+
+.search-container { position: relative; display: flex; align-items: center; }
+#searchBox { width: 100%; padding-right: 30px; } /* Plats för X */
+.clear-search-btn {
+    position: absolute; right: 5px; background: none; border: none;
+    cursor: pointer; font-size: 1.2rem; color: #888;
+}
+.clear-search-btn.hidden { display: none; }
