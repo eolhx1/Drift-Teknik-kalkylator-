@@ -39,7 +39,11 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
-.wrapper { max-width: 500px; margin: auto; padding: 12px; }
+.wrapper {
+    max-width: 500px;
+    margin: auto;
+    padding: 12px;
+}
 
 /* ==========================================================================
    2. NAVIGERING & MENYER
@@ -52,55 +56,233 @@ body {
     background: var(--header-bg);
     color: var(--header-text);
 }
-.app-title { font-size: 1.2rem; margin: 0; }
-.settings-btn { background: none; border: none; font-size: 20px; color: var(--header-text); cursor: pointer; }
+.app-title {
+    font-size: 1.2rem;
+    margin: 0;
+}
+.settings-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--header-text);
+    cursor: pointer;
+}
+#appTitle:active {
+    transform: scale(0.95);
+    transition: transform 0.1s;
+}
 
-.main-nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
-.main-nav::-webkit-scrollbar { display: none; }
-.nav-btn { background: var(--card-bg); border-radius: 20px; padding: 10px 16px; border: 1px solid var(--border-color); color: var(--text-dark); font-weight: 500; white-space: nowrap; cursor: pointer; transition: background 0.2s, transform 0.1s; }
-.nav-btn:active { background: var(--result-bg); transform: scale(0.97); }
+.main-nav {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    scrollbar-width: none;
+}
+.main-nav::-webkit-scrollbar {
+    display: none;
+}
+.nav-btn {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 10px 16px;
+    border: 1px solid var(--border-color);
+    color: var(--text-dark);
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+.nav-btn:active {
+    background: var(--result-bg);
+    transform: scale(0.97);
+}
 
-.sub-nav { display: none; flex-direction: column; gap: 8px; margin-top: 10px; }
-.sub-nav.active { display: flex; }
-.sub-btn { text-align: left; background: var(--card-bg); border-radius: 12px; padding: 14px; border: 1px solid var(--border-color); color: var(--text-dark); font-size: 16px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
-.sub-btn:active { background: var(--bg-color); }
+.sub-nav {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+.sub-nav.active {
+    display: flex;
+}
+.sub-btn {
+    text-align: left;
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 14px;
+    border: 1px solid var(--border-color);
+    color: var(--text-dark);
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.sub-btn:active {
+    background: var(--bg-color);
+}
 
 /* ==========================================================================
    3. KALKYLSIDOR & INMATNING
    ========================================================================== */
-.calc-page { background: var(--card-bg); border-radius: 16px; padding: 18px; margin-top: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); font-size: 16px; background: var(--card-bg); color: var(--text-dark); appearance: none; }
-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1); }
+.calc-page {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 18px;
+    margin-top: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    font-size: 16px;
+    background: var(--card-bg);
+    color: var(--text-dark);
+    appearance: none;
+}
+input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+}
 
 /* ==========================================================================
    4. RESULTAT & KNAPPAR
    ========================================================================== */
-.result { min-height: 50px; margin-top: 15px; padding: 10px; background: var(--result-bg); border-left: 4px solid var(--primary-color); border-radius: 10px; font-weight: 600; color: var(--primary-color); font-size: 16px; white-space: pre-line; line-height: 1.4; }
-.back-btn { background: none; border: none; color: var(--primary-color); font-size: 15px; font-weight: 500; padding: 5px 0; cursor: pointer; }
-.reset-btn { background: var(--btn-secondary); color: white; padding: 12px; border: none; border-radius: 10px; width: 100%; font-size: 16px; font-weight: 500; cursor: pointer; margin-top: 10px; }
-.reset-btn:active { background: #6c757d; transform: scale(0.98); }
-.favorite-btn { border: none; background: none; font-size: 24px; cursor: pointer; padding: 0; float: right; color: var(--text-dark); }
+.result {
+    min-height: 50px;
+    margin-top: 15px;
+    padding: 10px;
+    background: var(--result-bg);
+    border-left: 4px solid var(--primary-color);
+    border-radius: 10px;
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 16px;
+    white-space: pre-line;
+    line-height: 1.4;
+}
+.back-btn {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-size: 15px;
+    font-weight: 500;
+    padding: 5px 0;
+    cursor: pointer;
+}
+.reset-btn {
+    background: var(--btn-secondary);
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    width: 100%;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 10px;
+}
+.reset-btn:active {
+    background: #6c757d;
+    transform: scale(0.98);
+}
+.favorite-btn {
+    border: none;
+    background: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    float: right;
+    color: var(--text-dark);
+}
 
 /* ==========================================================================
    5. INFORMATION & HJÄLPTEXTER
    ========================================================================== */
-.calc-info-content { display: none; padding: 10px; background: var(--bg-color); border-left: 4px solid var(--primary-color); border-radius: 8px; margin-top: 5px; white-space: pre-line; color: var(--text-muted); transition: all 0.2s ease; }
-.calc-info-title { margin-top: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: bold; color: var(--primary-color); }
-.toast { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 25px; opacity: 0; transition: opacity 0.3s; z-index: 1000; pointer-events: none; }
+.calc-info-content {
+    display: none;
+    padding: 10px;
+    background: var(--bg-color);
+    border-left: 4px solid var(--primary-color);
+    border-radius: 8px;
+    margin-top: 5px;
+    white-space: pre-line;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+}
+.calc-info-title {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+.toast {
+    position: fixed;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 1000;
+    pointer-events: none;
+}
 
 /* ==========================================================================
    6. SPECIALSÖK & SYSTEMKLASSER
    ========================================================================== */
-#searchBox { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border-color); border-radius: 10px; font-size: 16px; background: var(--card-bg); color: var(--text-dark); }
-.hidden { display: none !important; }
-.settings-section { margin-bottom: 20px; }
-.settings-section h3 { margin-bottom: 10px; color: var(--primary-color); }
-
-
-.search-container { position: relative; display: flex; align-items: center; }
-#searchBox { width: 100%; padding-right: 30px; } /* Plats för X */
-.clear-search-btn {
-    position: absolute; right: 5px; background: none; border: none;
-    cursor: pointer; font-size: 1.2rem; color: #888;
+#searchBox {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 16px;
+    background: var(--card-bg);
+    color: var(--text-dark);
 }
-.clear-search-btn.hidden { display: none; }
+.hidden {
+    display: none !important;
+}
+.settings-section {
+    margin-bottom: 20px;
+}
+.settings-section h3 {
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+#searchBox {
+    width: 100%;
+    padding-right: 30px;
+}
+
+/* Plats för X */
+.clear-search-btn {
+    position: absolute;
+    right: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #888;
+}
+.clear-search-btn.hidden {
+    display: none;
+}
