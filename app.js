@@ -14,7 +14,8 @@ const state = {
     mainNav: document.getElementById("mainNav"),
     subNav: document.getElementById("subNav"),
     searchBox: document.getElementById("searchBox"),
-    activeCategory: null, // 
+    activeCategory: null,
+    //
     clearSearchBtn: document.getElementById("clearSearchBtn")
 };
 
@@ -43,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
             state.searchBox.value = "";
             state.clearSearchBtn.classList.add("hidden");
             // Återgå till menyn för aktuell kategori eller huvudmenyn
-            state.activeCategory ? showSubMenu(state.activeCategory) : showMainMenu();
+            state.activeCategory ? showSubMenu(state.activeCategory): showMainMenu();
             state.searchBox.focus();
         });
     }
@@ -97,8 +98,19 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+    // 2.6 Klick på rubriken för att gå hem
+    const appTitle = document.getElementById("appTitle");
+    if (appTitle) {
+        appTitle.addEventListener("click", () => {
+            triggerHaptic(20);
+            showMainMenu();
+        });
+    }
+
     showMainMenu();
 });
+
+
 
 // Hantera webbläsarens bakåt-knapp
 window.addEventListener("popstate", (event) => {
@@ -143,7 +155,7 @@ function runCalc(category, calcId) {
 
 // --- 4. MENYHANTERING & RENDERING ---
 function showMainMenu() {
-        state.activeCategory = null; // Nollställ när vi är på huvudmenyn
+    state.activeCategory = null; // Nollställ när vi är på huvudmenyn
     clear(state.container);
     clear(state.subNav);
     state.mainNav.classList.remove("hidden");
@@ -163,13 +175,13 @@ function showMainMenu() {
 }
 
 function showSubMenu(categoryKey) {
-        state.activeCategory = categoryKey; // Spara kategorin!
-        
-            // Töm sökfältet och dölj eventuella sökresultat
+    state.activeCategory = categoryKey; // Spara kategorin!
+
+    // Töm sökfältet och dölj eventuella sökresultat
     if (state.searchBox) {
-        state.searchBox.value = ""; 
+        state.searchBox.value = "";
     }
-        
+
     clear(state.container);
     clear(state.subNav);
     state.subNav.classList.add("active");
@@ -339,25 +351,25 @@ function debounce(func, delay) {
 
 
 function searchCalculations() {
-        // Om sökfältet saknas så, avbryt
-    if (!state.searchBox) return; 
-    
+    // Om sökfältet saknas så, avbryt
+    if (!state.searchBox) return;
+
     const search = state.searchBox.value.toLowerCase();
     clear(state.container);
     clear(state.subNav);
-    
+
     if (!search) {
         // Om sökfältet är tomt, återgå till det normala menyläget
-        state.activeCategory ? showSubMenu(state.activeCategory) : showMainMenu();
+        state.activeCategory ? showSubMenu(state.activeCategory): showMainMenu();
         return;
     }
 
     state.subNav.classList.add("active");
-    
+
     // Filtrera baserat på både söksträng OCH aktiv kategori
     ALLA_KALKYLER.filter(c => {
         const matchesSearch = c.namn.toLowerCase().includes(search);
-        const matchesCategory = state.activeCategory ? c.kategorier.includes(state.activeCategory) : true;
+        const matchesCategory = state.activeCategory ? c.kategorier.includes(state.activeCategory): true;
         return matchesSearch && matchesCategory;
     }).forEach(calc => {
         state.subNav.appendChild(createButton(calc.namn, "sub-btn", () => {
