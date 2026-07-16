@@ -56,10 +56,18 @@ body {
     background: var(--header-bg);
     color: var(--header-text);
 }
+
 .app-title {
     font-size: 1.2rem;
     margin: 0;
+    user-select: none;
+    /* Gör att texten inte går att markera */
+    -webkit-user-select: none;
+    /* För Safari/Chrome */
+    cursor: pointer;
+    /* Visar att det är en länk/knapp */
 }
+
 .settings-btn {
     background: none;
     border: none;
@@ -67,6 +75,7 @@ body {
     color: var(--header-text);
     cursor: pointer;
 }
+
 #appTitle:active {
     transform: scale(0.95);
     transition: transform 0.1s;
@@ -79,9 +88,11 @@ body {
     padding-bottom: 5px;
     scrollbar-width: none;
 }
+
 .main-nav::-webkit-scrollbar {
     display: none;
 }
+
 .nav-btn {
     background: var(--card-bg);
     border-radius: 20px;
@@ -93,6 +104,7 @@ body {
     cursor: pointer;
     transition: background 0.2s, transform 0.1s;
 }
+
 .nav-btn:active {
     background: var(--result-bg);
     transform: scale(0.97);
@@ -104,9 +116,11 @@ body {
     gap: 8px;
     margin-top: 10px;
 }
+
 .sub-nav.active {
     display: flex;
 }
+
 .sub-btn {
     text-align: left;
     background: var(--card-bg);
@@ -119,6 +133,7 @@ body {
     cursor: pointer;
     transition: background 0.2s;
 }
+
 .sub-btn:active {
     background: var(--bg-color);
 }
@@ -133,6 +148,7 @@ body {
     margin-top: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
+
 input {
     width: 100%;
     padding: 12px;
@@ -143,6 +159,7 @@ input {
     color: var(--text-dark);
     appearance: none;
 }
+
 input:focus {
     outline: none;
     border-color: var(--primary-color);
@@ -165,6 +182,7 @@ input:focus {
     white-space: pre-line;
     line-height: 1.4;
 }
+
 .back-btn {
     background: none;
     border: none;
@@ -174,6 +192,7 @@ input:focus {
     padding: 5px 0;
     cursor: pointer;
 }
+
 .reset-btn {
     background: var(--btn-secondary);
     color: white;
@@ -186,10 +205,12 @@ input:focus {
     cursor: pointer;
     margin-top: 10px;
 }
+
 .reset-btn:active {
     background: #6c757d;
     transform: scale(0.98);
 }
+
 .favorite-btn {
     border: none;
     background: none;
@@ -214,6 +235,7 @@ input:focus {
     color: var(--text-muted);
     transition: all 0.2s ease;
 }
+
 .calc-info-title {
     margin-top: 15px;
     display: flex;
@@ -223,6 +245,7 @@ input:focus {
     font-weight: bold;
     color: var(--primary-color);
 }
+
 .toast {
     position: fixed;
     bottom: 60px;
@@ -251,23 +274,26 @@ input:focus {
     background: var(--card-bg);
     color: var(--text-dark);
 }
+
 .hidden {
     display: none !important;
 }
+
 .settings-section {
     margin-bottom: 20px;
 }
+
 .settings-section h3 {
     margin-bottom: 10px;
     color: var(--primary-color);
 }
-
 
 .search-container {
     position: relative;
     display: flex;
     align-items: center;
 }
+
 #searchBox {
     width: 100%;
     padding-right: 30px;
@@ -283,6 +309,7 @@ input:focus {
     font-size: 1.2rem;
     color: #888;
 }
+
 .clear-search-btn.hidden {
     display: none;
 }

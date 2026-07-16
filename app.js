@@ -97,11 +97,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         });
-
-    // 2.6 Klick på rubriken för att gå hem
+        
+            // 2.6 Klick på rubriken för att gå hem
     const appTitle = document.getElementById("appTitle");
     if (appTitle) {
-        appTitle.addEventListener("click", () => {
+        appTitle.addEventListener("click", (e) => {
+            e.preventDefault(); // Stoppar eventuella standardbeteenden
             triggerHaptic(20);
             showMainMenu();
         });
