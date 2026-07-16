@@ -132,7 +132,6 @@ function runCalc(category, calcId) {
     const values = {};
     let allFilled = true;
 
-    // 3.1 Hämta värden
     selects.forEach(s => values[s.dataset.unit + "_unit"] = s.value);
     inputs.forEach(i => {
         const val = parseFloat(i.value.replace(",", "."));
@@ -147,16 +146,15 @@ function runCalc(category, calcId) {
         return;
     }
 
-    // 3.2 Presentation av beräkningen
     try {
-        const rawResult = calc.calc(values); // Kan vara ett tal eller en sträng ("Fel")
+        const rawResult = calc.calc(values);
 
-        // 1. Om det är en sträng (t.ex. "Fel" eller "Felaktiga värden"), visa den direkt
+        // Om kalkylen returnerar en sträng, visa den direkt (för gamla kalkyler)
         if (typeof rawResult === 'string') {
-            resultBox.innerText = rawResult;
+            resultBox.innerHTML = rawResult.replace(/\n/g, "<br>");
         } 
-        // 2. Om det är ett tal, formatera det
-        else {
+        // Om kalkylen returnerar ett tal, använd den nya formateringen
+        else if (typeof rawResult === 'number') {
             const decimalPrecision = calc.decimaler !== undefined ? calc.decimaler : 2;
             const unit = calc.unit || ""; 
             const label = calc.label ? `${calc.label}: ` : "";
@@ -164,10 +162,12 @@ function runCalc(category, calcId) {
             const formattedNum = formatResult(rawResult, decimalPrecision);
             resultBox.innerHTML = `${label}${formattedNum} ${unit}`;
         }
-        
     } catch (err) {
-        resultBox.innerText = "Ett fel uppstod.";
+        // Om något går fel, visa ett meddelande men krascha inte resten av appen
+        resultBox.innerText = "Ett fel uppstod i beräkningen.";
     }
+}
+
 
 // --- 4. MENYHANTERING & RENDERING ---
 function showMainMenu() {
