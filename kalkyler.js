@@ -46,7 +46,7 @@ const beraknaOmsattning = (v) => {
     if (!v.volym || v.volym <= 0 || !v.flode) return "Fel";
     return toM3h(v.flode, v.flode_unit || "m3h") / v.volym;
 };
- // ?
+// ?
 const beraknaKyleffekt = (v) => {
     const flode_ls = toLs(v.flode, v.flode_unit || "ls");
     const dT = v.tRum - v.tTill;
@@ -59,16 +59,14 @@ const beraknaKyleffekt = (v) => {
 
 
 // =================================================================
-// 3. KALKYL-GRUPPER (Här lägger du till dina kalkyler)
+// 3. KALKYL-GRUPPER (Här ligger kalkylerna)
 // =================================================================
 const styrKalkyler = [{
-    id: "skalning_0_10v",
+    id: "givar_skalning_0_10v",
     namn: "Givarskalning 0-10V",
     kategorier: ["styr"],
-    label: "Värde",
-    // Etiketten för resultatet
+    label: "Resultat",
     unit: "",
-    // Ingen enhet här
     decimaler: 2,
     inputs: [{
         id: "volt",
@@ -76,80 +74,95 @@ const styrKalkyler = [{
     },
         {
             id: "min",
-            label: "Minvärdet för givare"
+            label: "Minvärde"
         },
         {
             id: "max",
-            label: "Maxvärdet för givaren"
+            label: "Maxvärde"
         }],
     calc: (v) => !valid(v.volt, v.min, v.max) ? "Fel": beraknaSkalning010V(v),
-    info: "Skalar om 0-10V till ett mätområde."
+    info: {
+        beskrivning: "Skalar om en 0-10V signal till ett fysiskt mätområde.",
+        formel: {
+            namn: "Linjär skalning",
+            beskrivning: "Värde = (Volt / 10) * (Max - Min) + Min"
+        },
+        riktvarden: "Kontrollera att givaren är korrekt strömsatt (24V AC/DC).",
+        tips: "Om värdet fladdrar kan du behöva kontrollera att nollan är gemensam för givare och styrdator."
+    }
 }];
 
 
 const ventKalkyler = [
     //
     {
-    id: "omsattning",
-    namn: "Luftomsättning",
-    kategorier: ["vent"],
-    unit: "h⁻¹",
-    label: "Luftomsättning",
-    decimaler: 1,
-    inputs: [{
-        id: "volym",
-        label: "Rumsvolym (m³)"
+        id: "luft_omsattning",
+        namn: "Luftomsättning",
+        kategorier: ["vent"],
+        unit: "h⁻¹",
+        label: "Luftomsättning",
+        decimaler: 1,
+        inputs: [{
+            id: "volym",
+            label: "Rumsvolym (m³)"
+        },
+            {
+                id: "flode",
+                label: "Flöde",
+                unit: ["ls",
+                    "m3h"],
+                base: "m3h"
+            }],
+        calc: beraknaOmsattning,
+        info: {
+            beskrivning: "Beräknar hur många gånger per timme rumsvolymen byts ut.",
+            formel: {
+                namn: "Omsättningsformeln",
+                beskrivning: "n = Flöde (m³/h) / Volym (m³)"
+            },
+            riktvarden: "Kontor: 0.5 - 1.5 h⁻¹. Skolor: 2.0 - 4.0 h⁻¹.",
+            tips: "Tänk på att använda faktiskt uppmätt flöde vid kontrollmätning."
+        }
     },
-        {
+    // ?
+    {
+        id: "luft_kyleffekt",
+        namn: "Kyleffekt luft",
+        kategorier: ["vent"],
+        unit: "kW",
+        decimaler: 2,
+        inputs: [{
             id: "flode",
             label: "Flöde",
             unit: ["ls",
                 "m3h"],
-            base: "m3h"
-        }],
-    calc: beraknaOmsattning,
-    info: "Används för att kontrollera hur många gånger per timme luften i ett rum byts ut."
-},
-    // ?
-    {
-    id: "kyleffekt_luft",
-    namn: "Kyleffekt luft",
-    kategorier: ["vent"],
-    unit: "kW",
-    decimaler: 2,
-    inputs: [{
-        id: "flode",
-        label: "Flöde",
-        unit: ["ls",
-            "m3h"],
-        base: "ls"
-    },
-        {
-            id: "tRum",
-            label: "Rumstemperatur (°C)"
+            base: "ls"
         },
-        {
-            id: "tTill",
-            label: "Tilluftstemperatur (°C)"
-        }],
-    // Logik anropas här
-    calc: (v) => !valid(v.flode, v.tRum, v.tTill) ? "Fel": beraknaKyleffekt(v),
+            {
+                id: "tRum",
+                label: "Rumstemperatur (°C)"
+            },
+            {
+                id: "tTill",
+                label: "Tilluftstemperatur (°C)"
+            }],
+        // Logik anropas här
+        calc: (v) => !valid(v.flode, v.tRum, v.tTill) ? "Fel": beraknaKyleffekt(v),
 
-    // Den nya strukturerade infon
-    info: {
-        beskrivning: "Beräknar hur mycket kyleffekt (kW) som tillförs ett rum via tilluften.",
-        formel: {
-            namn: "Värme/Kyl-formeln för luft",
-            beskrivning: "Q = 1,2 * q * ΔT / 1000"
-        },
-        riktvarden: "Vanlig ΔT (tRum - tTill) ligger ofta mellan 5-10°C för att undvika drag.",
-        tips: "Kontrollera att flödet är inställt på aktuellt drifläge. Vid för stor temperaturskillnad (ΔT > 10°C) ökar risken för kalldrag markant."
-    }
-}
-];
+        // Den nya strukturerade infon
+        info: {
+            beskrivning: "Beräknar hur mycket kyleffekt (kW) som tillförs ett rum via tilluften.",
+            formel: {
+                namn: "Värme/Kyl-formeln för luft",
+                beskrivning: "Q = 1,2 * q * ΔT / 1000"
+            },
+            riktvarden: "Vanlig ΔT (tRum - tTill) ligger ofta mellan 5-10°C för att undvika drag.",
+            tips: "Kontrollera att flödet är inställt på aktuellt drifläge. Vid för stor temperaturskillnad (ΔT > 10°C) ökar risken för kalldrag markant."
+        }
+    }];
 
 const vsKalkyler = [
-    // Lägg till vs-kalkyler här efter samma mönster    
+    // Lägg till vs-kalkyler här efter samma mönster
 ];
 
 const elKalkyler = [

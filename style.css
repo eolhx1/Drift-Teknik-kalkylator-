@@ -12,6 +12,7 @@
     --result-bg: #eef6ff;
     --header-bg: #0066cc;
     --header-text: #ffffff;
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 body.dark-mode {
@@ -170,17 +171,32 @@ input:focus {
    4. RESULTAT & KNAPPAR
    ========================================================================== */
 .result {
-    min-height: 50px;
-    margin-top: 15px;
-    padding: 10px;
+    margin-top: 20px;
+    padding: 16px;
     background: var(--result-bg);
-    border-left: 4px solid var(--primary-color);
-    border-radius: 10px;
-    font-weight: 600;
+    border: 1px solid var(--primary-color);
+    border-radius: 12px;
+    font-weight: 700;
     color: var(--primary-color);
-    font-size: 16px;
-    white-space: pre-line;
-    line-height: 1.4;
+    font-size: 1.1rem;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Förstärkta knappar */
+.nav-btn, .sub-btn, .reset-btn {
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-color);
+}
+
+.nav-btn:active, .sub-btn:active, .reset-btn:active {
+    transform: scale(0.96);
+    filter: brightness(0.9);
+}
+
+.reset-btn {
+    background: var(--text-muted);
+    font-weight: 600;
 }
 
 .back-btn {
@@ -222,28 +238,36 @@ input:focus {
 }
 
 /* ==========================================================================
-   5. INFORMATION & HJÄLPTEXTER
+   5. INFORMATION & HJÄLPTEXTER (Uppdaterad design)
    ========================================================================== */
 .calc-info-content {
     display: none;
-    padding: 10px;
-    background: var(--bg-color);
-    border-left: 4px solid var(--primary-color);
+    margin-top: 10px;
+    padding: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-left: 5px solid var(--primary-color);
     border-radius: 8px;
-    margin-top: 5px;
-    white-space: pre-line;
-    color: var(--text-muted);
-    transition: all 0.2s ease;
+    color: var(--text-dark);
+    line-height: 1.5;
+    box-shadow: var(--shadow-sm);
 }
 
+.calc-info-content p { margin: 8px 0; }
+.calc-info-content strong { color: var(--primary-color); }
+
 .calc-info-title {
-    margin-top: 15px;
+    margin-top: 20px;
+    padding: 10px;
+    background: var(--card-bg);
+    border-radius: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    font-weight: bold;
+    font-weight: 600;
     color: var(--primary-color);
+    border: 1px solid var(--border-color);
 }
 
 .toast {
