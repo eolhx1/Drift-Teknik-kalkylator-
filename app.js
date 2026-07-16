@@ -97,8 +97,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         });
-        
-            // 2.6 Klick på rubriken för att gå hem
+
+    // 2.6 Klick på rubriken för att gå hem
     const appTitle = document.getElementById("appTitle");
     if (appTitle) {
         appTitle.addEventListener("click", (e) => {
@@ -139,7 +139,8 @@ function runCalc(category, calcId) {
         else values[i.dataset.id] = val;
     });
 
-    localStorage.setItem(`calc_${calcId}`, JSON.stringify(values));
+    localStorage.setItem(`calc_${calcId}`,
+        JSON.stringify(values));
 
     if (!allFilled) {
         resultBox.innerText = "Fyll i alla fält...";
@@ -152,13 +153,13 @@ function runCalc(category, calcId) {
         // Om kalkylen returnerar en sträng, visa den direkt (för gamla kalkyler)
         if (typeof rawResult === 'string') {
             resultBox.innerHTML = rawResult.replace(/\n/g, "<br>");
-        } 
+        }
         // Om kalkylen returnerar ett tal, använd den nya formateringen
         else if (typeof rawResult === 'number') {
-            const decimalPrecision = calc.decimaler !== undefined ? calc.decimaler : 2;
-            const unit = calc.unit || ""; 
-            const label = calc.label ? `${calc.label}: ` : "";
-            
+            const decimalPrecision = calc.decimaler !== undefined ? calc.decimaler: 2;
+            const unit = calc.unit || "";
+            const label = calc.label ? `${calc.label}: `: "";
+
             const formattedNum = formatResult(rawResult, decimalPrecision);
             resultBox.innerHTML = `${label}${formattedNum} ${unit}`;
         }
@@ -271,13 +272,20 @@ function renderCalc(category, calcId) {
 
     <button id="resetBtn" class="reset-btn" data-calc-id="${calcId}">Nollställ</button>
     <div class="result"></div>
+
     <div class="calc-info-title" onclick="toggleInfo()">
-    <span>Tips och riktvärden</span>
+    <span>Info om beräkningen</span>
     <span id="infoIcon">▼</span>
     </div>
     <div id="calcInfo" class="calc-info-content">
-    ${calc.info || ""}
+    ${typeof calc.info === 'string' ? `<p>${calc.info}</p>`: `
+    ${calc.info?.beskrivning ? `<p>${calc.info.beskrivning}</p>`: ""}
+    ${calc.info?.formel ? `<p><strong>Formel:</strong> ${calc.info.formel.namn} (${calc.info.formel.beskrivning})</p>`: ""}
+    ${calc.info?.riktvarden ? `<p><strong>Riktvärden:</strong> ${calc.info.riktvarden}</p>`: ""}
+    ${calc.info?.tips ? `<p><strong>Tips:</strong> ${calc.info.tips}</p>`: ""}
+    `}
     </div>
+
     </div>`;
 
     // Kör en beräkning direkt när sidan laddats så att resultatet visas omedelbart
