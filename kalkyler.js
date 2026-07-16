@@ -17,8 +17,6 @@ export const UNIT_MAP = {
     "celsius": "°C"
 };
 
-
-
 // 2. KATEGORIER
 export const KATEGORIER = {
     styr: "Styr & Regler",
@@ -184,6 +182,11 @@ export const ALLA_KALKYLER = [
         id: "omsattning",
         namn: "Luftomsättning",
         kategorier: ["vent"],
+        // Lägg till ny typ av inställningar i alla kalkyler
+        unit: "h⁻¹",
+        label: "Luftomsättning",
+        decimaler: 1,
+        // Inmatning
         inputs: [{
             id: "volym",
             label: "Rumsvolym (m³)"
@@ -195,7 +198,18 @@ export const ALLA_KALKYLER = [
                     "m3h"],
                 base: "m3h"
             }],
-        calc: (v) => (!valid(v.volym, v.flode) || v.volym <= 0) ? "Fel": beraknaOmsattning(v),
+
+        // Den "rena" beräkningen
+        calc: (v) => {
+            // Validering
+            if (!v.volym || v.volym <= 0 || !v.flode) return "Fel";
+
+            const unit = v.flode_unit || "m3h";
+            const flode_m3h = toM3h(v.flode, unit);
+            // Formeln för beräkningen
+            return flode_m3h / v.volym; // Returnera bara talet
+        },
+        // Infirmation om beräkningen TODO lägg till formeln
         info: `Används för att kontrollera hur många gånger per timme luften i ett rum byts ut.`
     },
 
@@ -245,6 +259,8 @@ export const ALLA_KALKYLER = [
     {
         id: "verkningsgrad",
         namn: "Temperaturverkningsgrad",
+        decimaler: 0,
+        // Denna kalkyl vill ha 0 decimaler
         kategorier: ["vent"],
         inputs: [{
             id: "tUte",

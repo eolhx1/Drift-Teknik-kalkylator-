@@ -132,6 +132,7 @@ function runCalc(category, calcId) {
     const values = {};
     let allFilled = true;
 
+    // 3.1 Hämta värden
     selects.forEach(s => values[s.dataset.unit + "_unit"] = s.value);
     inputs.forEach(i => {
         const val = parseFloat(i.value.replace(",", "."));
@@ -139,20 +140,34 @@ function runCalc(category, calcId) {
         else values[i.dataset.id] = val;
     });
 
-    localStorage.setItem(`calc_${calcId}`,
-        JSON.stringify(values));
+    localStorage.setItem(`calc_${calcId}`, JSON.stringify(values));
 
     if (!allFilled) {
         resultBox.innerText = "Fyll i alla fält...";
         return;
     }
 
+    // 3.2 Presentation av beräkningen
     try {
-        resultBox.innerHTML = calc.calc(values).replace(/\n/g, "<br>");
+        const rawResult = calc.calc(values); // Kan vara ett tal eller en sträng ("Fel")
+
+        // 1. Om det är en sträng (t.ex. "Fel" eller "Felaktiga värden"), visa den direkt
+        if (typeof rawResult === 'string') {
+            resultBox.innerText = rawResult;
+        } 
+        // 2. Om det är ett tal, formatera det
+        else {
+            const decimalPrecision = calc.decimaler !== undefined ? calc.decimaler : 2;
+            const unit = calc.unit || ""; 
+            const label = calc.label ? `${calc.label}: ` : "";
+            
+            const formattedNum = formatResult(rawResult, decimalPrecision);
+            resultBox.innerHTML = `${label}${formattedNum} ${unit}`;
+        }
+        
     } catch (err) {
         resultBox.innerText = "Ett fel uppstod.";
     }
-}
 
 // --- 4. MENYHANTERING & RENDERING ---
 function showMainMenu() {
@@ -417,7 +432,7 @@ function triggerHaptic(duration = 20) {
     }
 }
 
-// --- Funktin för att växla mellan Vibration och inte Vibration ---
+// --- Funktion för att växla mellan Vibration och inte Vibration ---
 function toggleHaptic() {
     const current = localStorage.getItem("hapticEnabled") || "enabled";
     const next = current === "enabled" ? "disabled": "enabled";
@@ -428,4 +443,13 @@ function toggleHaptic() {
 
     // Uppdatera inställningssidan (vi kör showSettings igen för att rita om knappen)
     showSettings();
+}
+
+// --- ? ---
+function formatResult(value, precision = 2) {
+    if (isNaN(value)) return "0";
+    return new Intl.NumberFormat('sv-SE', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: precision
+    }).format(value);
 }
