@@ -205,23 +205,27 @@ input:focus {
     transform: scale(1.05); /* Gör att den "poppar" ut lite */
 }
 
+/* Tillbaka knappens definitioner */
 .back-btn {
-    font-size: 1rem;
-    color: var(--text-dark);
-    background: var(--bg-color);
-    padding: 8px 16px;
-    border-radius: 20px;
-    border: 1px solid var(--border-color);
+    background: transparent;     /* Ingen bakgrund */
+    border: none;                /* Ingen ram */
+    color: var(--primary-color); /* Använder huvudfärgen för klickbarhet */
+    font-size: 0.95rem;          /* Lagom storlek */
+    font-weight: 600;
+    padding: 0;                  /* Ingen extra padding */
     display: inline-flex;
-    align-items: center; /* Centrerar pilen mot texten */
-    gap: 8px;           /* Luft mellan pil och text */
+    align-items: center;         /* Centrerar pilen vertikalt */
+    gap: 6px;                    /* Avståndet mellan pilen och texten */
     cursor: pointer;
+    margin-bottom: 12px;         /* Luft ner till rubriken */
 }
 
-/* Om pilen ändå ser liten ut, kan vi tvinga upp storleken */
-.back-btn::before {
-    font-size: 1.2rem;
+/* Subtil effekt när man trycker på knappen */
+.back-btn:active {
+    opacity: 0.6;
+    transform: translateX(-3px); /* Ger en visuell feedback att man går "bakåt" */
 }
+
 
 .reset-btn {
     background: var(--btn-secondary);
