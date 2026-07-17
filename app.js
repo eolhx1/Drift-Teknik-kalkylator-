@@ -231,6 +231,9 @@ function showSubMenu(categoryKey) {
     if (activeBtn) {
         activeBtn.classList.add('active-nav');
     }
+    
+    // Göm huvudmenyn helt när man valt en kategori för att frigöra plats
+    state.mainNav.classList.add("hidden"); 
 
     // Töm sökfältet och dölj eventuella sökresultat
     if (state.searchBox) {
