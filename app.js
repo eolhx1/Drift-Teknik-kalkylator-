@@ -121,10 +121,12 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault(); // Stoppar eventuella standardbeteenden
             triggerHaptic(20);
             showMainMenu();
+            setActiveNav("navHome"); 
         });
     }
 
     showMainMenu();
+    setActiveNav("navHome"); 
 });
 
 
@@ -234,7 +236,7 @@ function showSubMenu(categoryKey) {
     const list = (categoryKey === "recent") ? getRecent():
     (categoryKey === "favoriter") ? getFavorites(): null;
 
-    if (list) {
+    if (list) {()
         if (list.length === 0) {
             state.subNav.innerHTML = "<p style='padding:14px; color:var(--text-muted);'>Ingen data hittades.</p>";
             return;
