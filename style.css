@@ -228,11 +228,11 @@ input:focus {
     content: "←";
     position: absolute;
     left: 0;
-    /* Tvingar den till exakt vertikal mittpunkt */
     top: 50%;
     transform: translateY(-50%);
     font-size: 1.2rem;
     line-height: 1;
+    margin-top: -2px; /* JUSTERA HÄR: prova -2px, -3px eller -4px */
 }
 
 .back-btn:active {
