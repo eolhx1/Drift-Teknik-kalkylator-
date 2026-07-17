@@ -190,25 +190,30 @@ function runCalc(category, calcId) {
 
 // --- 4. MENYHANTERING & RENDERING ---
 function showMainMenu() {
-    state.activeCategory = null;// Nollställ när vi är på huvudmenyn
+    state.activeCategory = null; 
     clear(state.container);
     clear(state.subNav);
+    
+    // Vi ser till att menyn visas
     state.mainNav.classList.remove("hidden");
     state.subNav.classList.remove("hidden");
+    
     if (state.searchBox) {
         state.searchBox.value = "";
         state.searchBox.style.display = "block";
     }
 
+    // Vi tömmer mainNav för att fylla på med rätt saker
     state.mainNav.innerHTML = "";
-
-    // Kategorier
-    Object.entries(KATEGORIER).forEach(([key, name]) => {6
+    
+    // Kategorier - VIKTIGT: Kontrollera att KATEGORIER finns och har data!
+    Object.entries(KATEGORIER).forEach(([key, name]) => {
         const btn = createButton(name, "nav-btn", () => showSubMenu(key));
-        btn.dataset.category = key; // Här stämplar vi knappen!
+        btn.dataset.category = key; 
         state.mainNav.appendChild(btn);
     });
 }
+
 
 function showSubMenu(categoryKey) {
     state.activeCategory = categoryKey; // Spara kategorin
