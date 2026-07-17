@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
         state.searchBox.addEventListener("input", () => {
             // Visa/dölj X baserat på om fältet är tomt
             state.clearSearchBtn.classList.toggle("hidden", state.searchBox.value === "");
-            // Kör sökningen med debounce
+            // Kör sökningen med debounce89
             debounce(searchCalculations, 200)();
         });
 
@@ -57,6 +57,22 @@ document.addEventListener("DOMContentLoaded", () => {
             showSettings();
         });
     }
+
+ // Koppla bottenmenyns knappar
+    document.getElementById("navHome").addEventListener("click", () => {
+        setActiveNav("navHome");
+        showMainMenu();
+    });
+
+    document.getElementById("navFav").addEventListener("click", () => {
+        setActiveNav("navFav");
+        showSubMenu("favoriter");
+    });
+
+    document.getElementById("navRecent").addEventListener("click", () => {
+        setActiveNav("navRecent");
+        showSubMenu("recent");
+    });
 
     // 2.4 GLOBAL LYSSNARE för alla dynamiska knappar
     state.container.addEventListener("click", (event) => {
@@ -195,7 +211,7 @@ function showMainMenu() {
     state.mainNav.appendChild(recentBtn);
 
     // Kategorier
-    Object.entries(KATEGORIER).forEach(([key, name]) => {
+    Object.entries(KATEGORIER).forEach(([key, name]) => {6
         const btn = createButton(name, "nav-btn", () => showSubMenu(key));
         btn.dataset.category = key; // Här stämplar vi knappen!
         state.mainNav.appendChild(btn);
@@ -486,4 +502,9 @@ function formatResult(value, precision = 2) {
         minimumFractionDigits: 0,
         maximumFractionDigits: precision
     }).format(value);
+}
+
+function setActiveNav(id) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
 }
