@@ -213,29 +213,32 @@ input:focus {
     font-size: 0.95rem;
     font-weight: 600;
     padding: 0;
-    display: inline-flex;
-    align-items: center;
     cursor: pointer;
     margin-bottom: 12px;
-    /* Tvinga vertikal centrering */
-    line-height: 1;
+    
+    /* Gör knappen till en referensram för pilen */
+    position: relative;
+    padding-left: 22px; /* Ger plats åt pilen till vänster om texten */
+    display: block;    /* Ändra från inline-flex till block */
+    line-height: 1.2;
 }
 
-/* Lägg pilen i en egen span så vi kan kontrollera den individuellt */
 .back-btn::before {
     content: "←";
-    margin-right: 6px;
-    font-size: 1.2rem;   /* Gör själva pilen lite större */
-    line-height: 0.8;    /* Lyfter pilen uppåt visuellt */
-    display: inline-block;
-    vertical-align: middle;
+    position: absolute; /* Låser pilens position */
+    left: 0;
+    top: 50%;           /* Centrera pilen exakt i mitten vertikalt */
+    transform: translateY(-50%); 
+    font-size: 1.2rem;
+    line-height: 1;     /* Nollställer radhöjden för pilen */
 }
 
 /* Subtil effekt när man trycker på knappen */
 .back-btn:active {
     opacity: 0.6;
-    transform: translateX(-3px); /* Ger en visuell feedback att man går "bakåt" */
+    transform: translateX(-3px);
 }
+
 
 .reset-btn {
     background: var(--btn-secondary);
