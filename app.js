@@ -199,16 +199,6 @@ function showMainMenu() {
     }
 
     state.mainNav.innerHTML = "";
-    
-    // Favoriter
-    const favBtn = createButton("⭐ Favoriter", "nav-btn", () => showSubMenu("favoriter"));
-    favBtn.dataset.category = "favoriter";
-    state.mainNav.appendChild(favBtn);
-
-    // Senast
-    const recentBtn = createButton("🕒 Senast", "nav-btn", () => showSubMenu("recent"));
-    recentBtn.dataset.category = "recent";
-    state.mainNav.appendChild(recentBtn);
 
     // Kategorier
     Object.entries(KATEGORIER).forEach(([key, name]) => {6
