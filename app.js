@@ -58,21 +58,24 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
- // Koppla bottenmenyns knappar
-    document.getElementById("navHome").addEventListener("click", () => {
+    // Säker koppling av bottenmeny
+    const navHome = document.getElementById("navHome");
+    const navFav = document.getElementById("navFav");
+    const navRecent = document.getElementById("navRecent");
+
+    if (navHome) navHome.addEventListener("click", () => {
         setActiveNav("navHome");
         showMainMenu();
     });
-
-    document.getElementById("navFav").addEventListener("click", () => {
+    if (navFav) navFav.addEventListener("click", () => {
         setActiveNav("navFav");
         showSubMenu("favoriter");
     });
-
-    document.getElementById("navRecent").addEventListener("click", () => {
+    if (navRecent) navRecent.addEventListener("click", () => {
         setActiveNav("navRecent");
         showSubMenu("recent");
     });
+
 
     // 2.4 GLOBAL LYSSNARE för alla dynamiska knappar
     state.container.addEventListener("click", (event) => {
@@ -121,12 +124,12 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault(); // Stoppar eventuella standardbeteenden
             triggerHaptic(20);
             showMainMenu();
-            setActiveNav("navHome"); 
+            setActiveNav("navHome");
         });
     }
 
     showMainMenu();
-    setActiveNav("navHome"); 
+    setActiveNav("navHome");
 });
 
 
@@ -190,14 +193,14 @@ function runCalc(category, calcId) {
 
 // --- 4. MENYHANTERING & RENDERING ---
 function showMainMenu() {
-    state.activeCategory = null; 
+    state.activeCategory = null;
     clear(state.container);
     clear(state.subNav);
-    
+
     // Vi ser till att menyn visas
     state.mainNav.classList.remove("hidden");
     state.subNav.classList.remove("hidden");
-    
+
     if (state.searchBox) {
         state.searchBox.value = "";
         state.searchBox.style.display = "block";
@@ -205,11 +208,11 @@ function showMainMenu() {
 
     // Vi tömmer mainNav för att fylla på med rätt saker
     state.mainNav.innerHTML = "";
-    
+
     // Kategorier - VIKTIGT: Kontrollera att KATEGORIER finns och har data!
     Object.entries(KATEGORIER).forEach(([key, name]) => {
         const btn = createButton(name, "nav-btn", () => showSubMenu(key));
-        btn.dataset.category = key; 
+        btn.dataset.category = key;
         state.mainNav.appendChild(btn);
     });
 }
@@ -241,7 +244,7 @@ function showSubMenu(categoryKey) {
     const list = (categoryKey === "recent") ? getRecent():
     (categoryKey === "favoriter") ? getFavorites(): null;
 
-    if (list) {()
+    if (list) {
         if (list.length === 0) {
             state.subNav.innerHTML = "<p style='padding:14px; color:var(--text-muted);'>Ingen data hittades.</p>";
             return;
@@ -275,7 +278,7 @@ function renderCalc(category, calcId) {
     state.container.innerHTML = `
     <div class="calc-page" data-calc-id="${calcId}">
     <div class="calc-header-nav">
-<button id="backBtn" class="back-btn">${categoryName}</button>
+    <button id="backBtn" class="back-btn">${categoryName}</button>
     </div>
     <h2>${calc.namn}
     <button id="favoriteBtn" class="favorite-btn" data-calc-id="${calcId}">
@@ -342,7 +345,7 @@ function showSettings() {
 
     state.container.innerHTML = `
     <div class="calc-page">
-<button id="backBtn" class="back-btn">Tillbaka</button>
+    <button id="backBtn" class="back-btn">Tillbaka</button>
     <h2>Inställningar</h2>
     <div class="settings-section">
     <button id="darkModeToggle" class="nav-btn">🌙 Växla mörkt läge</button>
