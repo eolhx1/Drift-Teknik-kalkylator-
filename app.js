@@ -262,7 +262,7 @@ function renderCalc(category, calcId) {
     state.container.innerHTML = `
     <div class="calc-page" data-calc-id="${calcId}">
     <div class="calc-header-nav">
-        <button id="backBtn" class="back-btn">← ${categoryName}</button>
+<button id="backBtn" class="back-btn">${categoryName}</button>
     </div>
     <h2>${calc.namn}
     <button id="favoriteBtn" class="favorite-btn" data-calc-id="${calcId}">
@@ -329,7 +329,7 @@ function showSettings() {
 
     state.container.innerHTML = `
     <div class="calc-page">
-    <button id="backBtn" class="back-btn">← Tillbaka</button>
+<button id="backBtn" class="back-btn">Tillbaka</button>
     <h2>Inställningar</h2>
     <div class="settings-section">
     <button id="darkModeToggle" class="nav-btn">🌙 Växla mörkt läge</button>
