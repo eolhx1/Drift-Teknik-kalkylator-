@@ -216,24 +216,25 @@ input:focus {
     cursor: pointer;
     margin-bottom: 12px;
     
-    /* Gör knappen till en referensram för pilen */
+    /* Positionering */
     position: relative;
-    padding-left: 22px; /* Ger plats åt pilen till vänster om texten */
-    display: block;    /* Ändra från inline-flex till block */
-    line-height: 1.2;
+    padding-left: 20px; /* Gör plats för pilen */
+    min-height: 24px;   /* Säkerställer att knappen har höjd nog att centrera i */
+    display: flex;
+    align-items: center;
 }
 
 .back-btn::before {
     content: "←";
-    position: absolute; /* Låser pilens position */
+    position: absolute;
     left: 0;
-    top: 50%;           /* Centrera pilen exakt i mitten vertikalt */
-    transform: translateY(-50%); 
+    /* Tvingar den till exakt vertikal mittpunkt */
+    top: 50%;
+    transform: translateY(-50%);
     font-size: 1.2rem;
-    line-height: 1;     /* Nollställer radhöjden för pilen */
+    line-height: 1;
 }
 
-/* Subtil effekt när man trycker på knappen */
 .back-btn:active {
     opacity: 0.6;
     transform: translateX(-3px);
