@@ -172,7 +172,7 @@ function runCalc(category, calcId) {
 
 // --- 4. MENYHANTERING & RENDERING ---
 function showMainMenu() {
-    state.activeCategory = null; // Nollställ när vi är på huvudmenyn
+    state.activeCategory = null;// Nollställ när vi är på huvudmenyn
     clear(state.container);
     clear(state.subNav);
     state.mainNav.classList.remove("hidden");
@@ -183,16 +183,38 @@ function showMainMenu() {
     }
 
     state.mainNav.innerHTML = "";
-    state.mainNav.appendChild(createButton("⭐ Favoriter", "nav-btn", () => showSubMenu("favoriter")));
-    state.mainNav.appendChild(createButton("🕒 Senast", "nav-btn", () => showSubMenu("recent")));
+    
+    // Favoriter
+    const favBtn = createButton("⭐ Favoriter", "nav-btn", () => showSubMenu("favoriter"));
+    favBtn.dataset.category = "favoriter";
+    state.mainNav.appendChild(favBtn);
 
+    // Senast
+    const recentBtn = createButton("🕒 Senast", "nav-btn", () => showSubMenu("recent"));
+    recentBtn.dataset.category = "recent";
+    state.mainNav.appendChild(recentBtn);
+
+    // Kategorier
     Object.entries(KATEGORIER).forEach(([key, name]) => {
-        state.mainNav.appendChild(createButton(name, "nav-btn", () => showSubMenu(key)));
+        const btn = createButton(name, "nav-btn", () => showSubMenu(key));
+        btn.dataset.category = key; // Här stämplar vi knappen!
+        state.mainNav.appendChild(btn);
     });
 }
 
 function showSubMenu(categoryKey) {
-    state.activeCategory = categoryKey; // Spara kategorin!
+    state.activeCategory = categoryKey; // Spara kategorin
+
+    // 1. Ta bort 'active-nav' från alla
+    state.mainNav.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active-nav');
+    });
+
+    // 2. Hitta rätt knapp via data-attributet och markera
+    const activeBtn = state.mainNav.querySelector(`[data-category="${categoryKey}"]`);
+    if (activeBtn) {
+        activeBtn.classList.add('active-nav');
+    }
 
     // Töm sökfältet och dölj eventuella sökresultat
     if (state.searchBox) {

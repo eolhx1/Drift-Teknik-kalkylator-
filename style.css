@@ -198,12 +198,29 @@ input:focus {
     filter: brightness(0.9);
 }
 
+.nav-btn.active-nav {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: scale(1.05); /* Gör att den "poppar" ut lite */
+}
+
 .back-btn {
-    font-size: 0.9rem;
-    color: var(--text-muted);
+    font-size: 1rem;
+    color: var(--text-dark);
     background: var(--bg-color);
-    padding: 6px 12px;
-    border-radius: 15px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    display: inline-flex;
+    align-items: center; /* Centrerar pilen mot texten */
+    gap: 8px;           /* Luft mellan pil och text */
+    cursor: pointer;
+}
+
+/* Om pilen ändå ser liten ut, kan vi tvinga upp storleken */
+.back-btn::before {
+    font-size: 1.2rem;
 }
 
 .reset-btn {
