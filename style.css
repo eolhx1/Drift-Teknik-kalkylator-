@@ -150,6 +150,10 @@ body {
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
+.calc-header-nav {
+    margin-bottom: 10px;
+}
+
 input {
     width: 100%;
     padding: 12px;
@@ -194,19 +198,12 @@ input:focus {
     filter: brightness(0.9);
 }
 
-.reset-btn {
-    background: var(--text-muted);
-    font-weight: 600;
-}
-
 .back-btn {
-    background: none;
-    border: none;
-    color: var(--primary-color);
-    font-size: 15px;
-    font-weight: 500;
-    padding: 5px 0;
-    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    background: var(--bg-color);
+    padding: 6px 12px;
+    border-radius: 15px;
 }
 
 .reset-btn {

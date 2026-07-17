@@ -232,12 +232,16 @@ function renderCalc(category, calcId) {
     const calc = findCalc(calcId);
     if (!calc) return;
 
-    // HÄMTA SPARAD DATA: Försöker hämta objektet för denna kalkyl, annars tomt objekt
+    // Hämta namnet på kategorin för att visa i breadcrumb
+    const categoryName = KATEGORIER[category] || "Kalkyl";
+    // Hämtar spatad data: Försöker hämta objektet för denna kalkyl, annars tomt objekt
     const savedData = JSON.parse(localStorage.getItem(`calc_${calcId}`) || "{}");
 
     state.container.innerHTML = `
     <div class="calc-page" data-calc-id="${calcId}">
-    <button id="backBtn" class="back-btn">← Tillbaka</button>
+    <div class="calc-header-nav">
+        <button id="backBtn" class="back-btn">← ${categoryName}</button>
+    </div>
     <h2>${calc.namn}
     <button id="favoriteBtn" class="favorite-btn" data-calc-id="${calcId}">
     ${isFavorite(calcId) ? "⭐": "☆"}
