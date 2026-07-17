@@ -369,3 +369,38 @@ input:focus {
 .clear-search-btn.hidden {
     display: none;
 }
+
+/* Bottenmeny */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+}
+
+.nav-item {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 10px;
+    transition: color 0.2s;
+}
+
+.nav-item.active {
+    color: var(--primary-color);
+}
+
+/* Se till att innehållet inte göms bakom menyn */
+body {
+    padding-bottom: 70px; 
+}
