@@ -32,7 +32,6 @@ body.dark-mode {
 
 body {
     background-color: var(--bg-color);
-    color: var(--text-dark);
     font-family: -apple-system, sans-serif;
     margin: 0;
     padding: 10px 0 0 0; /* Topp, Höger, Botten, Vänster */
@@ -49,6 +48,10 @@ body {
     display: flex;
     flex-direction: column;
     overflow-y: auto; /* Gör innehållet scrollbart vid behov */
+}
+
+.app-header, .app-header h1 {
+    color: var(--header-text); 
 }
 
 h1, h2, label {
@@ -120,11 +123,11 @@ h1, h2, label {
 .nav-btn {
     flex: 0 1 calc(45%); /* Gör att de tar ca halva bredden, snyggare i rutnät */
     text-align: center;
-    background: #f8f9fa;
+    background: var(--card-bg);
     border: 1px solid #e9ecef;
     padding: 12px 20px;
     border-radius: 12px;
-    color: var(--text-main);
+    color: var(--text-dark);
     font-weight: 500;
     transition: all 0.2s ease;
 }
