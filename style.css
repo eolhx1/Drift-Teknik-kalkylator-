@@ -10,6 +10,7 @@
     --header-bg: #0066cc;
     --header-text: #ffffff;
     --text-dark: #333;
+    --border-color: #ccc;
 }
 
 
@@ -124,7 +125,7 @@ h1, h2, label {
     flex: 0 1 calc(45%); /* Gör att de tar ca halva bredden, snyggare i rutnät */
     text-align: center;
     background: var(--card-bg);
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--border-color); 
     padding: 12px 20px;
     border-radius: 12px;
     color: var(--text-dark);
