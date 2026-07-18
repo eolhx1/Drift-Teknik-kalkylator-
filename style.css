@@ -95,6 +95,15 @@ body {
     margin: 10px;
     border-radius: 16px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: opacity 0.3s ease, height 0.3s ease;
+    opacity: 1;
+}
+
+.main-nav.hidden {
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    margin: 0; /* För att undvika att marginaler ligger kvar och tar plats */
 }
 
 .main-nav::-webkit-scrollbar {
@@ -376,6 +385,8 @@ input:focus {
 
 /* Bottenmeny */
 .bottom-nav {
+        height: 60px; /* Fast höjd */
+    padding: 5px 0;
     background: var(--card-bg);
     border-top: 1px solid #eee;
     padding: 10px;
@@ -390,10 +401,13 @@ input:focus {
 }
 
 .nav-item {
-    background: none;
-    box-shadow: none;
-    font-size: 0.8rem;
-    color: #888;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem; /* Mindre text under ikonen */
+    line-height: 1.2;
+    padding: 0;
 }
 
 .nav-item.active {

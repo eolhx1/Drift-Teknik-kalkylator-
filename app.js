@@ -58,10 +58,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Säker koppling av bottenmeny
+    // Koppling av bottenmeny
     const navHome = document.getElementById("navHome");
     const navFav = document.getElementById("navFav");
     const navRecent = document.getElementById("navRecent");
+    const navSearch = document.getElementById("navSearch"); // Lägg till denna
 
     if (navHome) navHome.addEventListener("click", () => {
         setActiveNav("navHome");
@@ -75,6 +76,12 @@ document.addEventListener("DOMContentLoaded", () => {
         setActiveNav("navRecent");
         showSubMenu("recent");
     });
+    if (navSearch) navSearch.addEventListener("click", () => {
+        // Och denna
+        setActiveNav("navSearch");
+        showSearchModal();
+    });
+
 
 
     // 2.4 GLOBAL LYSSNARE för alla dynamiska knappar
@@ -231,9 +238,9 @@ function showSubMenu(categoryKey) {
     if (activeBtn) {
         activeBtn.classList.add('active-nav');
     }
-    
+
     // Göm huvudmenyn helt när man valt en kategori för att frigöra plats
-    state.mainNav.classList.add("hidden"); 
+    state.mainNav.classList.add("hidden");
 
     // Töm sökfältet och dölj eventuella sökresultat
     if (state.searchBox) {
@@ -358,7 +365,9 @@ function showSettings() {
     </div>`;
 }
 
-// --- 5. HJÄLPFUNKTIONER ---
+// ==========================================================================
+//  5. HJÄLPFUNKTIONER
+// ==========================================================================
 function clear(el) {
     if (el) el.innerHTML = "";
 }
@@ -510,4 +519,27 @@ function formatResult(value, precision = 2) {
 function setActiveNav(id) {
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+}
+
+function showSearchModal() {
+    clear(state.container);
+    state.mainNav.classList.add("hidden");
+    state.subNav.classList.add("hidden");
+
+    state.container.innerHTML = `
+    <div class="calc-page">
+    <h3>Sök</h3>
+    <input type="text" id="floatingSearch" placeholder="Sök i alla kalkyler...">
+    </div>
+    `;
+
+    const searchInput = document.getElementById("floatingSearch");
+    searchInput.focus();
+
+    // Koppla söklogiken till det temporära fältet
+    searchInput.addEventListener("input", (e) => {
+        const val = e.target.value;
+        // Här kan du återanvända din befintliga searchCalculations-logik
+        // eller skapa en enkel filtrering direkt här.
+    });
 }
