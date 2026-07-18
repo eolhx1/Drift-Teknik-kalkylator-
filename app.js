@@ -14,8 +14,6 @@ const state = {
     mainNav: document.getElementById("mainNav"),
     subNav: document.getElementById("subNav"),
     activeCategory: null,
-    //
-    clearSearchBtn: document.getElementById("clearSearchBtn")
 };
 
 // --- 2. INITIALISERING ---
@@ -31,22 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // 2.2 Sökfunktion (med rensa-knapp logik)
-    if (state.searchBox && state.clearSearchBtn) {
-        state.searchBox.addEventListener("input", () => {
-            // Visa/dölj X baserat på om fältet är tomt
-            state.clearSearchBtn.classList.toggle("hidden", state.searchBox.value === "");
-            // Kör sökningen med debounce89
-            debounce(searchCalculations, 200)();
-        });
 
-        state.clearSearchBtn.addEventListener("click", () => {
-            state.searchBox.value = "";
-            state.clearSearchBtn.classList.add("hidden");
-            // Återgå till menyn för aktuell kategori eller huvudmenyn
-            state.activeCategory ? showSubMenu(state.activeCategory): showMainMenu();
-            state.searchBox.focus();
-        });
-    }
 
     // 2.3 Koppla kugghjulet (statiskt element i headern)
     const settingsBtn = document.getElementById("settingsBtn");
@@ -207,11 +190,6 @@ function showMainMenu() {
     state.mainNav.classList.remove("hidden");
     state.subNav.classList.remove("hidden");
 
-    if (state.searchBox) {
-        state.searchBox.value = "";
-        state.searchBox.style.display = "block";
-    }
-
     // Vi tömmer mainNav för att fylla på med rätt saker
     state.mainNav.innerHTML = "";
 
@@ -241,11 +219,6 @@ function showSubMenu(categoryKey) {
     // Göm huvudmenyn helt när man valt en kategori för att frigöra plats
     state.mainNav.classList.add("hidden");
 
-    // Töm sökfältet och dölj eventuella sökresultat
-    if (state.searchBox) {
-        state.searchBox.value = "";
-    }
-
     clear(state.container);
     clear(state.subNav);
     state.subNav.classList.add("active");
@@ -274,8 +247,7 @@ function renderCalc(category, calcId) {
     clear(state.container);
     state.mainNav.classList.add("hidden");
     state.subNav.classList.add("hidden");
-    if (state.searchBox) state.searchBox.style.display = "none";
-
+    
     const calc = findCalc(calcId);
     if (!calc) return;
 
@@ -348,7 +320,6 @@ function showSettings() {
     clear(state.container);
     state.mainNav.classList.add("hidden");
     state.subNav.classList.add("hidden");
-    if (state.searchBox) state.searchBox.style.display = "none";
 
     const hapticStatus = localStorage.getItem("hapticEnabled") || "enabled";
 
@@ -424,35 +395,6 @@ function debounce(func, delay) {
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => func.apply(this, args), delay);
     };
-}
-
-
-function searchCalculations() {
-    // Om sökfältet saknas så, avbryt
-    if (!state.searchBox) return;
-
-    const search = state.searchBox.value.toLowerCase();
-    clear(state.container);
-    clear(state.subNav);
-
-    if (!search) {
-        // Om sökfältet är tomt, återgå till det normala menyläget
-        state.activeCategory ? showSubMenu(state.activeCategory): showMainMenu();
-        return;
-    }
-
-    state.subNav.classList.add("active");
-
-    // Filtrera baserat på både söksträng OCH aktiv kategori
-    ALLA_KALKYLER.filter(c => {
-        const matchesSearch = c.namn.toLowerCase().includes(search);
-        const matchesCategory = state.activeCategory ? c.kategorier.includes(state.activeCategory): true;
-        return matchesSearch && matchesCategory;
-    }).forEach(calc => {
-        state.subNav.appendChild(createButton(calc.namn, "sub-btn", () => {
-            renderCalc(state.activeCategory || calc.kategorier[0], calc.id);
-        }));
-    });
 }
 
 // "Info" onclick
