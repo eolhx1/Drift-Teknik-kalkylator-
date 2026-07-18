@@ -13,7 +13,6 @@ const state = {
     container: document.getElementById("calcContainer"),
     mainNav: document.getElementById("mainNav"),
     subNav: document.getElementById("subNav"),
-    searchBox: document.getElementById("searchBox"),
     activeCategory: null,
     //
     clearSearchBtn: document.getElementById("clearSearchBtn")
@@ -527,19 +526,31 @@ function showSearchModal() {
     state.subNav.classList.add("hidden");
 
     state.container.innerHTML = `
-    <div class="calc-page">
-    <h3>Sök</h3>
-    <input type="text" id="floatingSearch" placeholder="Sök i alla kalkyler...">
-    </div>
+        <div class="calc-page">
+            <h2>Sök kalkyler</h2>
+            <input type="text" id="floatingSearch" placeholder="Skriv för att söka...">
+            <div id="searchResults" style="margin-top: 15px;"></div>
+        </div>
     `;
-
+    
     const searchInput = document.getElementById("floatingSearch");
+    const resultsContainer = document.getElementById("searchResults");
     searchInput.focus();
 
-    // Koppla söklogiken till det temporära fältet
     searchInput.addEventListener("input", (e) => {
-        const val = e.target.value;
-        // Här kan du återanvända din befintliga searchCalculations-logik
-        // eller skapa en enkel filtrering direkt här.
+        const query = e.target.value.toLowerCase();
+        resultsContainer.innerHTML = ""; // Töm gamla resultat
+
+        if (!query) return;
+
+        // Filtrera ALLA_KALKYLER
+        const matches = ALLA_KALKYLER.filter(c => c.namn.toLowerCase().includes(query));
+        
+        matches.forEach(calc => {
+            const btn = createButton(calc.namn, "sub-btn", () => {
+                renderCalc(calc.kategorier[0], calc.id);
+            });
+            resultsContainer.appendChild(btn);
+        });
     });
 }
