@@ -17,6 +17,7 @@ body.dark-mode {
     --bg-color: #121212;
     --card-bg: #1e1e1e;
     --text-dark: #e0e0e0;
+    --text-main: #e0e0e0; 
     --text-muted: #aaaaaa;
     --border-color: #444;
     --btn-secondary: #4a4a4a;
@@ -31,6 +32,7 @@ body.dark-mode {
 
 body {
     background-color: var(--bg-color);
+    color: var(--text-dark);
     font-family: -apple-system, sans-serif;
     margin: 0;
     padding: 10px 0 0 0; /* Topp, Höger, Botten, Vänster */
@@ -48,6 +50,11 @@ body {
     flex-direction: column;
     overflow-y: auto; /* Gör innehållet scrollbart vid behov */
 }
+
+h1, h2, label {
+    color: var(--text-dark);
+}
+
 
 /* ==========================================================================
    2. NAVIGERING & MENYER
@@ -384,7 +391,7 @@ input:focus {
 /* Bottenmeny */
 .bottom-nav {
     background: var(--card-bg);
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--border-color);
     padding: 8px 0;
     display: flex;
     justify-content: space-around;
