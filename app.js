@@ -94,6 +94,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+
+state.container.addEventListener("focus", (e) => {
+        if (e.target.tagName === "INPUT" && e.target.type === "number") {
+            setTimeout(() => {
+                e.target.select();
+            }, 50);
+        }
+    }, true); 
+
     // 2.5 UPPDATERAD INPUT-LYSSNARE
     state.container.addEventListener("input",
         (e) => {
