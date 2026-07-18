@@ -247,7 +247,7 @@ function renderCalc(category, calcId) {
     clear(state.container);
     state.mainNav.classList.add("hidden");
     state.subNav.classList.add("hidden");
-    
+
     const calc = findCalc(calcId);
     if (!calc) return;
 
@@ -468,13 +468,22 @@ function showSearchModal() {
     state.subNav.classList.add("hidden");
 
     state.container.innerHTML = `
-        <div class="calc-page">
-            <h2>Sök kalkyler</h2>
-            <input type="text" id="floatingSearch" placeholder="Skriv för att söka...">
-            <div id="searchResults" style="margin-top: 15px;"></div>
-        </div>
+    <div class="calc-page">
+    <div class="calc-header-nav">
+    <button id="backFromSearch" class="back-btn">Tillbaka</button>
+    </div>
+    <h2>Sök kalkyler</h2>
+    <input type="text" id="floatingSearch" placeholder="Skriv för att söka...">
+    <div id="searchResults" style="margin-top: 15px;"></div>
+    </div>
     `;
-    
+
+    // Koppla tillbaka-knappen
+    document.getElementById("backFromSearch").addEventListener("click", () => {
+        showMainMenu();
+        setActiveNav("navHome"); // Återställ aktiv status i menyn
+    });
+
     const searchInput = document.getElementById("floatingSearch");
     const resultsContainer = document.getElementById("searchResults");
     searchInput.focus();
@@ -487,7 +496,7 @@ function showSearchModal() {
 
         // Filtrera ALLA_KALKYLER
         const matches = ALLA_KALKYLER.filter(c => c.namn.toLowerCase().includes(query));
-        
+
         matches.forEach(calc => {
             const btn = createButton(calc.namn, "sub-btn", () => {
                 renderCalc(calc.kategorier[0], calc.id);
