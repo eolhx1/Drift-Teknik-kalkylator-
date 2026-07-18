@@ -468,40 +468,55 @@ function showSearchModal() {
     state.subNav.classList.add("hidden");
 
     state.container.innerHTML = `
-    <div class="calc-page">
-    <div class="calc-header-nav">
-    <button id="backFromSearch" class="back-btn">Tillbaka</button>
-    </div>
-    <h2>Sök kalkyler</h2>
-    <input type="text" id="floatingSearch" placeholder="Skriv för att söka...">
-    <div id="searchResults" style="margin-top: 15px;"></div>
-    </div>
+        <div class="calc-page">
+            <div class="calc-header-nav">
+                <button id="backFromSearch" class="back-btn">Tillbaka</button>
+            </div>
+            <h2>Sök kalkyler</h2>
+            <div class="search-input-wrapper">
+                <input type="text" id="floatingSearch" placeholder="Skriv för att söka...">
+                <button id="clearSearch" style="display:none;">✕</button>
+            </div>
+            <div id="searchResults" style="margin-top: 15px;"></div>
+        </div>
     `;
+    
+    // Kopplingar
+    const searchInput = document.getElementById("floatingSearch");
+    const clearBtn = document.getElementById("clearSearch");
+    const resultsContainer = document.getElementById("searchResults");
 
-    // Koppla tillbaka-knappen
     document.getElementById("backFromSearch").addEventListener("click", () => {
         showMainMenu();
-        setActiveNav("navHome"); // Återställ aktiv status i menyn
+        setActiveNav("navHome");
     });
-
-    const searchInput = document.getElementById("floatingSearch");
-    const resultsContainer = document.getElementById("searchResults");
+    
     searchInput.focus();
 
+    // Logik för input och X-knappen
     searchInput.addEventListener("input", (e) => {
         const query = e.target.value.toLowerCase();
-        resultsContainer.innerHTML = ""; // Töm gamla resultat
-
+        
+        // Visa/dölj X
+        clearBtn.style.display = query ? "block" : "none";
+        
+        resultsContainer.innerHTML = "";
         if (!query) return;
 
-        // Filtrera ALLA_KALKYLER
         const matches = ALLA_KALKYLER.filter(c => c.namn.toLowerCase().includes(query));
-
         matches.forEach(calc => {
             const btn = createButton(calc.namn, "sub-btn", () => {
                 renderCalc(calc.kategorier[0], calc.id);
             });
             resultsContainer.appendChild(btn);
         });
+    });
+
+    // Rensa-logik
+    clearBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        searchInput.focus();
+        clearBtn.style.display = "none";
+        resultsContainer.innerHTML = "";
     });
 }

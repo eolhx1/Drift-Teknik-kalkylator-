@@ -335,17 +335,8 @@ input:focus {
 }
 
 /* ==========================================================================
-   6. SPECIALSÖK & SYSTEMKLASSER
+   6. SÖK & SYSTEMKLASSER
    ========================================================================== */
-#searchBox {
-    width: 100%;
-    padding: 15px;
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    font-size: 16px; /* Förhindrar zoom på iOS */
-}
-
 .hidden {
     display: none !important;
 }
@@ -357,30 +348,6 @@ input:focus {
 .settings-section h3 {
     margin-bottom: 10px;
     color: var(--primary-color);
-}
-
-.search-container {
-    padding: 0 15px;
-    margin-top: 10px;
-    position: relative; /* VIKTIGT för att X-knappen ska hamna rätt */
-    display: flex;
-    align-items: center;
-}
-
-
-/* Plats för X */
-.clear-search-btn {
-    position: absolute;
-    right: 5px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.2rem;
-    color: #888;
-}
-
-.clear-search-btn.hidden {
-    display: none;
 }
 
 /* Bottenmeny */
@@ -412,4 +379,28 @@ input:focus {
 .nav-item.active {
     color: var(--primary-color);
     font-weight: 600;
+}
+
+/* Container för sökfältet */
+.search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+#floatingSearch {
+    width: 100%;
+    padding-right: 40px; /* Gör plats för X-knappen så texten inte krockar */
+}
+
+/* X-knappen */
+#clearSearch {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #888;
+    cursor: pointer;
+    padding: 5px;
 }
