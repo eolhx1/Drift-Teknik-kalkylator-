@@ -18,7 +18,7 @@ body.dark-mode {
     --card-bg: #1e1e1e;
     --text-dark: #e0e0e0;
     --text-muted: #aaaaaa;
-    --border-color: #333;
+    --border-color: #444;
     --btn-secondary: #4a4a4a;
     --result-bg: #1a2a3a;
     --header-bg: #004488;
@@ -31,6 +31,7 @@ body.dark-mode {
 
 body {
     background-color: var(--bg-color);
+    padding-top: 10px; /* Lägger till ett mellanrum högst upp */
     font-family: -apple-system, sans-serif;
     margin: 0;
     padding: 0;
@@ -175,18 +176,30 @@ input {
     width: 100%;
     padding: 12px;
     border-radius: 10px;
-    border: 1px solid var(--border-color);
-    font-size: 16px;
-    background: var(--card-bg);
+    border: 1px solid var(--border-color); /* Denna var nog för ljus/transparent */
+    background: var(--bg-color); /* Kontrasterar bättre mot det vita kortet */
     color: var(--text-dark);
-    appearance: none;
 }
+
+
 
 input:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
 }
+
+.input-group {
+    margin-bottom: 15px; /* Skapar luft mellan fälten */
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
 
 /* ==========================================================================
    4. RESULTAT & KNAPPAR
@@ -257,9 +270,8 @@ input:focus {
     transform: translateX(-3px);
 }
 
-
 .reset-btn {
-    background: var(--btn-secondary);
+    background: #6c757d;
     color: white;
     padding: 12px;
     border: none;
@@ -267,8 +279,8 @@ input:focus {
     width: 100%;
     font-size: 16px;
     font-weight: 500;
-    cursor: pointer;
-    margin-top: 10px;
+    margin-top: 20px; 
+    display: block;
 }
 
 .reset-btn:active {

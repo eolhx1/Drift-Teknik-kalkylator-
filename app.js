@@ -468,19 +468,21 @@ function showSearchModal() {
     state.subNav.classList.add("hidden");
 
     state.container.innerHTML = `
-        <div class="calc-page">
-            <div class="calc-header-nav">
-                <button id="backFromSearch" class="back-btn">Tillbaka</button>
-            </div>
-            <h2>Sök kalkyler</h2>
-            <div class="search-input-wrapper">
-                <input type="text" id="floatingSearch" placeholder="Skriv för att söka...">
-                <button id="clearSearch" style="display:none;">✕</button>
-            </div>
-            <div id="searchResults" style="margin-top: 15px;"></div>
-        </div>
+    <div class="calc-page">
+    <div class="calc-header-nav">
+    <button id="backFromSearch" class="back-btn">Tillbaka</button>
+    </div>
+    <h2>Sök kalkyler</h2>
+    <div class="search-input-wrapper">
+    <input type="text" id="floatingSearch" placeholder="Skriv för att söka...">
+    <button id="clearSearch" aria-label="Rensa sökfält" style="display:none;">
+    <span aria-hidden="true">&times;</span>
+    </button>
+    </div>
+    <div id="searchResults" style="margin-top: 15px;"></div>
+    </div>
     `;
-    
+
     // Kopplingar
     const searchInput = document.getElementById("floatingSearch");
     const clearBtn = document.getElementById("clearSearch");
@@ -490,16 +492,16 @@ function showSearchModal() {
         showMainMenu();
         setActiveNav("navHome");
     });
-    
+
     searchInput.focus();
 
     // Logik för input och X-knappen
     searchInput.addEventListener("input", (e) => {
         const query = e.target.value.toLowerCase();
-        
+
         // Visa/dölj X
-        clearBtn.style.display = query ? "block" : "none";
-        
+        clearBtn.style.display = query ? "block": "none";
+
         resultsContainer.innerHTML = "";
         if (!query) return;
 
@@ -513,10 +515,11 @@ function showSearchModal() {
     });
 
     // Rensa-logik
-    clearBtn.addEventListener("click", () => {
-        searchInput.value = "";
-        searchInput.focus();
-        clearBtn.style.display = "none";
-        resultsContainer.innerHTML = "";
-    });
+    clearBtn.addEventListener("click",
+        () => {
+            searchInput.value = "";
+            searchInput.focus();
+            clearBtn.style.display = "none";
+            resultsContainer.innerHTML = "";
+        });
 }
