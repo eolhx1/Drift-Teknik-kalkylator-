@@ -294,7 +294,8 @@ function renderCalc(category, calcId) {
     }).join("")}
 
     <button id="resetBtn" class="reset-btn" data-calc-id="${calcId}">Nollställ</button>
-    <div class="result"></div>
+<div class="result" id="resultDisplay" onclick="copyResult()"></div>
+
 
     <div class="calc-info-title" onclick="toggleInfo()">
     <span>Info om beräkningen</span>
@@ -522,4 +523,37 @@ function showSearchModal() {
             clearBtn.style.display = "none";
             resultsContainer.innerHTML = "";
         });
+}
+
+// ==========================================================================
+// 6. KOPIERINGSFUNKTION & TOAST
+// ==========================================================================
+
+// Gör funktionen tillgänglig för din HTML (inline onclick)
+window.copyResult = function() {
+    const resultBox = document.getElementById("resultDisplay");
+    // Kontrollera att rutan finns och inte visar felmeddelande
+    if (!resultBox || resultBox.innerText.includes("Fyll i") || resultBox.innerText.includes("fel")) return;
+
+    // Rensa texten från "Resultat: " så bara värdet kopieras
+    const textToCopy = resultBox.innerText.replace("Resultat: ", "");
+    
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        showToast("Kopierat till urklipp!");
+    }).catch(err => {
+        console.error("Kunde inte kopiera: ", err);
+    });
+};
+
+function showToast(message) {
+    const toast = document.getElementById("toast");
+    if (!toast) return;
+
+    toast.textContent = message;
+    toast.style.opacity = "1";
+    
+    // Göm toasten efter 2 sekunder
+    setTimeout(() => {
+        toast.style.opacity = "0";
+    }, 2000);
 }
