@@ -129,14 +129,20 @@ h1, h2, label {
 
 .nav-btn {
     flex: 0 1 calc(45%);
-    /* Gör att de tar ca halva bredden, snyggare i rutnät */
-    text-align: center;
+    text-align: left; /* Ändrat från center för att ikonen ska sitta snyggt till vänster */
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    padding: 12px 20px;
+    padding: 12px 15px;
     border-radius: 12px;
     color: var(--text-dark);
     font-weight: 500;
+    
+    /* För ikoner */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    /* För animation */
     transition: all 0.2s ease;
 }
 
@@ -167,12 +173,17 @@ h1, h2, label {
     font-size: 16px;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.2s;
+    
+    /* För ikoner */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    /* För animation */
+    transition: all 0.2s ease;
 }
 
-.sub-btn:active {
-    background: var(--bg-color);
-}
+
 
 /* ==========================================================================
    3. KALKYLSIDOR & INMATNING
