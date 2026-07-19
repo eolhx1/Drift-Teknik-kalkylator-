@@ -80,12 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (id === "darkModeToggle") toggleDarkMode();
         if (id === "hapticToggle") toggleHaptic();
         if (id === "clearDataBtn") {
-if (id === "clearDataBtn") {
-    showConfirmModal("Är du säker på att du vill rensa all sparad data?", () => {
-        localStorage.clear();
-        location.reload();
-    });
-}
+
         if (id === "favoriteBtn") {
             toggleFavorite(calcId);
             renderCalc("favoriter", calcId); // Uppdatera stjärnan
