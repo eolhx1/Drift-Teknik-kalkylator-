@@ -80,10 +80,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (id === "darkModeToggle") toggleDarkMode();
         if (id === "hapticToggle") toggleHaptic();
         if (id === "clearDataBtn") {
-            if (confirm("Rensa all data?")) {
-                localStorage.clear(); location.reload();
-            }
-        }
+if (id === "clearDataBtn") {
+    showConfirmModal("Är du säker på att du vill rensa all sparad data?", () => {
+        localStorage.clear();
+        location.reload();
+    });
+}
         if (id === "favoriteBtn") {
             toggleFavorite(calcId);
             renderCalc("favoriter", calcId); // Uppdatera stjärnan
@@ -584,3 +586,35 @@ function showToast(message) {
         toast.style.opacity = "0";
     }, 2000);
 }
+
+// ==========================================================================
+// ?. modal-ruta
+// ==========================================================================
+// 
+function showConfirmModal(message, onConfirm) {
+    // Skapa modal-overlay
+    const modal = document.createElement("div");
+    modal.className = "confirm-modal";
+    modal.innerHTML = `
+        <div class="confirm-box">
+            <p>${message}</p>
+            <div class="confirm-actions">
+                <button id="cancelBtn" class="nav-btn">Avbryt</button>
+                <button id="okBtn" class="nav-btn" style="background: var(--primary-color); color: white;">OK</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Lyssna på knappar
+    modal.querySelector("#okBtn").addEventListener("click", () => {
+        onConfirm();
+        document.body.removeChild(modal);
+    });
+    modal.querySelector("#cancelBtn").addEventListener("click", () => {
+        document.body.removeChild(modal);
+    });
+}
+
+
+
