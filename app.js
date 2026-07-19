@@ -266,7 +266,10 @@ function renderCalc(category, calcId) {
     if (!calc) return;
 
     // Hämta namnet på kategorin för att visa i breadcrumb
-    const categoryName = KATEGORIER[category] || "Kalkyl";
+    // Kollar om det är ett objekt eller sträng
+    const catData = KATEGORIER[category];
+    const categoryName = (typeof catData === 'object') ? catData.namn: (catData || "Kalkyl");
+
     // Hämtar spatad data: Försöker hämta objektet för denna kalkyl, annars tomt objekt
     const savedData = JSON.parse(localStorage.getItem(`calc_${calcId}`) || "{}");
 
