@@ -543,3 +543,10 @@ button:active {
     text-align: center; /* Centrerar texten i knapparna */
     justify-content: center; /* Centrerar innehållet i flexboxen */
 }
+
+/* Denna påverkar bara knapparna när de ligger inuti inställningssidan */
+.settings-section .nav-btn {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start; /* Gör att ikonen och texten ligger till vänster */
+}
