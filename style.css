@@ -539,5 +539,7 @@ button:active {
 }
 
 .confirm-actions button {
-    flex: 1;
+    flex: 1; /* Gör att knapparna delar lika på utrymmet */
+    text-align: center; /* Centrerar texten i knapparna */
+    justify-content: center; /* Centrerar innehållet i flexboxen */
 }
