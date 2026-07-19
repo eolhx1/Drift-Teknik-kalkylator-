@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const navHome = document.getElementById("navHome");
     const navFav = document.getElementById("navFav");
     const navRecent = document.getElementById("navRecent");
-    const navSearch = document.getElementById("navSearch"); // Lägg till denna
+    const navSearch = document.getElementById("navSearch");
 
     if (navHome) navHome.addEventListener("click", () => {
         setActiveNav("navHome");
@@ -95,13 +95,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-state.container.addEventListener("focus", (e) => {
-        if (e.target.tagName === "INPUT" && e.target.type === "number") {
-            setTimeout(() => {
-                e.target.select();
-            }, 50);
-        }
-    }, true); 
+    state.container.addEventListener("focus",
+        (e) => {
+            if (e.target.tagName === "INPUT" && e.target.type === "number") {
+                setTimeout(() => {
+                    e.target.select();
+                }, 50);
+            }
+        },
+        true);
 
     // 2.5 UPPDATERAD INPUT-LYSSNARE
     state.container.addEventListener("input",
@@ -195,21 +197,24 @@ function showMainMenu() {
     clear(state.container);
     clear(state.subNav);
 
-    // Vi ser till att menyn visas
+    // Ser till att menyn visas
     state.mainNav.classList.remove("hidden");
     state.subNav.classList.remove("hidden");
 
-    // Vi tömmer mainNav för att fylla på med rätt saker
+    // Tömmer mainNav
     state.mainNav.innerHTML = "";
 
-    // Kategorier - VIKTIGT: Kontrollera att KATEGORIER finns och har data!
-    Object.entries(KATEGORIER).forEach(([key, name]) => {
-        const btn = createButton(name, "nav-btn", () => showSubMenu(key));
+    Object.entries(KATEGORIER).forEach(([key, cat]) => {
+        // Säker kontroll: Om det är ett objekt, använd ikon + namn.
+        // Annars använd bara strängen (bakåtkompatibilitet).
+        const isObject = typeof cat === 'object';
+        const displayName = isObject ? `${cat.ikon} ${cat.namn}`: cat;
+
+        const btn = createButton(displayName, "nav-btn", () => showSubMenu(key));
         btn.dataset.category = key;
         state.mainNav.appendChild(btn);
     });
 }
-
 
 function showSubMenu(categoryKey) {
     state.activeCategory = categoryKey; // Spara kategorin
@@ -303,13 +308,14 @@ function renderCalc(category, calcId) {
     }).join("")}
 
     <button id="resetBtn" class="reset-btn" data-calc-id="${calcId}">Nollställ</button>
-<div class="result" id="resultDisplay" onclick="copyResult()"></div>
+    <div class="result" id="resultDisplay" onclick="copyResult()"></div>
 
 
     <div class="calc-info-title" onclick="toggleInfo()">
-    <span>Info om beräkningen</span>
+    <span>ℹ️ Info om beräkningen</span>
     <span id="infoIcon">▼</span>
     </div>
+
     <div id="calcInfo" class="calc-info-content">
     ${typeof calc.info === 'string' ? `<p>${calc.info}</p>`: `
     ${calc.info?.beskrivning ? `<p>${calc.info.beskrivning}</p>`: ""}
@@ -524,6 +530,15 @@ function showSearchModal() {
         });
     });
 
+    // Stänger tangentbordet med enter
+    searchInput.addEventListener("keypress",
+        (e) => {
+            if (e.key === 'Enter') {
+                searchInput.blur();
+            }
+        });
+
+
     // Rensa-logik
     clearBtn.addEventListener("click",
         () => {
@@ -546,7 +561,7 @@ window.copyResult = function() {
 
     // Rensa texten från "Resultat: " så bara värdet kopieras
     const textToCopy = resultBox.innerText.replace("Resultat: ", "");
-    
+
     navigator.clipboard.writeText(textToCopy).then(() => {
         showToast("Kopierat till urklipp!");
     }).catch(err => {
@@ -560,7 +575,7 @@ function showToast(message) {
 
     toast.textContent = message;
     toast.style.opacity = "1";
-    
+
     // Göm toasten efter 2 sekunder
     setTimeout(() => {
         toast.style.opacity = "0";

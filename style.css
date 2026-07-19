@@ -18,7 +18,7 @@ body.dark-mode {
     --bg-color: #121212;
     --card-bg: #1e1e1e;
     --text-dark: #e0e0e0;
-    --text-main: #e0e0e0; 
+    --text-main: #e0e0e0;
     --text-muted: #aaaaaa;
     --border-color: #444;
     --btn-secondary: #4a4a4a;
@@ -35,24 +35,28 @@ body {
     background-color: var(--bg-color);
     font-family: -apple-system, sans-serif;
     margin: 0;
-    padding: 10px 0 0 0; /* Topp, Höger, Botten, Vänster */
-    height: 100vh /* Tvinga body att vara hela skärmhöjden */
+    padding: 10px 0 0 0;
+    /* Topp, Höger, Botten, Vänster */
+    height: 100vh;
+    /* Tvinga body att vara hela skärmhöjden */
     display: flex;
     flex-direction: column;
 }
 
 .wrapper {
-    flex: 1; /* Gör att wrapper tar all ledig plats */
+    flex: 1;
+    /* Gör att wrapper tar all ledig plats */
     width: 100%;
     max-width: 500px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    overflow-y: auto; /* Gör innehållet scrollbart vid behov */
+    overflow-y: auto;
+    /* Gör innehållet scrollbart vid behov */
 }
 
 .app-header, .app-header h1 {
-    color: var(--header-text); 
+    color: var(--header-text);
 }
 
 h1, h2, label {
@@ -99,7 +103,8 @@ h1, h2, label {
 .main-nav {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center; /* Centrerar knapparna snyggt */
+    justify-content: center;
+    /* Centrerar knapparna snyggt */
     gap: 10px;
     padding: 15px;
     background: var(--card-bg);
@@ -114,7 +119,8 @@ h1, h2, label {
     opacity: 0;
     height: 0;
     overflow: hidden;
-    margin: 0; /* För att undvika att marginaler ligger kvar och tar plats */
+    margin: 0;
+    /* För att undvika att marginaler ligger kvar och tar plats */
 }
 
 .main-nav::-webkit-scrollbar {
@@ -122,10 +128,11 @@ h1, h2, label {
 }
 
 .nav-btn {
-    flex: 0 1 calc(45%); /* Gör att de tar ca halva bredden, snyggare i rutnät */
+    flex: 0 1 calc(45%);
+    /* Gör att de tar ca halva bredden, snyggare i rutnät */
     text-align: center;
     background: var(--card-bg);
-    border: 1px solid var(--border-color); 
+    border: 1px solid var(--border-color);
     padding: 12px 20px;
     border-radius: 12px;
     color: var(--text-dark);
@@ -190,7 +197,8 @@ input, select {
     border: 1px solid var(--border-color);
     background: var(--bg-color);
     color: var(--text-dark);
-    font-size: 16px;
+    font-size: 16px !important;
+    /* Förhindrar att iOS zoomar in */
 }
 
 /* 2. Specifik design för select (pil osv) */
@@ -207,11 +215,13 @@ select {
     width: auto;
     min-width: 80px;
     flex-shrink: 0;
-    padding: 12px; /* Behåll 12px för att matcha höjden på input-fältet */
+    padding: 12px;
+    /* Behåll 12px för att matcha höjden på input-fältet */
 }
 /* Se till att inputen tar all resterande plats */
 .input-group input {
-    flex: 1; /* Inputen tar all ledig plats som blir över */
+    flex: 1;
+    /* Inputen tar all ledig plats som blir över */
 }
 
 input:focus {
@@ -221,7 +231,8 @@ input:focus {
 }
 
 .input-group {
-    margin-bottom: 15px; /* Skapar luft mellan fälten */
+    margin-bottom: 15px;
+    /* Skapar luft mellan fälten */
 }
 
 .input-group label {
@@ -234,6 +245,11 @@ input:focus {
 /* ==========================================================================
    4. RESULTAT & KNAPPAR
    ========================================================================== */
+button:active {
+    transform: scale(0.98);
+    transition: transform 0.1s;
+}
+
 .result {
     margin-top: 20px;
     padding: 16px;
@@ -268,7 +284,8 @@ input:focus {
     background: var(--primary-color);
     color: white;
     border-color: var(--primary-color);
-    transform: scale(1.05); /* Gör att den "poppar" ut lite */
+    transform: scale(1.05);
+    /* Gör att den "poppar" ut lite */
 }
 
 /* Tillbaka knappens definitioner */
@@ -281,11 +298,13 @@ input:focus {
     padding: 0;
     cursor: pointer;
     margin-bottom: 12px;
-    
+
     /* Positionering */
     position: relative;
-    padding-left: 20px; /* Gör plats för pilen */
-    min-height: 24px;   /* Säkerställer att knappen har höjd nog att centrera i */
+    padding-left: 20px;
+    /* Gör plats för pilen */
+    min-height: 24px;
+    /* Säkerställer att knappen har höjd nog att centrera i */
     display: flex;
     align-items: center;
 }
@@ -298,7 +317,8 @@ input:focus {
     transform: translateY(-50%);
     font-size: 1.2rem;
     line-height: 1;
-    margin-top: -2px; /* JUSTERA HÄR: prova -2px, -3px eller -4px */
+    margin-top: -2px;
+    /* JUSTERA HÄR: prova -2px, -3px eller -4px */
 }
 
 .back-btn:active {
@@ -315,7 +335,7 @@ input:focus {
     width: 100%;
     font-size: 16px;
     font-weight: 500;
-    margin-top: 20px; 
+    margin-top: 20px;
     display: block;
 }
 
@@ -350,8 +370,12 @@ input:focus {
     box-shadow: var(--shadow-sm);
 }
 
-.calc-info-content p { margin: 8px 0; }
-.calc-info-content strong { color: var(--primary-color); }
+.calc-info-content p {
+    margin: 8px 0;
+}
+.calc-info-content strong {
+    color: var(--primary-color);
+}
 
 .calc-info-title {
     margin-top: 20px;
@@ -409,7 +433,6 @@ input:focus {
     bottom: 0;
     left: 0;
     width: 100%;
-    
     z-index: 1000;
     box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
 }
@@ -438,7 +461,8 @@ input:focus {
 
 #floatingSearch {
     width: 100%;
-    padding-right: 40px; /* Gör plats för X-knappen så texten inte krockar */
+    padding-right: 40px;
+    /* Gör plats för X-knappen så texten inte krockar */
 }
 
 /* X-knappen */
@@ -455,13 +479,13 @@ input:focus {
 
 /* Animation för smidigare sidbyten */
 @keyframes fadeIn {
-    from { 
-        opacity: 0; 
-        transform: translateY(10px); 
+    from {
+        opacity: 0;
+        transform: translateY(10px);
     }
-    to { 
-        opacity: 1; 
-        transform: translateY(0); 
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 

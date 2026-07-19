@@ -22,14 +22,36 @@ export const UNIT_MAP = {
 
 // Kategorier för navigering och filtrering
 export const KATEGORIER = {
-    styr: "Styr & Regler",
-    vent: "Ventilation",
-    vs: "VS & Värme",
-    el: "Elkraft",
-    tele: "Tele & Data",
-    gas: "Gas",
-    bygg: "Bygg & Energi"
+    styr: {
+        namn: "Styr & Regler",
+        ikon: "⚙️"
+    },
+    vent: {
+        namn: "Ventilation",
+        ikon: "💨"
+    },
+    vs: {
+        namn: "VS & Värme",
+        ikon: "💧"
+    },
+    el: {
+        namn: "Elkraft",
+        ikon: "⚡"
+    },
+    tele: {
+        namn: "Tele & Data",
+        ikon: "📡"
+    },
+    gas: {
+        namn: "Gas",
+        ikon: "🔥"
+    },
+    bygg: {
+        namn: "Bygg & Energi",
+        ikon: "🧱"
+    }
 };
+
 
 // =================================================================
 // 2. MATEMATISK LOGIK
