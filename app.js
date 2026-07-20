@@ -354,30 +354,33 @@ async function showSettings() {
 
     state.container.innerHTML = `
     <div class="calc-page">
-        <button id="backBtn" class="back-btn">Tillbaka</button>
-        <h2>Inställningar</h2>
-        
-        <div class="settings-section">
-            <h3>App-kontroller</h3>
-            <button id="darkModeToggle" class="nav-btn">🌙 Växla mörkt läge</button>
-            <button id="hapticToggle" class="nav-btn">📳 Haptik: ${hapticStatus === "enabled" ? "PÅ": "AV"}</button>
-        </div>
+    <button id="backBtn" class="back-btn">Tillbaka</button>
+    <h2>Inställningar</h2>
+
+    <div class="settings-section">
+    <h3>⚙️ App-kontroller</h3>
+    <button id="darkModeToggle" class="nav-btn">🌙 Växla mörkt läge</button>
+    <button id="hapticToggle" class="nav-btn">📳 Haptik: ${hapticStatus === "enabled" ? "PÅ": "AV"}</button>
+    </div>
+
 
         <div class="settings-section">
-            <h3>Om appen</h3>
+            <h3>ℹ️ Om appen</h3>
             <p style="font-size: 0.9rem; color: var(--text-muted);">${info.om_appen}</p>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">
+                <strong>Kontakt:</strong> ${info.kontakt.text} 
+                <a href="mailto:${info.kontakt.email}" style="color: var(--primary-color); text-decoration: none;">${info.kontakt.email}</a>
+            </p>
             <p style="font-size: 0.8rem; color: var(--text-muted);">Version: ${info.version}</p>
         </div>
 
-        <div class="settings-section">
-            <h3>Data</h3>
-            <button id="clearDataBtn" class="nav-btn" style="color: var(--primary-color);">🗑️ Rensa all sparad data</button>
-        </div>
+
+    <div class="settings-section">
+    <h3>💾 Data</h3>
+    <button id="clearDataBtn" class="nav-btn" style="color: var(--primary-color);">🗑️ Rensa all sparad data</button>
+    </div>
     </div>`;
 }
-
-
-
 
 async function getAppInfo() {
     try {
@@ -386,7 +389,11 @@ async function getAppInfo() {
         return await response.json();
     } catch (error) {
         console.error("Fel vid laddning av info:", error);
-        return { om_appen: "Information saknas.", kontakt: "", version: "N/A" };
+        return {
+            om_appen: "Information saknas.",
+            kontakt: "",
+            version: "N/A"
+        };
     }
 }
 
@@ -651,6 +658,6 @@ function showConfirmModal(message, onConfirm) {
     });
 }
 // ==========================================================================
-// ?. 
+// ?.
 // ==========================================================================
 //

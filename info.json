@@ -1,5 +1,8 @@
 {
   "om_appen": "Drift Teknik är ett verktyg framtaget för snabba och säkra beräkningar i fält.",
-  "kontakt": "För support eller förslag på nya kalkyler, kontakta oss via mail.",
+  "kontakt": {
+    "text": "För support eller förslag på nya kalkyler, kontakta oss via mail:",
+    "email": "support@driftteknik.se"
+  },
   "version": "1.0.0"
 }

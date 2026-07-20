@@ -129,19 +129,20 @@ h1, h2, label {
 
 .nav-btn {
     flex: 0 1 calc(45%);
-    text-align: left; /* Ändrat från center för att ikonen ska sitta snyggt till vänster */
+    text-align: left;
+    /* Ändrat från center för att ikonen ska sitta snyggt till vänster */
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     padding: 12px 15px;
     border-radius: 12px;
     color: var(--text-dark);
     font-weight: 500;
-    
+
     /* För ikoner */
     display: flex;
     align-items: center;
     gap: 8px;
-    
+
     /* För animation */
     transition: all 0.2s ease;
 }
@@ -173,12 +174,12 @@ h1, h2, label {
     font-size: 16px;
     font-weight: 500;
     cursor: pointer;
-    
+
     /* För ikoner */
     display: flex;
     align-items: center;
     gap: 8px;
-    
+
     /* För animation */
     transition: all 0.2s ease;
 }
@@ -427,7 +428,8 @@ button:active {
 .settings-section {
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Detta skapar mellanrummet du vill ha mellan knapparna */
+    gap: 15px;
+    /* Detta skapar mellanrummet du vill ha mellan knapparna */
     margin-bottom: 20px;
 }
 
@@ -435,13 +437,21 @@ button:active {
 .settings-section .nav-btn {
     width: 100%;
     display: flex;
-    justify-content: flex-start; /* Gör att ikonen och texten ligger till vänster */
+    justify-content: flex-start;
+    /* Gör att ikonen och texten ligger till vänster */
 }
 
 .settings-section h3 {
-    margin-bottom: 10px;
+    font-size: 0.75rem;
+    /* Mindre och mer stilrent */
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     color: var(--primary-color);
+    margin-bottom: 10px;
+    margin-top: 20px;
+    padding-left: 5px;
 }
+
 
 /* Bottenmeny */
 .bottom-nav {
@@ -524,7 +534,10 @@ button:active {
    ========================================================================== */
 .confirm-modal {
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0,0,0,0.5);
     display: flex;
     justify-content: center;
@@ -541,7 +554,8 @@ button:active {
     max-width: 300px;
     text-align: center;
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    color: var(--text-dark); /* Tvingar texten att följa mörka/ljusa tema */
+    color: var(--text-dark);
+    /* Tvingar texten att följa mörka/ljusa tema */
 }
 
 
@@ -552,8 +566,10 @@ button:active {
 }
 
 .confirm-actions button {
-    flex: 1; /* Gör att knapparna delar lika på utrymmet */
-    text-align: center; /* Centrerar texten i knapparna */
-    justify-content: center; /* Centrerar innehållet i flexboxen */
+    flex: 1;
+    /* Gör att knapparna delar lika på utrymmet */
+    text-align: center;
+    /* Centrerar texten i knapparna */
+    justify-content: center;
+    /* Centrerar innehållet i flexboxen */
 }
-
