@@ -487,13 +487,15 @@ window.toggleInfo = function () {
 };
 
 function toggleDarkMode() {
-    // Växla klassen på body
-    document.body.classList.toggle("dark-mode");
+    const isDark = document.body.classList.toggle("dark-mode");
+    localStorage.setItem("darkMode", isDark ? "enabled": "disabled");
 
-    // Spara till localStorage
-    const isDark = document.body.classList.contains("dark-mode");
-    localStorage.setItem("darkMode", isDark ? "enabled" : "disabled");
+    // Tvinga omritning om nödvändigt (vissa webbläsare behöver en knuff)
+    document.body.style.display = 'none';
+    document.body.offsetHeight; // Trigger reflow
+    document.body.style.display = '';
 }
+
 
 
 // --- HAPTISK HJÄLPFUNKTION ---
@@ -611,7 +613,7 @@ function setupSettingsListeners() {
     if (darkToggle) {
         darkToggle.addEventListener("change", (e) => {
             toggleDarkMode();
-            // Switchen är redan "checked" eftersom användaren klickade på den, 
+            // Switchen är redan "checked" eftersom användaren klickade på den,
             // så vi behöver bara trigga haptik
             triggerHaptic(20);
         });
