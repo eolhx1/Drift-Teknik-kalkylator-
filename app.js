@@ -609,22 +609,22 @@ function setupSettingsListeners() {
     const hapticToggle = document.getElementById("hapticToggle");
 
     if (darkToggle) {
-        darkToggle.addEventListener("change", () => {
-            toggleDarkMode(); // Ändrar temat direkt
+        darkToggle.addEventListener("change", (e) => {
+            toggleDarkMode();
+            // Switchen är redan "checked" eftersom användaren klickade på den, 
+            // så vi behöver bara trigga haptik
             triggerHaptic(20);
         });
     }
 
     if (hapticToggle) {
-        hapticToggle.addEventListener("change", () => {
-            // Vi anropar INTE showSettings() här, då slipper du blinket
-            const current = localStorage.getItem("hapticEnabled") || "enabled";
-            const next = current === "enabled" ? "disabled" : "enabled";
-            localStorage.setItem("hapticEnabled", next);
-            triggerHaptic(50);
+        hapticToggle.addEventListener("change", (e) => {
+            toggleHaptic();
+            // Även här, switchen ändrar läge av sig själv
         });
     }
 }
+
 
 
 // ==========================================================================
