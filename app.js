@@ -487,15 +487,14 @@ window.toggleInfo = function () {
 };
 
 function toggleDarkMode() {
+    // Växla klassen på body
     document.body.classList.toggle("dark-mode");
 
-    // Spara inställningen så den kommer ihåg valet nästa gång appen öppnas
-    if (document.body.classList.contains("dark-mode")) {
-        localStorage.setItem("darkMode", "enabled");
-    } else {
-        localStorage.setItem("darkMode", "disabled");
-    }
+    // Spara till localStorage
+    const isDark = document.body.classList.contains("dark-mode");
+    localStorage.setItem("darkMode", isDark ? "enabled" : "disabled");
 }
+
 
 // --- HAPTISK HJÄLPFUNKTION ---
 // Kollar om webbläsaren stöder vibration och om användaren valt att ha det på
@@ -517,9 +516,6 @@ function toggleHaptic() {
 
     // Ge feedback direkt när man ändrar inställningen
     triggerHaptic([50]);
-
-    // Uppdatera inställningssidan (vi kör showSettings igen för att rita om knappen)
-    showSettings();
 }
 
 // --- ? ---
@@ -614,14 +610,18 @@ function setupSettingsListeners() {
 
     if (darkToggle) {
         darkToggle.addEventListener("change", () => {
-            toggleDarkMode();
+            toggleDarkMode(); // Ändrar temat direkt
             triggerHaptic(20);
         });
     }
 
     if (hapticToggle) {
         hapticToggle.addEventListener("change", () => {
-            toggleHaptic();
+            // Vi anropar INTE showSettings() här, då slipper du blinket
+            const current = localStorage.getItem("hapticEnabled") || "enabled";
+            const next = current === "enabled" ? "disabled" : "enabled";
+            localStorage.setItem("hapticEnabled", next);
+            triggerHaptic(50);
         });
     }
 }
