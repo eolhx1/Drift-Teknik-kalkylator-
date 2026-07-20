@@ -2,29 +2,34 @@
    1. GLOBALA STILAR & VARIABLER
    ========================================================================== */
 :root {
+    /* Basfärger */
     --primary-color: #0066cc;
     --bg-color: #f0f2f5;
     --card-bg: #ffffff;
     --text-main: #333;
+    --text-dark: #333;
+    --border-color: #ccc;
+    --btn-secondary: #6c757d; /* Standardgrå */
+    
+    /* Färger som inte ändras behöver inte ens finnas i dark-mode */
     --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
     --header-bg: #0066cc;
     --header-text: #ffffff;
-    --text-dark: #333;
-    --border-color: #ccc;
 }
 
-
 body.dark-mode {
+    /* Här skriver du BARA om de som ska bli annorlunda */
     --bg-color: #121212;
     --card-bg: #1e1e1e;
-    --text-dark: #e0e0e0;
     --text-main: #e0e0e0;
+    --text-dark: #e0e0e0;
     --text-muted: #aaaaaa;
     --border-color: #444;
-    --btn-secondary: #4a4a4a;
+    --btn-secondary: #4a4a4a; /* Mörkare grå för mörkt läge */
     --result-bg: #1a2a3a;
     --header-bg: #004488;
 }
+
 
 * {
     box-sizing: border-box;
@@ -103,7 +108,8 @@ h1, h2, label {
 .main-nav {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;    /* Centrerar knapparna snyggt */
+    justify-content: center;
+    /* Centrerar knapparna snyggt */
     gap: 10px;
     padding: 15px;
     background: var(--card-bg);
@@ -118,7 +124,8 @@ h1, h2, label {
     opacity: 0;
     height: 0;
     overflow: hidden;
-    margin: 0;    /* För att undvika att marginaler ligger kvar och tar plats */
+    margin: 0;
+    /* För att undvika att marginaler ligger kvar och tar plats */
 }
 
 .main-nav::-webkit-scrollbar {
@@ -127,7 +134,8 @@ h1, h2, label {
 
 .nav-btn {
     flex: 0 1 calc(45%);
-    text-align: left;    /* Ändrat från center för att ikonen ska sitta snyggt till vänster */
+    text-align: left;
+    /* Ändrat från center för att ikonen ska sitta snyggt till vänster */
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     padding: 12px 15px;
@@ -206,7 +214,8 @@ input, select {
     border: 1px solid var(--border-color);
     background: var(--bg-color);
     color: var(--text-dark);
-    font-size: 16px !important;    /* Förhindrar att iOS zoomar in */
+    font-size: 16px !important;
+    /* Förhindrar att iOS zoomar in */
 }
 
 /* 2. Specifik design för select (pil osv) */
@@ -223,11 +232,13 @@ select {
     width: auto;
     min-width: 80px;
     flex-shrink: 0;
-    padding: 12px;    /* Behåll 12px för att matcha höjden på input-fältet */
+    padding: 12px;
+    /* Behåll 12px för att matcha höjden på input-fältet */
 }
 /* Se till att inputen tar all resterande plats */
 .input-group input {
-    flex: 1;    /* Inputen tar all ledig plats som blir över */
+    flex: 1;
+    /* Inputen tar all ledig plats som blir över */
 }
 
 input:focus {
@@ -237,7 +248,8 @@ input:focus {
 }
 
 .input-group {
-    margin-bottom: 15px;    /* Skapar luft mellan fälten */
+    margin-bottom: 15px;
+    /* Skapar luft mellan fälten */
 }
 
 .input-group label {
@@ -289,7 +301,8 @@ button:active {
     background: var(--primary-color);
     color: white;
     border-color: var(--primary-color);
-    transform: scale(1.05);    /* Gör att den "poppar" ut lite */
+    transform: scale(1.05);
+    /* Gör att den "poppar" ut lite */
 }
 
 
@@ -307,8 +320,10 @@ button:active {
 
     /* Positionering */
     position: relative;
-    padding-left: 20px;    /* Gör plats för pilen */
-    min-height: 24px;    /* Säkerställer att knappen har höjd nog att centrera i */
+    padding-left: 20px;
+    /* Gör plats för pilen */
+    min-height: 24px;
+    /* Säkerställer att knappen har höjd nog att centrera i */
     display: flex;
     align-items: center;
 }
@@ -321,7 +336,8 @@ button:active {
     transform: translateY(-50%);
     font-size: 1.2rem;
     line-height: 1;
-    margin-top: -2px;    /* JUSTERA HÄR: prova -2px, -3px eller -4px */
+    margin-top: -2px;
+    /* JUSTERA HÄR: prova -2px, -3px eller -4px */
 }
 
 .back-btn:active {
@@ -343,7 +359,10 @@ button:active {
 }
 
 .reset-btn:active {
-    background: #6c757d;
+    background: var(--btn-secondary);
+    /* Ändra från #6c757d */
+    filter: brightness(0.8);
+    /* Lägg till filter för att få "tryck-effekt" */
     transform: scale(0.98);
 }
 
@@ -400,8 +419,10 @@ button:active {
     bottom: 60px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--text-dark); /* Använd variabler istället för #333 */
-    color: var(--bg-color);       /* Använd variabler istället för white */
+    background: var(--text-dark);
+    /* Använd variabler istället för #333 */
+    color: var(--bg-color);
+    /* Använd variabler istället för white */
     padding: 12px 24px;
     border-radius: 25px;
     opacity: 0;
@@ -420,7 +441,8 @@ button:active {
 .settings-section {
     display: flex;
     flex-direction: column;
-    gap: 15px;    /* Detta skapar mellanrummet du vill ha mellan knapparna */
+    gap: 15px;
+    /* Detta skapar mellanrummet du vill ha mellan knapparna */
     margin-bottom: 20px;
 }
 
@@ -428,11 +450,13 @@ button:active {
 .settings-section .nav-btn {
     width: 100%;
     display: flex;
-    justify-content: flex-start;    /* Gör att ikonen och texten ligger till vänster */
+    justify-content: flex-start;
+    /* Gör att ikonen och texten ligger till vänster */
 }
 
 .settings-section h3 {
-    font-size: 0.75rem;    /* Mindre och mer stilrent */
+    font-size: 0.75rem;
+    /* Mindre och mer stilrent */
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--primary-color);
@@ -481,7 +505,8 @@ button:active {
 
 #floatingSearch {
     width: 100%;
-    padding-right: 40px;    /* Gör plats för X-knappen så texten inte krockar */
+    padding-right: 40px;
+    /* Gör plats för X-knappen så texten inte krockar */
 }
 
 /* X-knappen */
@@ -491,7 +516,7 @@ button:active {
     background: none;
     border: none;
     font-size: 1.2rem;
-    color: var(--text-muted); 
+    color: var(--text-muted);
     cursor: pointer;
     padding: 5px;
 }
@@ -542,7 +567,8 @@ button:active {
     max-width: 300px;
     text-align: center;
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    color: var(--text-dark);    /* Tvingar texten att följa mörka/ljusa tema */
+    color: var(--text-dark);
+    /* Tvingar texten att följa mörka/ljusa tema */
 }
 
 
@@ -553,9 +579,12 @@ button:active {
 }
 
 .confirm-actions button {
-    flex: 1;    /* Gör att knapparna delar lika på utrymmet */
-    text-align: center;    /* Centrerar texten i knapparna */
-    justify-content: center;    /* Centrerar innehållet i flexboxen */
+    flex: 1;
+    /* Gör att knapparna delar lika på utrymmet */
+    text-align: center;
+    /* Centrerar texten i knapparna */
+    justify-content: center;
+    /* Centrerar innehållet i flexboxen */
 }
 
 /* ==========================================================================
@@ -580,12 +609,19 @@ button:active {
     width: 44px;
     height: 24px;
 }
-.switch input { opacity: 0; width: 0; height: 0; }
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
 
 .slider {
     position: absolute;
     cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-color: #ccc;
     transition: .4s;
     border-radius: 24px;
@@ -593,11 +629,17 @@ button:active {
 .slider:before {
     position: absolute;
     content: "";
-    height: 18px; width: 18px;
-    left: 3px; bottom: 3px;
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
     background-color: white;
     transition: .4s;
     border-radius: 50%;
 }
-input:checked + .slider { background-color: var(--primary-color); }
-input:checked + .slider:before { transform: translateX(20px); }
+input:checked + .slider {
+    background-color: var(--primary-color);
+}
+input:checked + .slider:before {
+    transform: translateX(20px);
+}

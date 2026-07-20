@@ -94,9 +94,6 @@ document.addEventListener("DOMContentLoaded", () => {
             smartReset(calcId);
         }
 
-        // Detta för switcharna
-        if (id === "darkModeToggle") toggleDarkMode();
-        if (id === "hapticToggle") toggleHaptic();
     });
 
 
@@ -360,7 +357,7 @@ async function showSettings() {
     <div class="settings-row">
     <span>🌙 Mörkt läge</span>
     <label class="switch">
-    <input type="checkbox" id="darkModeToggle" ${localStorage.getItem("darkMode") === "enabled" ? "checked": ""}>
+<input type="checkbox" id="darkModeToggle" ${localStorage.getItem("darkMode") === "enabled" ? "checked" : ""}>
     <span class="slider"></span>
     </label>
     </div>
@@ -488,15 +485,14 @@ window.toggleInfo = function () {
 
 function toggleDarkMode() {
     const isDark = document.body.classList.toggle("dark-mode");
-    localStorage.setItem("darkMode", isDark ? "enabled": "disabled");
+    localStorage.setItem("darkMode", isDark ? "enabled" : "disabled");
 
-    // Tvinga omritning om nödvändigt (vissa webbläsare behöver en knuff)
-    document.body.style.display = 'none';
-    document.body.offsetHeight; // Trigger reflow
-    document.body.style.display = '';
+    // Uppdatera switchen visuellt om vi råkar vara på inställningssidan
+    const toggle = document.getElementById("darkModeToggle");
+    if (toggle) {
+        toggle.checked = isDark;
+    }
 }
-
-
 
 // --- HAPTISK HJÄLPFUNKTION ---
 // Kollar om webbläsaren stöder vibration och om användaren valt att ha det på
@@ -513,12 +509,18 @@ function triggerHaptic(duration = 20) {
 // --- Funktion för att växla mellan Vibration och inte Vibration ---
 function toggleHaptic() {
     const current = localStorage.getItem("hapticEnabled") || "enabled";
-    const next = current === "enabled" ? "disabled": "enabled";
+    const next = current === "enabled" ? "disabled" : "enabled";
     localStorage.setItem("hapticEnabled", next);
 
-    // Ge feedback direkt när man ändrar inställningen
-    triggerHaptic([50]);
+    // Uppdatera switchen visuellt direkt
+    const toggle = document.getElementById("hapticToggle");
+    if (toggle) {
+        toggle.checked = (next === "enabled");
+    }
+
+    triggerHaptic(50);
 }
+
 
 // --- ? ---
 function formatResult(value, precision = 2) {
