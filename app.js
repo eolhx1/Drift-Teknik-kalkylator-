@@ -166,7 +166,7 @@ function runCalc(category, calcId) {
         JSON.stringify(values));
 
     if (!allFilled) {
-        resultBox.innerText = "Fyll i alla fält...";
+        document.getElementById("resultText").innerText = "Fyll i alla fält...";
         return;
     }
 
@@ -175,7 +175,7 @@ function runCalc(category, calcId) {
 
         // Om kalkylen returnerar en sträng, visa den direkt (för gamla kalkyler)
         if (typeof rawResult === 'string') {
-            resultBox.innerHTML = rawResult.replace(/\n/g, "<br>");
+            document.getElementById("resultText").innerHTML = rawResult.replace(/\n/g, "<br>");
         }
         // Om kalkylen returnerar ett tal, använd den nya formateringen
         else if (typeof rawResult === 'number') {
@@ -184,14 +184,13 @@ function runCalc(category, calcId) {
             const label = calc.label ? `${calc.label}: `: "";
 
             const formattedNum = formatResult(rawResult, decimalPrecision);
-            resultBox.innerHTML = `${label}${formattedNum} ${unit}`;
+              document.getElementById("resultText").innerHTML = `${label}${formattedNum} ${unit}`;
         }
     } catch (err) {
         // Om något går fel, visa ett meddelande men krascha inte resten av appen
         resultBox.innerText = "Ett fel uppstod i beräkningen.";
     }
 }
-
 
 // --- 4. MENYHANTERING & RENDERING ---
 function showMainMenu() {
@@ -334,6 +333,15 @@ function renderCalc(category, calcId) {
     </div>
 
     </div>`;
+
+   // 
+    const copyBtn = document.getElementById("copyBtn");
+    if (copyBtn) {
+        copyBtn.addEventListener("click", (e) => {
+            e.stopPropagation(); // Förhindrar att resultatet också triggar sin egen onclick
+            copyResult();
+        });
+    }
 
     // Kör en beräkning direkt när sidan laddats så att resultatet visas omedelbart
     runCalc(null, calcId);
@@ -639,19 +647,23 @@ function setupSettingsListeners() {
 // ==========================================================================
 
 // Gör funktionen tillgänglig för din HTML (inline onclick)
+
+
 window.copyResult = function() {
     const resultBox = document.getElementById("resultDisplay");
-    const textToCopy = document.getElementById("resultText").innerText; // Vi hämtar från spannen istället
+    const resultTextEl = document.getElementById("resultText");
+    
+    if (!resultTextEl || resultTextEl.innerText.includes("Fyll i")) return;
 
-    if (!textToCopy || textToCopy.includes("Fyll i")) return;
-
-    navigator.clipboard.writeText(textToCopy).then(() => {
+    navigator.clipboard.writeText(resultTextEl.innerText).then(() => {
         // Lägg till klass för färgbyte
         resultBox.classList.add("copied");
         showToast("Kopierat!");
 
         // Ta bort klassen efter 1 sekund
         setTimeout(() => resultBox.classList.remove("copied"), 1000);
+    }).catch(err => {
+        console.error("Kunde inte kopiera: ", err);
     });
 };
 
