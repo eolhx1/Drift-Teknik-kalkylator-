@@ -425,7 +425,17 @@ button:active {
 }
 
 .settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Detta skapar mellanrummet du vill ha mellan knapparna */
     margin-bottom: 20px;
+}
+
+/* Denna påverkar bara knapparna när de ligger inuti inställningssidan */
+.settings-section .nav-btn {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start; /* Gör att ikonen och texten ligger till vänster */
 }
 
 .settings-section h3 {
@@ -522,6 +532,7 @@ button:active {
     z-index: 2000;
 }
 
+
 .confirm-box {
     background: var(--card-bg);
     padding: 20px;
@@ -530,7 +541,9 @@ button:active {
     max-width: 300px;
     text-align: center;
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    color: var(--text-dark); /* Tvingar texten att följa mörka/ljusa tema */
 }
+
 
 .confirm-actions {
     display: flex;
@@ -544,9 +557,3 @@ button:active {
     justify-content: center; /* Centrerar innehållet i flexboxen */
 }
 
-/* Denna påverkar bara knapparna när de ligger inuti inställningssidan */
-.settings-section .nav-btn {
-    width: 100%;
-    display: flex;
-    justify-content: flex-start; /* Gör att ikonen och texten ligger till vänster */
-}
