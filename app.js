@@ -337,25 +337,59 @@ function renderCalc(category, calcId) {
     runCalc(null, calcId);
 }
 
+
+// ==========================================================================
+//  5. INSTÄLLNINGAR (kugghjulet)
+// ==========================================================================
 // ShowSettings-funktionen
-function showSettings() {
+// Ändra till async function
+async function showSettings() {
     clear(state.container);
     state.mainNav.classList.add("hidden");
     state.subNav.classList.add("hidden");
 
+    // Hämta info från json-filen
+    const info = await getAppInfo();
     const hapticStatus = localStorage.getItem("hapticEnabled") || "enabled";
 
     state.container.innerHTML = `
     <div class="calc-page">
-    <button id="backBtn" class="back-btn">Tillbaka</button>
-    <h2>Inställningar</h2>
-    <div class="settings-section">
-    <button id="darkModeToggle" class="nav-btn">🌙 Växla mörkt läge</button>
-    <button id="hapticToggle" class="nav-btn">📳 Haptik: ${hapticStatus === "enabled" ? "PÅ": "AV"}</button>
-    <button id="clearDataBtn" class="nav-btn">Rensa all sparad data</button>
-    </div>
+        <button id="backBtn" class="back-btn">Tillbaka</button>
+        <h2>Inställningar</h2>
+        
+        <div class="settings-section">
+            <h3>App-kontroller</h3>
+            <button id="darkModeToggle" class="nav-btn">🌙 Växla mörkt läge</button>
+            <button id="hapticToggle" class="nav-btn">📳 Haptik: ${hapticStatus === "enabled" ? "PÅ": "AV"}</button>
+        </div>
+
+        <div class="settings-section">
+            <h3>Om appen</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">${info.om_appen}</p>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Version: ${info.version}</p>
+        </div>
+
+        <div class="settings-section">
+            <h3>Data</h3>
+            <button id="clearDataBtn" class="nav-btn" style="color: var(--primary-color);">🗑️ Rensa all sparad data</button>
+        </div>
     </div>`;
 }
+
+
+
+
+async function getAppInfo() {
+    try {
+        const response = await fetch('./info.json');
+        if (!response.ok) throw new Error("Kunde inte ladda info.json");
+        return await response.json();
+    } catch (error) {
+        console.error("Fel vid laddning av info:", error);
+        return { om_appen: "Information saknas.", kontakt: "", version: "N/A" };
+    }
+}
+
 
 // ==========================================================================
 //  5. HJÄLPFUNKTIONER
@@ -616,3 +650,7 @@ function showConfirmModal(message, onConfirm) {
         document.body.removeChild(modal);
     });
 }
+// ==========================================================================
+// ?. 
+// ==========================================================================
+//
