@@ -9,8 +9,9 @@
     --text-main: #333;
     --text-dark: #333;
     --border-color: #ccc;
-    --btn-secondary: #6c757d; /* Standardgrå */
-    
+    --btn-secondary: #6c757d;
+    /* Standardgrå */
+
     /* Färger som inte ändras behöver inte ens finnas i dark-mode */
     --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
     --header-bg: #0066cc;
@@ -25,7 +26,8 @@ body.dark-mode {
     --text-dark: #e0e0e0;
     --text-muted: #aaaaaa;
     --border-color: #444;
-    --btn-secondary: #4a4a4a; /* Mörkare grå för mörkt läge */
+    --btn-secondary: #4a4a4a;
+    /* Mörkare grå för mörkt läge */
     --result-bg: #1a2a3a;
     --header-bg: #004488;
 }
@@ -280,6 +282,9 @@ button:active {
     box-shadow: var(--shadow-sm);
     cursor: pointer;
     transition: background 0.2s, opacity 0.2s;
+    position: relative;
+    /* Viktigt för att ikonen ska kunna placeras */
+    transition: background 0.3s ease;
 }
 
 .result:active {
@@ -642,4 +647,23 @@ input:checked + .slider {
 }
 input:checked + .slider:before {
     transform: translateX(20px);
+}
+
+.copy-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+/* Blink-effekten */
+.result.copied {
+    background-color: #d4edda;
+    /* Ljusgrön */
+    border-color: #28a745;
+    /* Grön ram */
 }

@@ -313,8 +313,11 @@ function renderCalc(category, calcId) {
     }).join("")}
 
     <button id="resetBtn" class="reset-btn" data-calc-id="${calcId}">Nollställ</button>
-    <div class="result" id="resultDisplay" onclick="copyResult()"></div>
 
+    <div class="result" id="resultDisplay">
+    <span id="resultText"></span>
+    <button id="copyBtn" class="copy-icon">📋</button>
+    </div>
 
     <div class="calc-info-title" onclick="toggleInfo()">
     <span>ℹ️ Info om beräkningen</span>
@@ -357,7 +360,7 @@ async function showSettings() {
     <div class="settings-row">
     <span>🌙 Mörkt läge</span>
     <label class="switch">
-<input type="checkbox" id="darkModeToggle" ${localStorage.getItem("darkMode") === "enabled" ? "checked" : ""}>
+    <input type="checkbox" id="darkModeToggle" ${localStorage.getItem("darkMode") === "enabled" ? "checked": ""}>
     <span class="slider"></span>
     </label>
     </div>
@@ -485,7 +488,7 @@ window.toggleInfo = function () {
 
 function toggleDarkMode() {
     const isDark = document.body.classList.toggle("dark-mode");
-    localStorage.setItem("darkMode", isDark ? "enabled" : "disabled");
+    localStorage.setItem("darkMode", isDark ? "enabled": "disabled");
 
     // Uppdatera switchen visuellt om vi råkar vara på inställningssidan
     const toggle = document.getElementById("darkModeToggle");
@@ -509,7 +512,7 @@ function triggerHaptic(duration = 20) {
 // --- Funktion för att växla mellan Vibration och inte Vibration ---
 function toggleHaptic() {
     const current = localStorage.getItem("hapticEnabled") || "enabled";
-    const next = current === "enabled" ? "disabled" : "enabled";
+    const next = current === "enabled" ? "disabled": "enabled";
     localStorage.setItem("hapticEnabled", next);
 
     // Uppdatera switchen visuellt direkt
@@ -638,18 +641,20 @@ function setupSettingsListeners() {
 // Gör funktionen tillgänglig för din HTML (inline onclick)
 window.copyResult = function() {
     const resultBox = document.getElementById("resultDisplay");
-    // Kontrollera att rutan finns och inte visar felmeddelande
-    if (!resultBox || resultBox.innerText.includes("Fyll i") || resultBox.innerText.includes("fel")) return;
+    const textToCopy = document.getElementById("resultText").innerText; // Vi hämtar från spannen istället
 
-    // Rensa texten från "Resultat: " så bara värdet kopieras
-    const textToCopy = resultBox.innerText.replace("Resultat: ", "");
+    if (!textToCopy || textToCopy.includes("Fyll i")) return;
 
     navigator.clipboard.writeText(textToCopy).then(() => {
-        showToast("Kopierat till urklipp!");
-    }).catch(err => {
-        console.error("Kunde inte kopiera: ", err);
+        // Lägg till klass för färgbyte
+        resultBox.classList.add("copied");
+        showToast("Kopierat!");
+
+        // Ta bort klassen efter 1 sekund
+        setTimeout(() => resultBox.classList.remove("copied"), 1000);
     });
 };
+
 
 function showToast(message) {
     const toast = document.getElementById("toast");
