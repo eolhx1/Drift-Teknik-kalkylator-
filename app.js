@@ -77,8 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Routa klick baserat på ID
         if (id === "backBtn") showMainMenu();
-        if (id === "darkModeToggle") toggleDarkMode();
-        if (id === "hapticToggle") toggleHaptic();
 
         if (id === "clearDataBtn") {
             showConfirmModal("Är du säker på att du vill rensa all sparad data?", () => {
@@ -95,6 +93,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (id === "resetBtn") {
             smartReset(calcId);
         }
+
+        // Detta för switcharna
+        if (id === "darkModeToggle") toggleDarkMode();
+        if (id === "hapticToggle") toggleHaptic();
     });
 
 
@@ -341,16 +343,12 @@ function renderCalc(category, calcId) {
 // ==========================================================================
 //  5. INSTÄLLNINGAR (kugghjulet)
 // ==========================================================================
-// ShowSettings-funktionen
-// Ändra till async function
 async function showSettings() {
     clear(state.container);
     state.mainNav.classList.add("hidden");
     state.subNav.classList.add("hidden");
 
-    // Hämta info från json-filen
     const info = await getAppInfo();
-    const hapticStatus = localStorage.getItem("hapticEnabled") || "enabled";
 
     state.container.innerHTML = `
     <div class="calc-page">
@@ -359,27 +357,40 @@ async function showSettings() {
 
     <div class="settings-section">
     <h3>⚙️ App-kontroller</h3>
-    <button id="darkModeToggle" class="nav-btn">🌙 Växla mörkt läge</button>
-    <button id="hapticToggle" class="nav-btn">📳 Haptik: ${hapticStatus === "enabled" ? "PÅ": "AV"}</button>
+    <div class="settings-row">
+    <span>🌙 Mörkt läge</span>
+    <label class="switch">
+    <input type="checkbox" id="darkModeToggle" ${localStorage.getItem("darkMode") === "enabled" ? "checked": ""}>
+    <span class="slider"></span>
+    </label>
+    </div>
+    <div class="settings-row">
+    <span>📳 Haptik</span>
+    <label class="switch">
+    <input type="checkbox" id="hapticToggle" ${localStorage.getItem("hapticEnabled") === "enabled" ? "checked": ""}>
+    <span class="slider"></span>
+    </label>
+    </div>
     </div>
 
-
-        <div class="settings-section">
-            <h3>ℹ️ Om appen</h3>
-            <p style="font-size: 0.9rem; color: var(--text-muted);">${info.om_appen}</p>
-            <p style="font-size: 0.9rem; color: var(--text-muted);">
-                <strong>Kontakt:</strong> ${info.kontakt.text} 
-                <a href="mailto:${info.kontakt.email}" style="color: var(--primary-color); text-decoration: none;">${info.kontakt.email}</a>
-            </p>
-            <p style="font-size: 0.8rem; color: var(--text-muted);">Version: ${info.version}</p>
-        </div>
-
+    <div class="settings-section">
+    <h3>ℹ️ Om appen</h3>
+    <p style="font-size: 0.9rem; color: var(--text-muted);">${info.om_appen}</p>
+    <p style="font-size: 0.9rem; color: var(--text-muted);">
+    <strong>Kontakt:</strong> <a href="mailto:${info.kontakt.email}" style="color: var(--primary-color); text-decoration: none;">${info.kontakt.email}</a>
+    </p>
+    <p style="font-size: 0.8rem; color: var(--text-muted);">Version: ${info.version}</p>
+    </div>
 
     <div class="settings-section">
     <h3>💾 Data</h3>
-    <button id="clearDataBtn" class="nav-btn" style="color: var(--primary-color);">🗑️ Rensa all sparad data</button>
+    <button id="clearDataBtn" class="nav-btn" style="color: var(--primary-color); width: 100%;">🗑️ Rensa all sparad data</button>
     </div>
     </div>`;
+
+    // HÄR ÄR ÄNDRINGEN: Koppla lyssnarna direkt efter att HTML satts
+    setupSettingsListeners();
+
 }
 
 async function getAppInfo() {
@@ -596,6 +607,26 @@ function showSearchModal() {
         });
 }
 
+// ?
+function setupSettingsListeners() {
+    const darkToggle = document.getElementById("darkModeToggle");
+    const hapticToggle = document.getElementById("hapticToggle");
+
+    if (darkToggle) {
+        darkToggle.addEventListener("change", () => {
+            toggleDarkMode();
+            triggerHaptic(20);
+        });
+    }
+
+    if (hapticToggle) {
+        hapticToggle.addEventListener("change", () => {
+            toggleHaptic();
+        });
+    }
+}
+
+
 // ==========================================================================
 // 6. KOPIERINGSFUNKTION & TOAST
 // ==========================================================================
@@ -657,7 +688,3 @@ function showConfirmModal(message, onConfirm) {
         document.body.removeChild(modal);
     });
 }
-// ==========================================================================
-// ?.
-// ==========================================================================
-//
