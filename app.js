@@ -695,6 +695,7 @@ window.copyResult = function(copyFull) {
 };
 
 
+
 function showToast(message) {
     const toast = document.getElementById("toast");
     if (!toast) return;
