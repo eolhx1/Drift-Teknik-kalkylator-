@@ -546,6 +546,7 @@ function moveFavorite(fromIndex, toIndex) {
 }
 
 // Bygger upp själva kalkylsidan med fält, resultat, info-sektion OCH spara-knapp
+// Bygger upp själva kalkylsidan med fält, resultat, info-sektion OCH spara-knapp
 function renderCalc(category, calcId) {
     addRecent(calcId);
     clear(state.container);
@@ -556,81 +557,90 @@ function renderCalc(category, calcId) {
     if (!calc) return;
 
     const catData = KATEGORIER[category];
-    const categoryName = (typeof catData === 'object') ? catData.namn: (catData || "Kalkyl");
+    const categoryName = (typeof catData === 'object') ? catData.namn : (catData || "Kalkyl");
     const savedData = JSON.parse(localStorage.getItem(`calc_${calcId}`) || "{}");
 
     state.container.innerHTML = `
     <div class="calc-page" data-calc-id="${calcId}">
-    <div class="calc-header-nav">
-    <button id="backBtn" class="back-btn">${categoryName}</button>
-    </div>
-    <h2>${calc.namn}
-    <button id="favoriteBtn" class="favorite-btn" data-calc-id="${calcId}">
-    ${isFavorite(calcId) ? "⭐": "☆"}
-    </button>
-    </h2>
-
-    ${calc.inputs.map(i => {
-        const savedValue = savedData[i.id] || "";
-        const savedUnit = savedData[i.id + "_unit"] || (i.unit ? i.unit[0]: "");
-
-        return i.unit ? `
-        <div class="input-group">
-        <label>${i.label}</label>
-        <div style="display:flex; gap:8px;">
-        <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
-        <select data-unit="${i.id}">
-        ${i.unit.map(u => {
-            const display = UNIT_MAP[u] || u;
-            return `<option value="${u}" ${savedUnit === u ? "selected": ""}>${display}</option>`;
-        }).join("")}
-        </select>
+        <div class="calc-header-nav">
+            <button id="backBtn" class="back-btn">${categoryName}</button>
         </div>
-        </div>`: `
-        <div class="input-group">
-        <label>${i.label}</label>
-        <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
-        </div>`;
-    }).join("")}
+        <h2>${calc.namn}
+            <button id="favoriteBtn" class="favorite-btn" data-calc-id="${calcId}">
+                ${isFavorite(calcId) ? "⭐" : "☆"}
+            </button>
+        </h2>
 
-    <button id="resetBtn" class="reset-btn" data-calc-id="${calcId}">Nollställ</button>
+        ${calc.inputs.map(i => {
+            const savedValue = savedData[i.id] || "";
+            const savedUnit = savedData[i.id + "_unit"] || (i.unit ? i.unit[0] : "");
 
-    <div class="result" id="resultDisplay">
-    <span id="resultText"></span>
-    <button id="copyBtn" class="copy-icon">📋</button>
-    </div>
+            return i.unit ? `
+            <div class="input-group">
+                <label>${i.label}</label>
+                <div style="display:flex; gap:8px;">
+                    <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
+                    <select data-unit="${i.id}">
+                        ${i.unit.map(u => {
+                            const display = UNIT_MAP[u] || u;
+                            return `<option value="${u}" ${savedUnit === u ? "selected" : ""}>${display}</option>`;
+                        }).join("")}
+                    </select>
+                </div>
+            </div>` : `
+            <div class="input-group">
+                <label>${i.label}</label>
+                <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
+            </div>`;
+        }).join("")}
 
-    <!-- NY: Spara till fältjobb-knapp -->
-    <button id="saveJobBtn" class="nav-btn" style="background: var(--primary-color); color: white; width: 100%; margin-top: 10px; margin-bottom: 5px;">💾 Spara till jobb</button>
+        <button id="resetBtn" class="reset-btn" data-calc-id="${calcId}">Nollställ</button>
 
-    <div class="calc-info-title" onclick="toggleInfo()">
-    <span>ℹ️ Info om beräkningen</span>
-    <span id="infoIcon">▼</span>
-    </div>
+        <div class="result" id="resultDisplay">
+            <span id="resultText"></span>
+            <button id="copyBtn" class="copy-icon">📋</button>
+        </div>
 
-    <div id="calcInfo" class="calc-info-content">
-    ${typeof calc.info === 'string' ? `<p>${calc.info}</p>`: `
-    ${calc.info?.beskrivning ? `<p>${calc.info.beskrivning}</p>`: ""}
-    ${calc.info?.formel ? `<p><strong>Formel:</strong> ${calc.info.formel.namn} (${calc.info.formel.beskrivning})</p>`: ""}
-    ${calc.info?.riktvarden ? `<p><strong>Riktvärden:</strong> ${calc.info.riktvarden}</p>`: ""}
-    ${calc.info?.tips ? `<p><strong>Tips:</strong> ${calc.info.tips}</p>`: ""}
-    `}
-    </div>
+        <!-- Spara till fältjobb-knapp -->
+        <button id="saveJobBtn" class="nav-btn" style="background: var(--primary-color); color: white; width: 100%; margin-top: 10px; margin-bottom: 5px;">💾 Spara till jobb</button>
+
+        <div class="calc-info-title" onclick="toggleInfo()">
+            <span>ℹ️ Info om beräkningen</span>
+            <span id="infoIcon">▼</span>
+        </div>
+
+        <div id="calcInfo" class="calc-info-content">
+            ${typeof calc.info === 'string' ? `<p>${calc.info}</p>` : `
+                ${calc.info?.beskrivning ? `<p>${calc.info.beskrivning}</p>` : ""}
+                ${calc.info?.formel ? `<p><strong>Formel:</strong> ${calc.info.formel.namn} (${calc.info.formel.beskrivning})</p>` : ""}
+                ${calc.info?.riktvarden ? `<p><strong>Riktvärden:</strong> ${calc.info.riktvarden}</p>` : ""}
+                ${calc.info?.tips ? `<p><strong>Tips:</strong> ${calc.info.tips}</p>` : ""}
+            `}
+        </div>
     </div>`;
 
+    // Koppla kopieringsknappen
     const copyBtn = document.getElementById("copyBtn");
     if (copyBtn) {
-        copyBtn.addEventListener("click", () => {
-            copyResult(false);
-        });
+        copyBtn.addEventListener("click", () => { copyResult(false); });
         copyBtn.addEventListener("contextmenu", (e) => {
             e.preventDefault();
             copyResult(true);
         });
     }
 
+    // NYTT: Koppla spara-knappen direkt här så den garanterat reagerar på klick
+    const saveJobBtn = document.getElementById("saveJobBtn");
+    if (saveJobBtn) {
+        saveJobBtn.addEventListener("click", () => {
+            triggerHaptic(20);
+            showSaveJobModal(calcId);
+        });
+    }
+
     runCalc(null, calcId);
 }
+
 
 // ==========================================================================
 // 5. INSTÄLLNINGAR & APPLÅDA (Kugghjulet)
