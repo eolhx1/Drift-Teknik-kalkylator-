@@ -8,7 +8,9 @@ import {
     UNIT_MAP
 } from './kalkyler.js';
 
-// --- 1. GLOBAL STATE & DOM-REFERENSER ---
+// ==========================================================================
+// 1. GLOBAL STATE & DOM-REFERENSER
+// ==========================================================================
 const state = {
     container: document.getElementById("calcContainer"),
     mainNav: document.getElementById("mainNav"),
@@ -16,22 +18,21 @@ const state = {
     activeCategory: null,
 };
 
-// --- 2. INITIALISERING ---
+// ==========================================================================
+// 2. INITIALISERING & Händelselyssnare vid start
+// ==========================================================================
 document.addEventListener("DOMContentLoaded", () => {
-    // 2.0 Definierar debounce funktionen
+    // 2.0 Fördröjningsfunktion (så beräkningen inte körs för ofta vid snabb inmatning)
     const debouncedRunCalc = debounce((calcId) => {
         runCalc(null, calcId);
     }, 250);
 
-    // 2.1 Inställningar vid start
+    // 2.1 Startinställningar (t.ex. mörkt läge om det sparats tidigare)
     if (localStorage.getItem("darkMode") === "enabled") {
         document.body.classList.add("dark-mode");
     }
 
-    // 2.2 Sökfunktion (med rensa-knapp logik)
-
-
-    // 2.3 Koppla kugghjulet (statiskt element i headern)
+    // 2.2 Koppla kugghjulet i headern (Öppnar inställningar)
     const settingsBtn = document.getElementById("settingsBtn");
     if (settingsBtn) {
         settingsBtn.addEventListener("click", () => {
@@ -40,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Koppling av bottenmeny
+    // 2.3 Koppling av bottenmeny (Hem, Favoriter, Senaste, Sök)
     const navHome = document.getElementById("navHome");
     const navFav = document.getElementById("navFav");
     const navRecent = document.getElementById("navRecent");
@@ -50,17 +51,17 @@ document.addEventListener("DOMContentLoaded", () => {
         setActiveNav("navHome");
         showMainMenu();
     });
+    
     if (navFav) navFav.addEventListener("click", () => {
         setActiveNav("navFav");
-        // Säkerställ att vi rensar bort ev. öppen kalkyl och visar subnav-menyn
         state.container.innerHTML = "";
         state.mainNav.classList.add("hidden");
         state.subNav.classList.remove("hidden");
         showSubMenu("favoriter");
     });
+    
     if (navRecent) navRecent.addEventListener("click", () => {
         setActiveNav("navRecent");
-        // Säkerställ att vi rensar bort ev. öppen kalkyl och visar subnav-menyn
         state.container.innerHTML = "";
         state.mainNav.classList.add("hidden");
         state.subNav.classList.remove("hidden");
@@ -72,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
         showSearchModal();
     });
 
-    // 2.4 GLOBAL LYSSNARE för alla dynamiska knappar
+    // 2.4 Global klicklyssnare för dynamiska knappar (bakåt, stjärna, nollställ, rensa data)
     state.container.addEventListener("click", (event) => {
         const id = event.target.id;
         const calcId = event.target.dataset.calcId;
@@ -100,28 +101,26 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    state.container.addEventListener("focus",
-        (e) => {
-            if (e.target.tagName === "INPUT" && e.target.type === "number") {
-                setTimeout(() => {
-                    e.target.select();
-                }, 50);
-            }
-        },
-        true);
+    // Välj text automatiskt i inmatningsfält när man klickar på dem
+    state.container.addEventListener("focus", (e) => {
+        if (e.target.tagName === "INPUT" && e.target.type === "number") {
+            setTimeout(() => {
+                e.target.select();
+            }, 50);
+        }
+    }, true);
 
-    // 2.5 UPPDATERAD INPUT-LYSSNARE
-    state.container.addEventListener("input",
-        (e) => {
-            if (e.target.matches("input, select")) {
-                const calcId = state.container.querySelector("[data-calc-id]")?.dataset.calcId;
-                if (calcId) {
-                    debouncedRunCalc(calcId);
-                }
+    // 2.5 Lyssna på förändringar i kalkylfälten för att köra direktberäkning
+    state.container.addEventListener("input", (e) => {
+        if (e.target.matches("input, select")) {
+            const calcId = state.container.querySelector("[data-calc-id]")?.dataset.calcId;
+            if (calcId) {
+                debouncedRunCalc(calcId);
             }
-        });
+        }
+    });
 
-    // 2.6 Klick på rubriken för att gå hem
+    // 2.6 Klick på appens huvudrubrik för att gå till start
     const appTitle = document.getElementById("appTitle");
     if (appTitle) {
         appTitle.addEventListener("click", (e) => {
@@ -132,17 +131,20 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Starta i hemläge
     showMainMenu();
     setActiveNav("navHome");
 });
 
-// Hantera webbläsarens bakåt-knapp
+// Hantera webbläsarens bakåt/framåt-knappar
 window.addEventListener("popstate", (event) => {
     if (!event.state || event.state.page === "home") showMainMenu();
     else if (event.state.category && event.state.calcId) renderCalc(event.state.category, event.state.calcId);
 });
 
-// --- 3. BERÄKNINGSMOTOR ---
+// ==========================================================================
+// 3. BERÄKNINGSMOTOR (Hanterar matematiska uträkningar och sparar tillstånd)
+// ==========================================================================
 function runCalc(category, calcId) {
     const calc = findCalc(calcId);
     const page = state.container.querySelector(".calc-page");
@@ -155,6 +157,7 @@ function runCalc(category, calcId) {
     const values = {};
     let allFilled = true;
 
+    // Hämta enheter och indata
     selects.forEach(s => values[s.dataset.unit + "_unit"] = s.value);
     inputs.forEach(i => {
         const val = parseFloat(i.value.replace(",", "."));
@@ -162,8 +165,8 @@ function runCalc(category, calcId) {
         else values[i.dataset.id] = val;
     });
 
-    localStorage.setItem(`calc_${calcId}`,
-        JSON.stringify(values));
+    // Spara det användaren skrivit i enhetens minne (localStorage)
+    localStorage.setItem(`calc_${calcId}`, JSON.stringify(values));
 
     if (!allFilled) {
         document.getElementById("resultText").innerText = "Fyll i alla fält...";
@@ -176,9 +179,9 @@ function runCalc(category, calcId) {
         if (typeof rawResult === 'string') {
             document.getElementById("resultText").innerHTML = rawResult.replace(/\n/g, "<br>");
         } else if (typeof rawResult === 'number') {
-            const decimalPrecision = calc.decimaler !== undefined ? calc.decimaler: 2;
+            const decimalPrecision = calc.decimaler !== undefined ? calc.decimaler : 2;
             const unit = calc.unit || "";
-            const label = calc.label ? `${calc.label}: `: "";
+            const label = calc.label ? `${calc.label}: ` : "";
 
             const formattedNum = formatResult(rawResult, decimalPrecision);
             document.getElementById("resultText").innerHTML = `${label}${formattedNum} ${unit}`;
@@ -188,7 +191,11 @@ function runCalc(category, calcId) {
     }
 }
 
-// --- 4. MENYHANTERING & RENDERING ---
+// ==========================================================================
+// 4. MENYHANTERING & RENDERING (Huvudmeny, undermeny och favoritlistor)
+// ==========================================================================
+
+// Visar kategorierna på startsidan
 function showMainMenu() {
     state.activeCategory = null;
     clear(state.container);
@@ -200,7 +207,7 @@ function showMainMenu() {
 
     Object.entries(KATEGORIER).forEach(([key, cat]) => {
         const isObject = typeof cat === 'object';
-        const displayName = isObject ? `${cat.ikon} ${cat.namn}`: cat;
+        const displayName = isObject ? `${cat.ikon} ${cat.namn}` : cat;
 
         const btn = createButton(displayName, "nav-btn", () => showSubMenu(key));
         btn.dataset.category = key;
@@ -208,6 +215,7 @@ function showMainMenu() {
     });
 }
 
+// Visar listan över kalkyler i en specifik kategori (eller senast/favoriter)
 function showSubMenu(categoryKey) {
     state.activeCategory = categoryKey;
 
@@ -225,12 +233,13 @@ function showSubMenu(categoryKey) {
     clear(state.subNav);
     state.subNav.classList.add("active");
 
+    // Om användaren klickar på favoriter öppnas administrationsvyn för favoriter
     if (categoryKey === "favoriter") {
         renderFavoritesManagement();
         return;
     }
 
-    const list = (categoryKey === "recent") ? getRecent(): null;
+    const list = (categoryKey === "recent") ? getRecent() : null;
 
     if (list) {
         if (list.length === 0) {
@@ -248,12 +257,11 @@ function showSubMenu(categoryKey) {
     }
 }
 
-// Funktion för att hantera, sortera och ta bort favoriter i menyn
+// Skapar gränssnittet för att hantera, sortera (med pilar) och ta bort favoriter
 function renderFavoritesManagement() {
     const favorites = getFavorites();
 
-    // VIKTIGT: Töm subNav helt först så att gamla element försvinner
-    state.subNav.innerHTML = "";
+    state.subNav.innerHTML = ""; // Töm listan först så inga dubbletter uppstår
 
     if (favorites.length === 0) {
         state.subNav.innerHTML = "<p style='padding:14px; color:var(--text-muted);'>Inga favoriter sparade än. Klicka på stjärnan i en kalkyl för att spara den här!</p>";
@@ -284,7 +292,7 @@ function renderFavoritesManagement() {
 
         const btnStyle = "background:var(--card-bg, #fff); border:1px solid var(--border-color, #ccc); border-radius:4px; padding:8px; cursor:pointer; font-size:0.9rem;";
 
-        // Uppåt-knapp
+        // Pil upp-knapp
         const upBtn = document.createElement("button");
         upBtn.innerHTML = "⬆️";
         upBtn.title = "Flytta upp";
@@ -295,7 +303,7 @@ function renderFavoritesManagement() {
             moveFavorite(index, index - 1);
         };
 
-        // Nedåt-knapp
+        // Pil ner-knapp
         const downBtn = document.createElement("button");
         downBtn.innerHTML = "⬇️";
         downBtn.title = "Flytta ner";
@@ -306,7 +314,7 @@ function renderFavoritesManagement() {
             moveFavorite(index, index + 1);
         };
 
-        // Ta bort-knapp
+        // Ta bort-knapp (kryss)
         const removeBtn = document.createElement("button");
         removeBtn.innerHTML = "❌";
         removeBtn.title = "Ta bort från favoriter";
@@ -329,23 +337,20 @@ function renderFavoritesManagement() {
     state.subNav.appendChild(listContainer);
 }
 
-// Hjälpfunktion för att flytta element i favoritlistan
+// Flyttar ordningen på en favorit upp eller ner i listan
 function moveFavorite(fromIndex, toIndex) {
     let favorites = getFavorites();
 
     if (toIndex < 0 || toIndex >= favorites.length) return;
 
-    // Flytta elementet
     const item = favorites.splice(fromIndex, 1)[0];
     favorites.splice(toIndex, 0, item);
 
-    // Spara tillbaka den unika listan
     localStorage.setItem("favorites", JSON.stringify(favorites));
-
-    // Rendera om menyn
     renderFavoritesManagement();
 }
 
+// Bygger upp själva kalkylsidan med fält, resultat och info-sektion
 function renderCalc(category, calcId) {
     addRecent(calcId);
     clear(state.container);
@@ -356,7 +361,7 @@ function renderCalc(category, calcId) {
     if (!calc) return;
 
     const catData = KATEGORIER[category];
-    const categoryName = (typeof catData === 'object') ? catData.namn: (catData || "Kalkyl");
+    const categoryName = (typeof catData === 'object') ? catData.namn : (catData || "Kalkyl");
     const savedData = JSON.parse(localStorage.getItem(`calc_${calcId}`) || "{}");
 
     state.container.innerHTML = `
@@ -366,13 +371,13 @@ function renderCalc(category, calcId) {
     </div>
     <h2>${calc.namn}
     <button id="favoriteBtn" class="favorite-btn" data-calc-id="${calcId}">
-    ${isFavorite(calcId) ? "⭐": "☆"}
+    ${isFavorite(calcId) ? "⭐" : "☆"}
     </button>
     </h2>
 
     ${calc.inputs.map(i => {
         const savedValue = savedData[i.id] || "";
-        const savedUnit = savedData[i.id + "_unit"] || (i.unit ? i.unit[0]: "");
+        const savedUnit = savedData[i.id + "_unit"] || (i.unit ? i.unit[0] : "");
 
         return i.unit ? `
         <div class="input-group">
@@ -382,11 +387,11 @@ function renderCalc(category, calcId) {
         <select data-unit="${i.id}">
         ${i.unit.map(u => {
             const display = UNIT_MAP[u] || u;
-            return `<option value="${u}" ${savedUnit === u ? "selected": ""}>${display}</option>`;
+            return `<option value="${u}" ${savedUnit === u ? "selected" : ""}>${display}</option>`;
         }).join("")}
         </select>
         </div>
-        </div>`: `
+        </div>` : `
         <div class="input-group">
         <label>${i.label}</label>
         <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
@@ -406,11 +411,11 @@ function renderCalc(category, calcId) {
     </div>
 
     <div id="calcInfo" class="calc-info-content">
-    ${typeof calc.info === 'string' ? `<p>${calc.info}</p>`: `
-    ${calc.info?.beskrivning ? `<p>${calc.info.beskrivning}</p>`: ""}
-    ${calc.info?.formel ? `<p><strong>Formel:</strong> ${calc.info.formel.namn} (${calc.info.formel.beskrivning})</p>`: ""}
-    ${calc.info?.riktvarden ? `<p><strong>Riktvärden:</strong> ${calc.info.riktvarden}</p>`: ""}
-    ${calc.info?.tips ? `<p><strong>Tips:</strong> ${calc.info.tips}</p>`: ""}
+    ${typeof calc.info === 'string' ? `<p>${calc.info}</p>` : `
+    ${calc.info?.beskrivning ? `<p>${calc.info.beskrivning}</p>` : ""}
+    ${calc.info?.formel ? `<p><strong>Formel:</strong> ${calc.info.formel.namn} (${calc.info.formel.beskrivning})</p>` : ""}
+    ${calc.info?.riktvarden ? `<p><strong>Riktvärden:</strong> ${calc.info.riktvarden}</p>` : ""}
+    ${calc.info?.tips ? `<p><strong>Tips:</strong> ${calc.info.tips}</p>` : ""}
     `}
     </div>
     </div>`;
@@ -431,7 +436,7 @@ function renderCalc(category, calcId) {
 }
 
 // ==========================================================================
-//  5. INSTÄLLNINGAR (kugghjulet)
+// 5. INSTÄLLNINGAR & APPLÅDA (Kugghjulet)
 // ==========================================================================
 async function showSettings() {
     clear(state.container);
@@ -450,14 +455,14 @@ async function showSettings() {
     <div class="settings-row">
     <span>🌙 Mörkt läge</span>
     <label class="switch">
-    <input type="checkbox" id="darkModeToggle" ${localStorage.getItem("darkMode") === "enabled" ? "checked": ""}>
+    <input type="checkbox" id="darkModeToggle" ${localStorage.getItem("darkMode") === "enabled" ? "checked" : ""}>
     <span class="slider"></span>
     </label>
     </div>
     <div class="settings-row">
     <span>📳 Haptik</span>
     <label class="switch">
-    <input type="checkbox" id="hapticToggle" ${localStorage.getItem("hapticEnabled") === "enabled" ? "checked": ""}>
+    <input type="checkbox" id="hapticToggle" ${localStorage.getItem("hapticEnabled") === "enabled" ? "checked" : ""}>
     <span class="slider"></span>
     </label>
     </div>
@@ -481,6 +486,7 @@ async function showSettings() {
     setupSettingsListeners();
 }
 
+// Hämtar information om appen från info.json
 async function getAppInfo() {
     try {
         const response = await fetch('./info.json');
@@ -497,7 +503,7 @@ async function getAppInfo() {
 }
 
 // ==========================================================================
-//  5. HJÄLPFUNKTIONER
+// 6. HJÄLPFUNKTIONER (LocalStorage, sökning, formatering & effekter)
 // ==========================================================================
 function clear(el) {
     if (el) el.innerHTML = "";
@@ -518,9 +524,9 @@ function findCalc(calcId) {
     return ALLA_KALKYLER.find(c => c.id === calcId);
 }
 
+// Hämtar unika favoriter från enhetens minne
 function getFavorites() {
     const rawFavs = JSON.parse(localStorage.getItem("favorites") || "[]");
-    // Returnera endast unika ID:n för att förhindra dubbletter
     return [...new Set(rawFavs)];
 }
 
@@ -563,6 +569,7 @@ function debounce(func, delay) {
     };
 }
 
+// Fäll ut/fäll ihop info-sektionen i en kalkyl
 window.toggleInfo = function () {
     const info = document.getElementById("calcInfo");
     const icon = document.getElementById("infoIcon");
@@ -579,7 +586,7 @@ window.toggleInfo = function () {
 
 function toggleDarkMode() {
     const isDark = document.body.classList.toggle("dark-mode");
-    localStorage.setItem("darkMode", isDark ? "enabled": "disabled");
+    localStorage.setItem("darkMode", isDark ? "enabled" : "disabled");
 
     const toggle = document.getElementById("darkModeToggle");
     if (toggle) {
@@ -587,6 +594,7 @@ function toggleDarkMode() {
     }
 }
 
+// Vibrationsfeedback i mobiler
 function triggerHaptic(duration = 20) {
     const hapticSetting = localStorage.getItem("hapticEnabled") || "enabled";
     if (hapticSetting === "enabled" && navigator.vibrate) {
@@ -596,7 +604,7 @@ function triggerHaptic(duration = 20) {
 
 function toggleHaptic() {
     const current = localStorage.getItem("hapticEnabled") || "enabled";
-    const next = current === "enabled" ? "disabled": "enabled";
+    const next = current === "enabled" ? "disabled" : "enabled";
     localStorage.setItem("hapticEnabled", next);
 
     const toggle = document.getElementById("hapticToggle");
@@ -607,6 +615,7 @@ function toggleHaptic() {
     triggerHaptic(50);
 }
 
+// Formaterar tal snyggt enligt svensk standard
 function formatResult(value, precision = 2) {
     if (isNaN(value)) return "0";
     return new Intl.NumberFormat('sv-SE', {
@@ -620,6 +629,7 @@ function setActiveNav(id) {
     document.getElementById(id).classList.add('active');
 }
 
+// Visar sökmodalen och hanterar sökning i kalkyler och info-texter
 function showSearchModal() {
     clear(state.container);
     state.mainNav.classList.add("hidden");
@@ -654,7 +664,7 @@ function showSearchModal() {
 
     searchInput.addEventListener("input", (e) => {
         const query = e.target.value.toLowerCase().trim();
-        clearBtn.style.display = query ? "block": "none";
+        clearBtn.style.display = query ? "block" : "none";
 
         resultsContainer.innerHTML = "";
         if (!query) return;
@@ -692,13 +702,12 @@ function showSearchModal() {
         }
     });
 
-    clearBtn.addEventListener("click",
-        () => {
-            searchInput.value = "";
-            searchInput.focus();
-            clearBtn.style.display = "none";
-            resultsContainer.innerHTML = "";
-        });
+    clearBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        searchInput.focus();
+        clearBtn.style.display = "none";
+        resultsContainer.innerHTML = "";
+    });
 }
 
 function setupSettingsListeners() {
@@ -720,7 +729,7 @@ function setupSettingsListeners() {
 }
 
 // ==========================================================================
-// 6. KOPIERINGSFUNKTION & TOAST
+// 7. KOPIERINGSFUNKTION & TOAST-MEDDELANDEN
 // ==========================================================================
 window.copyResult = function(copyFull) {
     const resultTextEl = document.getElementById("resultText");
@@ -745,7 +754,7 @@ window.copyResult = function(copyFull) {
 
     navigator.clipboard.writeText(textToCopy).then(() => {
         document.getElementById("resultDisplay").classList.add("copied");
-        showToast(copyFull ? "Kopierade hela raden": `Kopierade tal: ${textToCopy}`);
+        showToast(copyFull ? "Kopierade hela raden" : `Kopierade tal: ${textToCopy}`);
 
         setTimeout(() => document.getElementById("resultDisplay").classList.remove("copied"), 1000);
     }).catch(err => {
@@ -766,7 +775,7 @@ function showToast(message) {
 }
 
 // ==========================================================================
-// 7. MODAL-RUTA
+// 8. BEKRÄFTELSE-MODAL (Pop-up vid t.ex. rensning av data)
 // ==========================================================================
 function showConfirmModal(message, onConfirm) {
     const modal = document.createElement("div");
