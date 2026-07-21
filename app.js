@@ -656,22 +656,37 @@ function setupSettingsListeners() {
 window.copyResult = function(copyFull) {
     const resultTextEl = document.getElementById("resultText");
     const fullText = resultTextEl.innerText;
-
+    
     if (!resultTextEl || fullText.includes("Fyll i")) return;
 
     let textToCopy = fullText;
 
-    // Om copyFull är false (vanligt klick), plocka ut bara talet/enheten
-    if (!copyFull && fullText.includes(":")) {
-        // Delar upp texten vid kolonet och tar det som är efter (t.ex. "230 V")
-        textToCopy = fullText.split(":")[1].trim();
+    if (copyFull) {
+        // Långtryck: Kopierar hela raden (t.ex. "Spänning: 230 V")
+        textToCopy = fullText;
+    } else {
+        // Vanligt klick: VI VILL BARA HA TALET FÖR EXCEL/KALKYLATORN
+        
+        // 1. Om det finns ett kolon, ta bort allt före det (t.ex. "Spänning: 230 V" blir "230 V")
+        if (textToCopy.includes(":")) {
+            textToCopy = textToCopy.split(":")[1].trim();
+        }
+
+        // 2. Extrahera bara själva talet (behåller siffror, komma och punkt)
+        // Detta plockar bort enheter som "V", "A", "kW" etc.
+        const match = textToCopy.match(/[\d,\.]+/);
+        if (match) {
+            textToCopy = match[0];
+        }
+        
+        // OBS: Om din Excel vill ha punkt istället för komma som decimaltecken 
+        // (vanligt i engelsk Excel eller standard JS-tal), kan du avkommentera raden nedan:
+        // textToCopy = textToCopy.replace(',', '.');
     }
 
     navigator.clipboard.writeText(textToCopy).then(() => {
         document.getElementById("resultDisplay").classList.add("copied");
-
-        // Visar en tydlig toast beroende på vad som kopierades
-        showToast(copyFull ? "Kopierade hela raden": "Kopierade värde");
+        showToast(copyFull ? "Kopierade hela raden" : `Kopierade tal: ${textToCopy}`);
 
         setTimeout(() => document.getElementById("resultDisplay").classList.remove("copied"), 1000);
     }).catch(err => {
