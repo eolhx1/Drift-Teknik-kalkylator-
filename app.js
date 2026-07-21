@@ -243,7 +243,7 @@ function showSubMenu(categoryKey) {
         return;
     }
 
-    const list = (categoryKey === "recent") ? getRecent(): null;
+    const list = (categoryKey === "recent") ? getRecent() : null;
 
     if (list) {
         if (list.length === 0) {
@@ -260,6 +260,96 @@ function showSubMenu(categoryKey) {
         });
     }
 }
+
+// Ny funktion för att hantera, sortera och ta bort favoriter direkt i menyn
+function renderFavoritesManagement() {
+    const favorites = getFavorites();
+
+    if (favorites.length === 0) {
+        state.subNav.innerHTML = "<p style='padding:14px; color:var(--text-muted);'>Inga favoriter sparade än. Klicka på stjärnan i en kalkyl för att spara den här!</p>";
+        return;
+    }
+
+    const listContainer = document.createElement("div");
+    listContainer.className = "favorites-manage-list";
+    listContainer.style.display = "flex";
+    listContainer.style.flexDirection = "column";
+    listContainer.style.gap = "8px";
+    listContainer.style.padding = "4px";
+
+    favorites.forEach((calcId, index) => {
+        const calc = findCalc(calcId);
+        if (!calc) return;
+
+        const row = document.createElement("div");
+        row.style.display = "flex";
+        row.style.alignItems = "center";
+        row.style.gap = "4px";
+
+        // Själva kalkylknappen (tar upp tillgänglig plats)
+        const calcBtn = createButton(calc.namn, "sub-btn", () => {
+            renderCalc("favoriter", calc.id);
+        });
+        calcBtn.style.flexGrow = "1";
+        calcBtn.style.margin = "0"; // Nollställ eventuella externa marginaler
+
+        // Sortering & Ta bort-knappar (smidiga små verktygsknappar bredvid)
+        const btnStyle = "background:var(--card-bg, #fff); border:1px solid var(--border-color, #ccc); border-radius:4px; padding:8px; cursor:pointer; font-size:0.9rem;";
+
+        // Uppåt-knapp
+        const upBtn = document.createElement("button");
+        upBtn.innerHTML = "⬆️";
+        upBtn.title = "Flytta upp";
+        upBtn.style = btnStyle;
+        upBtn.disabled = index === 0; // Avaktivera om den redan är överst
+        if (index === 0) upBtn.style.opacity = "0.3";
+        upBtn.onclick = () => {
+            moveFavorite(index, index - 1);
+        };
+
+        // Nedåt-knapp
+        const downBtn = document.createElement("button");
+        downBtn.innerHTML = "⬇️";
+        downBtn.title = "Flytta ner";
+        downBtn.style = btnStyle;
+        downBtn.disabled = index === favorites.length - 1; // Avaktivera om den är längst ner
+        if (index === favorites.length - 1) downBtn.style.opacity = "0.3";
+        downBtn.onclick = () => {
+            moveFavorite(index, index + 1);
+        };
+
+        // Ta bort-knapp
+        const removeBtn = document.createElement("button");
+        removeBtn.innerHTML = "❌";
+        removeBtn.title = "Ta bort från favoriter";
+        removeBtn.style = btnStyle;
+        removeBtn.onclick = () => {
+            let favs = getFavorites();
+            favs = favs.filter(id => id !== calcId);
+            localStorage.setItem("favorites", JSON.stringify(favs));
+            renderFavoritesManagement(); // Rita om listan direkt
+        };
+
+        row.appendChild(calcBtn);
+        row.appendChild(upBtn);
+        row.appendChild(downBtn);
+        row.appendChild(removeBtn);
+
+        listContainer.appendChild(row);
+    });
+
+    state.subNav.appendChild(listContainer);
+}
+
+// Hjälpfunktion för att flytta element i favoritlistan
+function moveFavorite(fromIndex, toIndex) {
+    let favorites = getFavorites();
+    const item = favorites.splice(fromIndex, 1)[0];
+    favorites.splice(toIndex, 0, item);
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+    renderFavoritesManagement(); // Uppdatera vyn
+}
+
 
 // Ny funktion för att hantera, sortera och ta bort favoriter direkt i menyn
 function renderFavoritesManagement() {
