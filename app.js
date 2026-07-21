@@ -409,7 +409,7 @@ function showSaveJobModal(calcId) {
     </div>
 
     <div style="font-size: 0.9rem; margin-bottom: 15px; background: rgba(0,0,0,0.03); padding: 8px; border-radius: 4px;">
-    <strong>Resultat:</strong> ${resultText}
+        ${resultText}
     </div>
 
     <div class="confirm-actions" style="display: flex; gap: 8px;">
@@ -546,7 +546,6 @@ function moveFavorite(fromIndex, toIndex) {
 }
 
 // Bygger upp själva kalkylsidan med fält, resultat, info-sektion OCH spara-knapp
-// Bygger upp själva kalkylsidan med fält, resultat, info-sektion OCH spara-knapp
 function renderCalc(category, calcId) {
     addRecent(calcId);
     clear(state.container);
@@ -572,7 +571,8 @@ function renderCalc(category, calcId) {
         </h2>
 
         ${calc.inputs.map(i => {
-            const savedValue = savedData[i.id] || "";
+            // FIX: Kontrollera att värdet inte är undefined/null så att nollor (0) sparas och visas korrekt
+            const savedValue = (savedData[i.id] !== undefined && savedData[i.id] !== null) ? savedData[i.id] : "";
             const savedUnit = savedData[i.id + "_unit"] || (i.unit ? i.unit[0] : "");
 
             return i.unit ? `
@@ -619,7 +619,6 @@ function renderCalc(category, calcId) {
         </div>
     </div>`;
 
-    // Koppla kopieringsknappen
     const copyBtn = document.getElementById("copyBtn");
     if (copyBtn) {
         copyBtn.addEventListener("click", () => { copyResult(false); });
@@ -629,7 +628,6 @@ function renderCalc(category, calcId) {
         });
     }
 
-    // NYTT: Koppla spara-knappen direkt här så den garanterat reagerar på klick
     const saveJobBtn = document.getElementById("saveJobBtn");
     if (saveJobBtn) {
         saveJobBtn.addEventListener("click", () => {
