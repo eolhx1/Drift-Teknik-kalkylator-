@@ -76,6 +76,15 @@ const beraknaKyleffekt = (v) => {
     return (1.2 * flode_ls * dT) / 1000;
 };
 
+// Ohms lag
+const beraknaOhmsLag = (v) => {
+    if (!valid(v.varde1, v.varde2)) return "Fel";
+    if (v.lage === "U") return v.varde1 * v.varde2;      // U = I * R
+    if (v.lage === "I") return v.varde1 / v.varde2;      // I = U / R
+    if (v.lage === "R") return v.varde1 / v.varde2;      // R = U / I
+    return "Fel";
+};
+
 
 // Lägg till fler beräkningar
 
@@ -188,7 +197,41 @@ const vsKalkyler = [
 ];
 
 const elKalkyler = [
-    // Lägg till el-kalkyler här efter samma mönster
+    {
+        id: "ohms_lag",
+        namn: "Ohms lag",
+        kategorier: ["el", "tele"], // <-- Tillhör båda kategorierna!
+        unit: "V", // Detta kan dynamiskt anpassas i app.js beroende på läge, eller lämnas öppet
+        decimaler: 2,
+        inputs: [
+            {
+                id: "lage",
+                label: "Vad vill du räkna ut?",
+                unit: ["Spänning (U)", "Ström (I)", "Resistans (R)"]
+            },
+            {
+                id: "varde1",
+                label: "Värde 1"
+            },
+            {
+                id: "varde2",
+                label: "Värde 2"
+            }
+        ],
+        calc: beraknaOhmsLag,
+        info: {
+            beskrivning: "Beräknar spänning, ström eller resistans med Ohms lag.",
+            formel: {
+                namn: "U = R × I",
+                beskrivning: "Sambandet mellan spänning, ström och resistans."
+            },
+            riktvarden: "Grundläggande formel för all el- och teknikberäkning.",
+            tips: "Kontrollera enheterna så att du räknar i Volt, Ampere och Ohm."
+        }
+    }
+];
+const teleKalkyler = [
+    // Lägg till tele-kalkyler här efter samma mönster
 ];
 
 // =================================================================
@@ -199,6 +242,7 @@ export const ALLA_KALKYLER = [
     ...styrKalkyler,
     ...ventKalkyler,
     ...vsKalkyler,
-    ...elKalkyler
+    ...elKalkyler,
+    ...teleKalkyler
     // Lägg till fler grupper här
 ];
