@@ -316,11 +316,26 @@ function renderFavoritesManagement() {
 // Hjälpfunktion för att flytta element i favoritlistan
 function moveFavorite(fromIndex, toIndex) {
     let favorites = getFavorites();
-    const item = favorites.splice(fromIndex, 1)[0];
-    favorites.splice(toIndex, 0, item);
+    
+    // Säkerställ att indexen är giltiga
+    if (toIndex < 0 || toIndex >= favorites.length) return;
+
+    // Plocka ut kalkyl-ID:t från sin gamla plats
+    const itemToMove = favorites[fromIndex];
+
+    // Ta bort den från gamla platsen
+    favorites.splice(fromIndex, 1);
+
+    // Sätt in den på nya platsen
+    favorites.splice(toIndex, 0, itemToMove);
+
+    // Spara den nya rena listan
     localStorage.setItem("favorites", JSON.stringify(favorites));
+    
+    // Uppdatera vyn direkt
     renderFavoritesManagement();
 }
+
 
 function renderCalc(category, calcId) {
     addRecent(calcId);
