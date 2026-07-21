@@ -264,11 +264,34 @@ function showSubMenu(categoryKey) {
         return;
     }
 
+    // --- NYTT: Skapa en snygg rubrik och tillbakaknapp för vanliga kategorier ---
+    const catData = KATEGORIER[categoryKey] || {};
+    const categoryName = catData.namn || (categoryKey === "recent" ? "Senaste" : "Kategorier");
+    const categoryIcon = catData.ikon || "";
+
+    const headerDiv = document.createElement("div");
+    headerDiv.className = "submenu-header-bar";
+    headerDiv.style.cssText = "display: flex; align-items: center; margin-bottom: 15px; gap: 10px; padding: 0 4px;";
+    headerDiv.innerHTML = `
+        <button id="subBackBtn" class="back-btn" style="padding: 6px 12px; cursor: pointer;">← Tillbaka</button>
+        <h2 style="margin: 0; font-size: 1.2rem;">${categoryIcon} ${categoryName}</h2>
+    `;
+    state.subNav.appendChild(headerDiv);
+
+    document.getElementById("subBackBtn").onclick = () => {
+        triggerHaptic(20);
+        showHomeView(); // Eller den funktion som visar huvudsidan/hemvyn
+    };
+    // ------------------------------------------------------------------------
+
     const list = (categoryKey === "recent") ? getRecent(): null;
 
     if (list) {
         if (list.length === 0) {
-            state.subNav.innerHTML = "<p style='padding:14px; color:var(--text-muted);'>Ingen data hittades.</p>";
+            const emptyMsg = document.createElement("p");
+            emptyMsg.style.cssText = "padding:14px; color:var(--text-muted);";
+            emptyMsg.textContent = "Ingen data hittades.";
+            state.subNav.appendChild(emptyMsg);
             return;
         }
         list.forEach(calcId => {
@@ -281,6 +304,7 @@ function showSubMenu(categoryKey) {
         });
     }
 }
+
 
 // NY: Visar listan över sparade fältjobb i undermenyn
 function renderSavedJobsList() {
