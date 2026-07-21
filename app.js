@@ -91,23 +91,26 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    state.container.addEventListener("focus", (e) => {
-        if (e.target.tagName === "INPUT" && e.target.type === "number") {
-            setTimeout(() => {
-                e.target.select();
-            }, 50);
-        }
-    }, true);
+    state.container.addEventListener("focus",
+        (e) => {
+            if (e.target.tagName === "INPUT" && e.target.type === "number") {
+                setTimeout(() => {
+                    e.target.select();
+                }, 50);
+            }
+        },
+        true);
 
     // 2.5 UPPDATERAD INPUT-LYSSNARE
-    state.container.addEventListener("input", (e) => {
-        if (e.target.matches("input, select")) {
-            const calcId = state.container.querySelector("[data-calc-id]")?.dataset.calcId;
-            if (calcId) {
-                debouncedRunCalc(calcId);
+    state.container.addEventListener("input",
+        (e) => {
+            if (e.target.matches("input, select")) {
+                const calcId = state.container.querySelector("[data-calc-id]")?.dataset.calcId;
+                if (calcId) {
+                    debouncedRunCalc(calcId);
+                }
             }
-        }
-    });
+        });
 
     // 2.6 Klick på rubriken för att gå hem
     const appTitle = document.getElementById("appTitle");
@@ -150,7 +153,8 @@ function runCalc(category, calcId) {
         else values[i.dataset.id] = val;
     });
 
-    localStorage.setItem(`calc_${calcId}`, JSON.stringify(values));
+    localStorage.setItem(`calc_${calcId}`,
+        JSON.stringify(values));
 
     if (!allFilled) {
         document.getElementById("resultText").innerText = "Fyll i alla fält...";
@@ -163,9 +167,9 @@ function runCalc(category, calcId) {
         if (typeof rawResult === 'string') {
             document.getElementById("resultText").innerHTML = rawResult.replace(/\n/g, "<br>");
         } else if (typeof rawResult === 'number') {
-            const decimalPrecision = calc.decimaler !== undefined ? calc.decimaler : 2;
+            const decimalPrecision = calc.decimaler !== undefined ? calc.decimaler: 2;
             const unit = calc.unit || "";
-            const label = calc.label ? `${calc.label}: ` : "";
+            const label = calc.label ? `${calc.label}: `: "";
 
             const formattedNum = formatResult(rawResult, decimalPrecision);
             document.getElementById("resultText").innerHTML = `${label}${formattedNum} ${unit}`;
@@ -187,7 +191,7 @@ function showMainMenu() {
 
     Object.entries(KATEGORIER).forEach(([key, cat]) => {
         const isObject = typeof cat === 'object';
-        const displayName = isObject ? `${cat.ikon} ${cat.namn}` : cat;
+        const displayName = isObject ? `${cat.ikon} ${cat.namn}`: cat;
 
         const btn = createButton(displayName, "nav-btn", () => showSubMenu(key));
         btn.dataset.category = key;
@@ -217,7 +221,7 @@ function showSubMenu(categoryKey) {
         return;
     }
 
-    const list = (categoryKey === "recent") ? getRecent() : null;
+    const list = (categoryKey === "recent") ? getRecent(): null;
 
     if (list) {
         if (list.length === 0) {
@@ -238,6 +242,9 @@ function showSubMenu(categoryKey) {
 // Funktion för att hantera, sortera och ta bort favoriter i menyn
 function renderFavoritesManagement() {
     const favorites = getFavorites();
+
+    // VIKTIGT: Töm subNav helt först så att gamla element försvinner
+    state.subNav.innerHTML = "";
 
     if (favorites.length === 0) {
         state.subNav.innerHTML = "<p style='padding:14px; color:var(--text-muted);'>Inga favoriter sparade än. Klicka på stjärnan i en kalkyl för att spara den här!</p>";
@@ -316,26 +323,19 @@ function renderFavoritesManagement() {
 // Hjälpfunktion för att flytta element i favoritlistan
 function moveFavorite(fromIndex, toIndex) {
     let favorites = getFavorites();
-    
-    // Säkerställ att indexen är giltiga
+
     if (toIndex < 0 || toIndex >= favorites.length) return;
 
-    // Plocka ut kalkyl-ID:t från sin gamla plats
-    const itemToMove = favorites[fromIndex];
+    // Flytta elementet
+    const item = favorites.splice(fromIndex, 1)[0];
+    favorites.splice(toIndex, 0, item);
 
-    // Ta bort den från gamla platsen
-    favorites.splice(fromIndex, 1);
-
-    // Sätt in den på nya platsen
-    favorites.splice(toIndex, 0, itemToMove);
-
-    // Spara den nya rena listan
+    // Spara tillbaka den unika listan
     localStorage.setItem("favorites", JSON.stringify(favorites));
-    
-    // Uppdatera vyn direkt
+
+    // Rendera om menyn
     renderFavoritesManagement();
 }
-
 
 function renderCalc(category, calcId) {
     addRecent(calcId);
@@ -347,7 +347,7 @@ function renderCalc(category, calcId) {
     if (!calc) return;
 
     const catData = KATEGORIER[category];
-    const categoryName = (typeof catData === 'object') ? catData.namn : (catData || "Kalkyl");
+    const categoryName = (typeof catData === 'object') ? catData.namn: (catData || "Kalkyl");
     const savedData = JSON.parse(localStorage.getItem(`calc_${calcId}`) || "{}");
 
     state.container.innerHTML = `
@@ -357,13 +357,13 @@ function renderCalc(category, calcId) {
     </div>
     <h2>${calc.namn}
     <button id="favoriteBtn" class="favorite-btn" data-calc-id="${calcId}">
-    ${isFavorite(calcId) ? "⭐" : "☆"}
+    ${isFavorite(calcId) ? "⭐": "☆"}
     </button>
     </h2>
 
     ${calc.inputs.map(i => {
         const savedValue = savedData[i.id] || "";
-        const savedUnit = savedData[i.id + "_unit"] || (i.unit ? i.unit[0] : "");
+        const savedUnit = savedData[i.id + "_unit"] || (i.unit ? i.unit[0]: "");
 
         return i.unit ? `
         <div class="input-group">
@@ -373,11 +373,11 @@ function renderCalc(category, calcId) {
         <select data-unit="${i.id}">
         ${i.unit.map(u => {
             const display = UNIT_MAP[u] || u;
-            return `<option value="${u}" ${savedUnit === u ? "selected" : ""}>${display}</option>`;
+            return `<option value="${u}" ${savedUnit === u ? "selected": ""}>${display}</option>`;
         }).join("")}
         </select>
         </div>
-        </div>` : `
+        </div>`: `
         <div class="input-group">
         <label>${i.label}</label>
         <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
@@ -397,11 +397,11 @@ function renderCalc(category, calcId) {
     </div>
 
     <div id="calcInfo" class="calc-info-content">
-    ${typeof calc.info === 'string' ? `<p>${calc.info}</p>` : `
-    ${calc.info?.beskrivning ? `<p>${calc.info.beskrivning}</p>` : ""}
-    ${calc.info?.formel ? `<p><strong>Formel:</strong> ${calc.info.formel.namn} (${calc.info.formel.beskrivning})</p>` : ""}
-    ${calc.info?.riktvarden ? `<p><strong>Riktvärden:</strong> ${calc.info.riktvarden}</p>` : ""}
-    ${calc.info?.tips ? `<p><strong>Tips:</strong> ${calc.info.tips}</p>` : ""}
+    ${typeof calc.info === 'string' ? `<p>${calc.info}</p>`: `
+    ${calc.info?.beskrivning ? `<p>${calc.info.beskrivning}</p>`: ""}
+    ${calc.info?.formel ? `<p><strong>Formel:</strong> ${calc.info.formel.namn} (${calc.info.formel.beskrivning})</p>`: ""}
+    ${calc.info?.riktvarden ? `<p><strong>Riktvärden:</strong> ${calc.info.riktvarden}</p>`: ""}
+    ${calc.info?.tips ? `<p><strong>Tips:</strong> ${calc.info.tips}</p>`: ""}
     `}
     </div>
     </div>`;
@@ -441,14 +441,14 @@ async function showSettings() {
     <div class="settings-row">
     <span>🌙 Mörkt läge</span>
     <label class="switch">
-    <input type="checkbox" id="darkModeToggle" ${localStorage.getItem("darkMode") === "enabled" ? "checked" : ""}>
+    <input type="checkbox" id="darkModeToggle" ${localStorage.getItem("darkMode") === "enabled" ? "checked": ""}>
     <span class="slider"></span>
     </label>
     </div>
     <div class="settings-row">
     <span>📳 Haptik</span>
     <label class="switch">
-    <input type="checkbox" id="hapticToggle" ${localStorage.getItem("hapticEnabled") === "enabled" ? "checked" : ""}>
+    <input type="checkbox" id="hapticToggle" ${localStorage.getItem("hapticEnabled") === "enabled" ? "checked": ""}>
     <span class="slider"></span>
     </label>
     </div>
@@ -510,7 +510,9 @@ function findCalc(calcId) {
 }
 
 function getFavorites() {
-    return JSON.parse(localStorage.getItem("favorites") || "[]");
+    const rawFavs = JSON.parse(localStorage.getItem("favorites") || "[]");
+    // Returnera endast unika ID:n för att förhindra dubbletter
+    return [...new Set(rawFavs)];
 }
 
 function isFavorite(calcId) {
@@ -519,9 +521,13 @@ function isFavorite(calcId) {
 
 function toggleFavorite(calcId) {
     let fav = getFavorites();
-    fav = fav.includes(calcId) ? fav.filter(id => id !== calcId) : [...fav, calcId];
+    if (fav.includes(calcId)) {
+        fav = fav.filter(id => id !== calcId);
+    } else {
+        fav.push(calcId);
+    }
     localStorage.setItem("favorites", JSON.stringify(fav));
-    renderCalc("favoriter", calcId);
+    renderFavoritesManagement();
 }
 
 function getRecent() {
@@ -564,7 +570,7 @@ window.toggleInfo = function () {
 
 function toggleDarkMode() {
     const isDark = document.body.classList.toggle("dark-mode");
-    localStorage.setItem("darkMode", isDark ? "enabled" : "disabled");
+    localStorage.setItem("darkMode", isDark ? "enabled": "disabled");
 
     const toggle = document.getElementById("darkModeToggle");
     if (toggle) {
@@ -581,7 +587,7 @@ function triggerHaptic(duration = 20) {
 
 function toggleHaptic() {
     const current = localStorage.getItem("hapticEnabled") || "enabled";
-    const next = current === "enabled" ? "disabled" : "enabled";
+    const next = current === "enabled" ? "disabled": "enabled";
     localStorage.setItem("hapticEnabled", next);
 
     const toggle = document.getElementById("hapticToggle");
@@ -639,7 +645,7 @@ function showSearchModal() {
 
     searchInput.addEventListener("input", (e) => {
         const query = e.target.value.toLowerCase().trim();
-        clearBtn.style.display = query ? "block" : "none";
+        clearBtn.style.display = query ? "block": "none";
 
         resultsContainer.innerHTML = "";
         if (!query) return;
@@ -648,7 +654,7 @@ function showSearchModal() {
 
         const matches = ALLA_KALKYLER.filter(calc => {
             let searchableText = calc.namn.toLowerCase();
-            
+
             if (calc.info) {
                 if (typeof calc.info === 'string') {
                     searchableText += " " + calc.info.toLowerCase();
@@ -677,12 +683,13 @@ function showSearchModal() {
         }
     });
 
-    clearBtn.addEventListener("click", () => {
-        searchInput.value = "";
-        searchInput.focus();
-        clearBtn.style.display = "none";
-        resultsContainer.innerHTML = "";
-    });
+    clearBtn.addEventListener("click",
+        () => {
+            searchInput.value = "";
+            searchInput.focus();
+            clearBtn.style.display = "none";
+            resultsContainer.innerHTML = "";
+        });
 }
 
 function setupSettingsListeners() {
@@ -709,7 +716,7 @@ function setupSettingsListeners() {
 window.copyResult = function(copyFull) {
     const resultTextEl = document.getElementById("resultText");
     const fullText = resultTextEl.innerText;
-    
+
     if (!resultTextEl || fullText.includes("Fyll i")) return;
 
     let textToCopy = fullText;
@@ -729,7 +736,7 @@ window.copyResult = function(copyFull) {
 
     navigator.clipboard.writeText(textToCopy).then(() => {
         document.getElementById("resultDisplay").classList.add("copied");
-        showToast(copyFull ? "Kopierade hela raden" : `Kopierade tal: ${textToCopy}`);
+        showToast(copyFull ? "Kopierade hela raden": `Kopierade tal: ${textToCopy}`);
 
         setTimeout(() => document.getElementById("resultDisplay").classList.remove("copied"), 1000);
     }).catch(err => {
