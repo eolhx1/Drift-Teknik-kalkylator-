@@ -59,23 +59,19 @@ document.addEventListener("DOMContentLoaded", () => {
         showSubMenu("recent");
     });
     if (navSearch) navSearch.addEventListener("click", () => {
-        // Och denna
         setActiveNav("navSearch");
         showSearchModal();
     });
 
-
-
     // 2.4 GLOBAL LYSSNARE för alla dynamiska knappar
     state.container.addEventListener("click", (event) => {
         const id = event.target.id;
-        const calcId = event.target.dataset.calcId; // Hämtar värdet från data-calc-id
+        const calcId = event.target.dataset.calcId;
 
-        if (!id) return; // Om man klickar utanför en knapp
+        if (!id) return;
 
-        triggerHaptic(20); // Haptik på ALLA klick i containern
+        triggerHaptic(20);
 
-        // Routa klick baserat på ID
         if (id === "backBtn") showMainMenu();
 
         if (id === "clearDataBtn") {
@@ -87,43 +83,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (id === "favoriteBtn") {
             toggleFavorite(calcId);
-            renderCalc("favoriter", calcId); // Uppdatera stjärnan
+            renderCalc("favoriter", calcId);
         }
 
         if (id === "resetBtn") {
             smartReset(calcId);
         }
-
     });
 
-
-    state.container.addEventListener("focus",
-        (e) => {
-            if (e.target.tagName === "INPUT" && e.target.type === "number") {
-                setTimeout(() => {
-                    e.target.select();
-                }, 50);
-            }
-        },
-        true);
+    state.container.addEventListener("focus", (e) => {
+        if (e.target.tagName === "INPUT" && e.target.type === "number") {
+            setTimeout(() => {
+                e.target.select();
+            }, 50);
+        }
+    }, true);
 
     // 2.5 UPPDATERAD INPUT-LYSSNARE
-    state.container.addEventListener("input",
-        (e) => {
-            if (e.target.matches("input, select")) {
-                // Vi hämtar calcId från det element som har attributet
-                const calcId = state.container.querySelector("[data-calc-id]")?.dataset.calcId;
-                if (calcId) {
-                    debouncedRunCalc(calcId); // Använd den debounced-versionen här!
-                }
+    state.container.addEventListener("input", (e) => {
+        if (e.target.matches("input, select")) {
+            const calcId = state.container.querySelector("[data-calc-id]")?.dataset.calcId;
+            if (calcId) {
+                debouncedRunCalc(calcId);
             }
-        });
+        }
+    });
 
     // 2.6 Klick på rubriken för att gå hem
     const appTitle = document.getElementById("appTitle");
     if (appTitle) {
         appTitle.addEventListener("click", (e) => {
-            e.preventDefault(); // Stoppar eventuella standardbeteenden
+            e.preventDefault();
             triggerHaptic(20);
             showMainMenu();
             setActiveNav("navHome");
@@ -133,8 +123,6 @@ document.addEventListener("DOMContentLoaded", () => {
     showMainMenu();
     setActiveNav("navHome");
 });
-
-
 
 // Hantera webbläsarens bakåt-knapp
 window.addEventListener("popstate", (event) => {
@@ -162,8 +150,7 @@ function runCalc(category, calcId) {
         else values[i.dataset.id] = val;
     });
 
-    localStorage.setItem(`calc_${calcId}`,
-        JSON.stringify(values));
+    localStorage.setItem(`calc_${calcId}`, JSON.stringify(values));
 
     if (!allFilled) {
         document.getElementById("resultText").innerText = "Fyll i alla fält...";
@@ -173,21 +160,17 @@ function runCalc(category, calcId) {
     try {
         const rawResult = calc.calc(values);
 
-        // Om kalkylen returnerar en sträng, visa den direkt (för gamla kalkyler)
         if (typeof rawResult === 'string') {
             document.getElementById("resultText").innerHTML = rawResult.replace(/\n/g, "<br>");
-        }
-        // Om kalkylen returnerar ett tal, använd den nya formateringen
-        else if (typeof rawResult === 'number') {
-            const decimalPrecision = calc.decimaler !== undefined ? calc.decimaler: 2;
+        } else if (typeof rawResult === 'number') {
+            const decimalPrecision = calc.decimaler !== undefined ? calc.decimaler : 2;
             const unit = calc.unit || "";
-            const label = calc.label ? `${calc.label}: `: "";
+            const label = calc.label ? `${calc.label}: ` : "";
 
             const formattedNum = formatResult(rawResult, decimalPrecision);
             document.getElementById("resultText").innerHTML = `${label}${formattedNum} ${unit}`;
         }
     } catch (err) {
-        // Om något går fel, visa ett meddelande men krascha inte resten av appen
         resultBox.innerText = "Ett fel uppstod i beräkningen.";
     }
 }
@@ -198,18 +181,13 @@ function showMainMenu() {
     clear(state.container);
     clear(state.subNav);
 
-    // Ser till att menyn visas
     state.mainNav.classList.remove("hidden");
     state.subNav.classList.remove("hidden");
-
-    // Tömmer mainNav
     state.mainNav.innerHTML = "";
 
     Object.entries(KATEGORIER).forEach(([key, cat]) => {
-        // Säker kontroll: Om det är ett objekt, använd ikon + namn.
-        // Annars använd bara strängen (bakåtkompatibilitet).
         const isObject = typeof cat === 'object';
-        const displayName = isObject ? `${cat.ikon} ${cat.namn}`: cat;
+        const displayName = isObject ? `${cat.ikon} ${cat.namn}` : cat;
 
         const btn = createButton(displayName, "nav-btn", () => showSubMenu(key));
         btn.dataset.category = key;
@@ -218,22 +196,18 @@ function showMainMenu() {
 }
 
 function showSubMenu(categoryKey) {
-    state.activeCategory = categoryKey; // Spara kategorin
+    state.activeCategory = categoryKey;
 
-    // 1. Ta bort 'active-nav' från alla
     state.mainNav.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('active-nav');
     });
 
-    // 2. Hitta rätt knapp via data-attributet och markera
     const activeBtn = state.mainNav.querySelector(`[data-category="${categoryKey}"]`);
     if (activeBtn) {
         activeBtn.classList.add('active-nav');
     }
 
-    // Göm huvudmenyn helt när man valt en kategori för att frigöra plats
     state.mainNav.classList.add("hidden");
-
     clear(state.container);
     clear(state.subNav);
     state.subNav.classList.add("active");
@@ -261,7 +235,7 @@ function showSubMenu(categoryKey) {
     }
 }
 
-// Ny funktion för att hantera, sortera och ta bort favoriter direkt i menyn
+// Funktion för att hantera, sortera och ta bort favoriter i menyn
 function renderFavoritesManagement() {
     const favorites = getFavorites();
 
@@ -286,14 +260,12 @@ function renderFavoritesManagement() {
         row.style.alignItems = "center";
         row.style.gap = "4px";
 
-        // Själva kalkylknappen (tar upp tillgänglig plats)
         const calcBtn = createButton(calc.namn, "sub-btn", () => {
             renderCalc("favoriter", calc.id);
         });
         calcBtn.style.flexGrow = "1";
-        calcBtn.style.margin = "0"; // Nollställ eventuella externa marginaler
+        calcBtn.style.margin = "0";
 
-        // Sortering & Ta bort-knappar (smidiga små verktygsknappar bredvid)
         const btnStyle = "background:var(--card-bg, #fff); border:1px solid var(--border-color, #ccc); border-radius:4px; padding:8px; cursor:pointer; font-size:0.9rem;";
 
         // Uppåt-knapp
@@ -301,7 +273,7 @@ function renderFavoritesManagement() {
         upBtn.innerHTML = "⬆️";
         upBtn.title = "Flytta upp";
         upBtn.style = btnStyle;
-        upBtn.disabled = index === 0; // Avaktivera om den redan är överst
+        upBtn.disabled = index === 0;
         if (index === 0) upBtn.style.opacity = "0.3";
         upBtn.onclick = () => {
             moveFavorite(index, index - 1);
@@ -312,7 +284,7 @@ function renderFavoritesManagement() {
         downBtn.innerHTML = "⬇️";
         downBtn.title = "Flytta ner";
         downBtn.style = btnStyle;
-        downBtn.disabled = index === favorites.length - 1; // Avaktivera om den är längst ner
+        downBtn.disabled = index === favorites.length - 1;
         if (index === favorites.length - 1) downBtn.style.opacity = "0.3";
         downBtn.onclick = () => {
             moveFavorite(index, index + 1);
@@ -327,7 +299,7 @@ function renderFavoritesManagement() {
             let favs = getFavorites();
             favs = favs.filter(id => id !== calcId);
             localStorage.setItem("favorites", JSON.stringify(favs));
-            renderFavoritesManagement(); // Rita om listan direkt
+            renderFavoritesManagement();
         };
 
         row.appendChild(calcBtn);
@@ -347,103 +319,8 @@ function moveFavorite(fromIndex, toIndex) {
     const item = favorites.splice(fromIndex, 1)[0];
     favorites.splice(toIndex, 0, item);
     localStorage.setItem("favorites", JSON.stringify(favorites));
-    renderFavoritesManagement(); // Uppdatera vyn
+    renderFavoritesManagement();
 }
-
-
-// Ny funktion för att hantera, sortera och ta bort favoriter direkt i menyn
-function renderFavoritesManagement() {
-    const favorites = getFavorites();
-
-    if (favorites.length === 0) {
-        state.subNav.innerHTML = "<p style='padding:14px; color:var(--text-muted);'>Inga favoriter sparade än. Klicka på stjärnan i en kalkyl för att spara den här!</p>";
-        return;
-    }
-
-    const listContainer = document.createElement("div");
-    listContainer.className = "favorites-manage-list";
-    listContainer.style.display = "flex";
-    listContainer.style.flexDirection = "column";
-    listContainer.style.gap = "8px";
-    listContainer.style.padding = "4px";
-
-    favorites.forEach((calcId, index) => {
-        const calc = findCalc(calcId);
-        if (!calc) return;
-
-        const row = document.createElement("div");
-        row.style.display = "flex";
-        row.style.alignItems = "center";
-        row.style.gap = "4px";
-
-        // Själva kalkylknappen (tar upp tillgänglig plats)
-        const calcBtn = createButton(calc.namn, "sub-btn", () => {
-            renderCalc("favoriter", calc.id);
-        });
-        calcBtn.style.flexGrow = "1";
-        calcBtn.style.margin = "0"; // Nollställ eventuella externa marginaler
-
-        // Sortering & Ta bort-knappar (smidiga små verktygsknappar bredvid)
-        const btnStyle = "background:var(--card-bg, #fff); border:1px solid var(--border-color, #ccc); border-radius:4px; padding:8px; cursor:pointer; font-size:0.9rem;";
-
-        // Uppåt-knapp
-        const upBtn = document.createElement("button");
-        upBtn.innerHTML = "⬆️";
-        upBtn.title = "Flytta upp";
-        upBtn.style = btnStyle;
-        upBtn.disabled = index === 0; // Avaktivera om den redan är överst
-        if (index === 0) upBtn.style.opacity = "0.3";
-        upBtn.onclick = () => {
-            moveFavorite(index, index - 1);
-        };
-
-        // Nedåt-knapp
-        const downBtn = document.createElement("button");
-        downBtn.innerHTML = "⬇️";
-        downBtn.title = "Flytta ner";
-        downBtn.style = btnStyle;
-        downBtn.disabled = index === favorites.length - 1; // Avaktivera om den är längst ner
-        if (index === favorites.length - 1) downBtn.style.opacity = "0.3";
-        downBtn.onclick = () => {
-            moveFavorite(index, index + 1);
-        };
-
-        // Ta bort-knapp
-        const removeBtn = document.createElement("button");
-        removeBtn.innerHTML = "❌";
-        removeBtn.title = "Ta bort från favoriter";
-        removeBtn.style = btnStyle;
-        removeBtn.onclick = () => {
-            let favs = getFavorites();
-            favs = favs.filter(id => id !== calcId);
-            localStorage.setItem("favorites", JSON.stringify(favs));
-            renderFavoritesManagement(); // Rita om listan direkt
-        };
-
-        row.appendChild(calcBtn);
-        row.appendChild(upBtn);
-        row.appendChild(downBtn);
-        row.appendChild(removeBtn);
-
-        listContainer.appendChild(row);
-    });
-
-    state.subNav.appendChild(listContainer);
-}
-
-// Hjälpfunktion för att flytta element i favoritlistan
-function moveFavorite(fromIndex, toIndex) {
-    let favorites = getFavorites();
-    const item = favorites.splice(fromIndex,
-        1)[0];
-    favorites.splice(toIndex,
-        0,
-        item);
-    localStorage.setItem("favorites",
-        JSON.stringify(favorites));
-    renderFavoritesManagement(); // Uppdatera vyn
-}
-
 
 function renderCalc(category, calcId) {
     addRecent(calcId);
@@ -454,12 +331,8 @@ function renderCalc(category, calcId) {
     const calc = findCalc(calcId);
     if (!calc) return;
 
-    // Hämta namnet på kategorin för att visa i breadcrumb
-    // Kollar om det är ett objekt eller sträng
     const catData = KATEGORIER[category];
-    const categoryName = (typeof catData === 'object') ? catData.namn: (catData || "Kalkyl");
-
-    // Hämtar spatad data: Försöker hämta objektet för denna kalkyl, annars tomt objekt
+    const categoryName = (typeof catData === 'object') ? catData.namn : (catData || "Kalkyl");
     const savedData = JSON.parse(localStorage.getItem(`calc_${calcId}`) || "{}");
 
     state.container.innerHTML = `
@@ -469,14 +342,13 @@ function renderCalc(category, calcId) {
     </div>
     <h2>${calc.namn}
     <button id="favoriteBtn" class="favorite-btn" data-calc-id="${calcId}">
-    ${isFavorite(calcId) ? "⭐": "☆"}
+    ${isFavorite(calcId) ? "⭐" : "☆"}
     </button>
     </h2>
 
     ${calc.inputs.map(i => {
-        // Hämta sparade värden för just denna input
         const savedValue = savedData[i.id] || "";
-        const savedUnit = savedData[i.id + "_unit"] || (i.unit ? i.unit[0]: "");
+        const savedUnit = savedData[i.id + "_unit"] || (i.unit ? i.unit[0] : "");
 
         return i.unit ? `
         <div class="input-group">
@@ -485,14 +357,12 @@ function renderCalc(category, calcId) {
         <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
         <select data-unit="${i.id}">
         ${i.unit.map(u => {
-            // Om nyckeln 'u' inte finns i UNIT_MAP, fall tillbaka på 'u' själv
             const display = UNIT_MAP[u] || u;
-            return `<option value="${u}" ${savedUnit === u ? "selected": ""}>${display}</option>`;
+            return `<option value="${u}" ${savedUnit === u ? "selected" : ""}>${display}</option>`;
         }).join("")}
         </select>
-
         </div>
-        </div>`: `
+        </div>` : `
         <div class="input-group">
         <label>${i.label}</label>
         <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
@@ -512,35 +382,29 @@ function renderCalc(category, calcId) {
     </div>
 
     <div id="calcInfo" class="calc-info-content">
-    ${typeof calc.info === 'string' ? `<p>${calc.info}</p>`: `
-    ${calc.info?.beskrivning ? `<p>${calc.info.beskrivning}</p>`: ""}
-    ${calc.info?.formel ? `<p><strong>Formel:</strong> ${calc.info.formel.namn} (${calc.info.formel.beskrivning})</p>`: ""}
-    ${calc.info?.riktvarden ? `<p><strong>Riktvärden:</strong> ${calc.info.riktvarden}</p>`: ""}
-    ${calc.info?.tips ? `<p><strong>Tips:</strong> ${calc.info.tips}</p>`: ""}
+    ${typeof calc.info === 'string' ? `<p>${calc.info}</p>` : `
+    ${calc.info?.beskrivning ? `<p>${calc.info.beskrivning}</p>` : ""}
+    ${calc.info?.formel ? `<p><strong>Formel:</strong> ${calc.info.formel.namn} (${calc.info.formel.beskrivning})</p>` : ""}
+    ${calc.info?.riktvarden ? `<p><strong>Riktvärden:</strong> ${calc.info.riktvarden}</p>` : ""}
+    ${calc.info?.tips ? `<p><strong>Tips:</strong> ${calc.info.tips}</p>` : ""}
     `}
     </div>
-
     </div>`;
 
-    //
     const copyBtn = document.getElementById("copyBtn");
     if (copyBtn) {
-        // Enkelt klick -> Kopierar bara talet (perfekt för Excel/Kalkylatorn)
         copyBtn.addEventListener("click", () => {
             copyResult(false);
         });
 
-        // Långtryck (eller högerklick på PC) -> Kopierar hela raden (perfekt för dokumentation)
         copyBtn.addEventListener("contextmenu", (e) => {
-            e.preventDefault(); // Stoppar webbläsarens vanliga högerklicksmeny
+            e.preventDefault();
             copyResult(true);
         });
     }
 
-    // Kör en beräkning direkt när sidan laddats så att resultatet visas omedelbart
     runCalc(null, calcId);
 }
-
 
 // ==========================================================================
 //  5. INSTÄLLNINGAR (kugghjulet)
@@ -562,14 +426,14 @@ async function showSettings() {
     <div class="settings-row">
     <span>🌙 Mörkt läge</span>
     <label class="switch">
-    <input type="checkbox" id="darkModeToggle" ${localStorage.getItem("darkMode") === "enabled" ? "checked": ""}>
+    <input type="checkbox" id="darkModeToggle" ${localStorage.getItem("darkMode") === "enabled" ? "checked" : ""}>
     <span class="slider"></span>
     </label>
     </div>
     <div class="settings-row">
     <span>📳 Haptik</span>
     <label class="switch">
-    <input type="checkbox" id="hapticToggle" ${localStorage.getItem("hapticEnabled") === "enabled" ? "checked": ""}>
+    <input type="checkbox" id="hapticToggle" ${localStorage.getItem("hapticEnabled") === "enabled" ? "checked" : ""}>
     <span class="slider"></span>
     </label>
     </div>
@@ -590,9 +454,7 @@ async function showSettings() {
     </div>
     </div>`;
 
-    // HÄR ÄR ÄNDRINGEN: Koppla lyssnarna direkt efter att HTML satts
     setupSettingsListeners();
-
 }
 
 async function getAppInfo() {
@@ -610,7 +472,6 @@ async function getAppInfo() {
     }
 }
 
-
 // ==========================================================================
 //  5. HJÄLPFUNKTIONER
 // ==========================================================================
@@ -623,8 +484,8 @@ function createButton(text, className, onClick) {
     btn.textContent = text;
     btn.className = className;
     btn.onclick = () => {
-        triggerHaptic(20); // Vibrera lite lätt vid varje klick
-        onClick(); // Kör den vanliga funktionen
+        triggerHaptic(20);
+        onClick();
     };
     return btn;
 }
@@ -643,10 +504,9 @@ function isFavorite(calcId) {
 
 function toggleFavorite(calcId) {
     let fav = getFavorites();
-    fav = fav.includes(calcId) ? fav.filter(id => id !== calcId): [...fav,
-        calcId];
+    fav = fav.includes(calcId) ? fav.filter(id => id !== calcId) : [...fav, calcId];
     localStorage.setItem("favorites", JSON.stringify(fav));
-    renderCalc("favoriter", calcId); // Uppdatera ikon
+    renderCalc("favoriter", calcId);
 }
 
 function getRecent() {
@@ -673,7 +533,6 @@ function debounce(func, delay) {
     };
 }
 
-// "Info" onclick
 window.toggleInfo = function () {
     const info = document.getElementById("calcInfo");
     const icon = document.getElementById("infoIcon");
@@ -690,34 +549,26 @@ window.toggleInfo = function () {
 
 function toggleDarkMode() {
     const isDark = document.body.classList.toggle("dark-mode");
-    localStorage.setItem("darkMode", isDark ? "enabled": "disabled");
+    localStorage.setItem("darkMode", isDark ? "enabled" : "disabled");
 
-    // Uppdatera switchen visuellt om vi råkar vara på inställningssidan
     const toggle = document.getElementById("darkModeToggle");
     if (toggle) {
         toggle.checked = isDark;
     }
 }
 
-// --- HAPTISK HJÄLPFUNKTION ---
-// Kollar om webbläsaren stöder vibration och om användaren valt att ha det på
 function triggerHaptic(duration = 20) {
-    // 1. Hämta inställningen först
     const hapticSetting = localStorage.getItem("hapticEnabled") || "enabled";
-
-    // 2. Kontrollera inställning OCH om navigator.vibrate finns
     if (hapticSetting === "enabled" && navigator.vibrate) {
         navigator.vibrate([duration]);
     }
 }
 
-// --- Funktion för att växla mellan Vibration och inte Vibration ---
 function toggleHaptic() {
     const current = localStorage.getItem("hapticEnabled") || "enabled";
-    const next = current === "enabled" ? "disabled": "enabled";
+    const next = current === "enabled" ? "disabled" : "enabled";
     localStorage.setItem("hapticEnabled", next);
 
-    // Uppdatera switchen visuellt direkt
     const toggle = document.getElementById("hapticToggle");
     if (toggle) {
         toggle.checked = (next === "enabled");
@@ -726,8 +577,6 @@ function toggleHaptic() {
     triggerHaptic(50);
 }
 
-
-// --- ? ---
 function formatResult(value, precision = 2) {
     if (isNaN(value)) return "0";
     return new Intl.NumberFormat('sv-SE', {
@@ -762,7 +611,6 @@ function showSearchModal() {
     </div>
     `;
 
-    // Kopplingar
     const searchInput = document.getElementById("floatingSearch");
     const clearBtn = document.getElementById("clearSearch");
     const resultsContainer = document.getElementById("searchResults");
@@ -774,24 +622,18 @@ function showSearchModal() {
 
     searchInput.focus();
 
-    // Logik för input och X-knappen
     searchInput.addEventListener("input", (e) => {
         const query = e.target.value.toLowerCase().trim();
-
-        // Visa/dölj X
-        clearBtn.style.display = query ? "block": "none";
+        clearBtn.style.display = query ? "block" : "none";
 
         resultsContainer.innerHTML = "";
         if (!query) return;
 
-        // 1. Dela upp söksträngen i enskilda ord
         const searchWords = query.split(/\s+/);
 
-        // 2. Filtrera kalkyler: Alla sökord måste finnas med i antingen namnet eller info-texten
         const matches = ALLA_KALKYLER.filter(calc => {
-            // Samla ihop all sökbar text för kalkylen till en enda stor sträng
             let searchableText = calc.namn.toLowerCase();
-
+            
             if (calc.info) {
                 if (typeof calc.info === 'string') {
                     searchableText += " " + calc.info.toLowerCase();
@@ -803,7 +645,6 @@ function showSearchModal() {
                 }
             }
 
-            // Kontrollera att VARJE ord finns med någonstans i den sökbara texten
             return searchWords.every(word => searchableText.includes(word));
         });
 
@@ -815,97 +656,71 @@ function showSearchModal() {
         });
     });
 
+    searchInput.addEventListener("keypress", (e) => {
+        if (e.key === 'Enter') {
+            searchInput.blur();
+        }
+    });
 
-    // Stänger tangentbordet med enter
-    searchInput.addEventListener("keypress",
-        (e) => {
-            if (e.key === 'Enter') {
-                searchInput.blur();
-            }
-        });
-
-
-    // Rensa-logik
-    clearBtn.addEventListener("click",
-        () => {
-            searchInput.value = "";
-            searchInput.focus();
-            clearBtn.style.display = "none";
-            resultsContainer.innerHTML = "";
-        });
+    clearBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        searchInput.focus();
+        clearBtn.style.display = "none";
+        resultsContainer.innerHTML = "";
+    });
 }
 
-// ?
 function setupSettingsListeners() {
     const darkToggle = document.getElementById("darkModeToggle");
     const hapticToggle = document.getElementById("hapticToggle");
 
     if (darkToggle) {
-        darkToggle.addEventListener("change", (e) => {
+        darkToggle.addEventListener("change", () => {
             toggleDarkMode();
-            // Switchen är redan "checked" eftersom användaren klickade på den,
-            // så vi behöver bara trigga haptik
             triggerHaptic(20);
         });
     }
 
     if (hapticToggle) {
-        hapticToggle.addEventListener("change", (e) => {
+        hapticToggle.addEventListener("change", () => {
             toggleHaptic();
-            // Även här, switchen ändrar läge av sig själv
         });
     }
 }
 
-
-
 // ==========================================================================
 // 6. KOPIERINGSFUNKTION & TOAST
 // ==========================================================================
-
-// Gör funktionen tillgänglig för din HTML (inline onclick)
 window.copyResult = function(copyFull) {
     const resultTextEl = document.getElementById("resultText");
     const fullText = resultTextEl.innerText;
-
+    
     if (!resultTextEl || fullText.includes("Fyll i")) return;
 
     let textToCopy = fullText;
 
     if (copyFull) {
-        // Långtryck: Kopierar hela raden (t.ex. "Spänning: 230 V")
         textToCopy = fullText;
     } else {
-        // Vanligt klick: VI VILL BARA HA TALET FÖR EXCEL/KALKYLATORN
-
-        // 1. Om det finns ett kolon, ta bort allt före det (t.ex. "Spänning: 230 V" blir "230 V")
         if (textToCopy.includes(":")) {
             textToCopy = textToCopy.split(":")[1].trim();
         }
 
-        // 2. Extrahera bara själva talet (behåller siffror, komma och punkt)
-        // Detta plockar bort enheter som "V", "A", "kW" etc.
         const match = textToCopy.match(/[\d,\.]+/);
         if (match) {
             textToCopy = match[0];
         }
-
-        // OBS: Om din Excel vill ha punkt istället för komma som decimaltecken
-        // (vanligt i engelsk Excel eller standard JS-tal), kan du avkommentera raden nedan:
-        // textToCopy = textToCopy.replace(',', '.');
     }
 
     navigator.clipboard.writeText(textToCopy).then(() => {
         document.getElementById("resultDisplay").classList.add("copied");
-        showToast(copyFull ? "Kopierade hela raden": `Kopierade tal: ${textToCopy}`);
+        showToast(copyFull ? "Kopierade hela raden" : `Kopierade tal: ${textToCopy}`);
 
         setTimeout(() => document.getElementById("resultDisplay").classList.remove("copied"), 1000);
     }).catch(err => {
         console.error("Kunde inte kopiera: ", err);
     });
 };
-
-
 
 function showToast(message) {
     const toast = document.getElementById("toast");
@@ -914,18 +729,15 @@ function showToast(message) {
     toast.textContent = message;
     toast.style.opacity = "1";
 
-    // Göm toasten efter 2 sekunder
     setTimeout(() => {
         toast.style.opacity = "0";
     }, 2000);
 }
 
 // ==========================================================================
-// ?. modal-ruta
+// 7. MODAL-RUTA
 // ==========================================================================
-//
 function showConfirmModal(message, onConfirm) {
-    // Skapa modal-overlay
     const modal = document.createElement("div");
     modal.className = "confirm-modal";
     modal.innerHTML = `
@@ -939,7 +751,6 @@ function showConfirmModal(message, onConfirm) {
     `;
     document.body.appendChild(modal);
 
-    // Lyssna på knappar
     modal.querySelector("#okBtn").addEventListener("click", () => {
         onConfirm();
         document.body.removeChild(modal);
