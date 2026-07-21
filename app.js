@@ -342,6 +342,8 @@ function renderCalc(category, calcId) {
             copyResult();
         });
     }
+    
+    
 
     // Kör en beräkning direkt när sidan laddats så att resultatet visas omedelbart
     runCalc(null, calcId);
@@ -647,20 +649,27 @@ function setupSettingsListeners() {
 // ==========================================================================
 
 // Gör funktionen tillgänglig för din HTML (inline onclick)
-
-
 window.copyResult = function() {
     const resultBox = document.getElementById("resultDisplay");
     const resultTextEl = document.getElementById("resultText");
     
     if (!resultTextEl || resultTextEl.innerText.includes("Fyll i")) return;
 
-    navigator.clipboard.writeText(resultTextEl.innerText).then(() => {
-        // Lägg till klass för färgbyte
-        resultBox.classList.add("copied");
-        showToast("Kopierat!");
+    // Här hämtar vi texten
+    const fullText = resultTextEl.innerText; // Ex: "Spänning: 230 V"
+    
+    // Vi skapar en enkel logik: 
+    // Om det finns ett kolon (:), extrahera bara siffrorna/enheten efteråt
+    let textToCopy = fullText;
+    if (fullText.includes(":")) {
+        textToCopy = fullText.split(":")[1].trim(); // Ex: "230 V"
+    }
 
-        // Ta bort klassen efter 1 sekund
+    // Vi kör kopieringen
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        resultBox.classList.add("copied");
+        showToast(`Kopierat: ${textToCopy}`); // Visar vad som kopierades
+
         setTimeout(() => resultBox.classList.remove("copied"), 1000);
     }).catch(err => {
         console.error("Kunde inte kopiera: ", err);
