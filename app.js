@@ -284,7 +284,7 @@ function showSubMenu(categoryKey) {
 
     document.getElementById("subBackBtn").onclick = () => {
         triggerHaptic(20);
-        showMainMenuView();
+        showMainMenu();
     };
 
     // ------------------------------------------------------------------------
