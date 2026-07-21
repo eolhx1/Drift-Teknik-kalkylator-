@@ -52,12 +52,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     if (navFav) navFav.addEventListener("click", () => {
         setActiveNav("navFav");
+        // Säkerställ att vi rensar bort ev. öppen kalkyl och visar subnav-menyn
+        state.container.innerHTML = "";
+        state.mainNav.classList.add("hidden");
+        state.subNav.classList.remove("hidden");
         showSubMenu("favoriter");
     });
     if (navRecent) navRecent.addEventListener("click", () => {
         setActiveNav("navRecent");
+        // Säkerställ att vi rensar bort ev. öppen kalkyl och visar subnav-menyn
+        state.container.innerHTML = "";
+        state.mainNav.classList.add("hidden");
+        state.subNav.classList.remove("hidden");
         showSubMenu("recent");
     });
+
     if (navSearch) navSearch.addEventListener("click", () => {
         setActiveNav("navSearch");
         showSearchModal();
