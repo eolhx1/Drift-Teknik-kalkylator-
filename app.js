@@ -184,7 +184,7 @@ function runCalc(category, calcId) {
             const label = calc.label ? `${calc.label}: `: "";
 
             const formattedNum = formatResult(rawResult, decimalPrecision);
-              document.getElementById("resultText").innerHTML = `${label}${formattedNum} ${unit}`;
+            document.getElementById("resultText").innerHTML = `${label}${formattedNum} ${unit}`;
         }
     } catch (err) {
         // Om något går fel, visa ett meddelande men krascha inte resten av appen
@@ -334,16 +334,20 @@ function renderCalc(category, calcId) {
 
     </div>`;
 
-   // 
+    //
     const copyBtn = document.getElementById("copyBtn");
     if (copyBtn) {
-        copyBtn.addEventListener("click", (e) => {
-            e.stopPropagation(); // Förhindrar att resultatet också triggar sin egen onclick
-            copyResult();
+        // Enkelt klick -> Kopierar bara talet (perfekt för Excel/Kalkylatorn)
+        copyBtn.addEventListener("click", () => {
+            copyResult(false);
+        });
+
+        // Långtryck (eller högerklick på PC) -> Kopierar hela raden (perfekt för dokumentation)
+        copyBtn.addEventListener("contextmenu", (e) => {
+            e.preventDefault(); // Stoppar webbläsarens vanliga högerklicksmeny
+            copyResult(true);
         });
     }
-    
-    
 
     // Kör en beräkning direkt när sidan laddats så att resultatet visas omedelbart
     runCalc(null, calcId);
@@ -649,28 +653,27 @@ function setupSettingsListeners() {
 // ==========================================================================
 
 // Gör funktionen tillgänglig för din HTML (inline onclick)
-window.copyResult = function() {
-    const resultBox = document.getElementById("resultDisplay");
+window.copyResult = function(copyFull) {
     const resultTextEl = document.getElementById("resultText");
-    
-    if (!resultTextEl || resultTextEl.innerText.includes("Fyll i")) return;
+    const fullText = resultTextEl.innerText;
 
-    // Här hämtar vi texten
-    const fullText = resultTextEl.innerText; // Ex: "Spänning: 230 V"
-    
-    // Vi skapar en enkel logik: 
-    // Om det finns ett kolon (:), extrahera bara siffrorna/enheten efteråt
+    if (!resultTextEl || fullText.includes("Fyll i")) return;
+
     let textToCopy = fullText;
-    if (fullText.includes(":")) {
-        textToCopy = fullText.split(":")[1].trim(); // Ex: "230 V"
+
+    // Om copyFull är false (vanligt klick), plocka ut bara talet/enheten
+    if (!copyFull && fullText.includes(":")) {
+        // Delar upp texten vid kolonet och tar det som är efter (t.ex. "230 V")
+        textToCopy = fullText.split(":")[1].trim();
     }
 
-    // Vi kör kopieringen
     navigator.clipboard.writeText(textToCopy).then(() => {
-        resultBox.classList.add("copied");
-        showToast(`Kopierat: ${textToCopy}`); // Visar vad som kopierades
+        document.getElementById("resultDisplay").classList.add("copied");
 
-        setTimeout(() => resultBox.classList.remove("copied"), 1000);
+        // Visar en tydlig toast beroende på vad som kopierades
+        showToast(copyFull ? "Kopierade hela raden": "Kopierade värde");
+
+        setTimeout(() => document.getElementById("resultDisplay").classList.remove("copied"), 1000);
     }).catch(err => {
         console.error("Kunde inte kopiera: ", err);
     });
