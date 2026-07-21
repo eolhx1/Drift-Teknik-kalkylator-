@@ -271,17 +271,22 @@ function showSubMenu(categoryKey) {
 
     const headerDiv = document.createElement("div");
     headerDiv.className = "submenu-header-bar";
-    headerDiv.style.cssText = "display: flex; align-items: center; margin-bottom: 15px; gap: 10px; padding: 0 4px;";
+    headerDiv.style.cssText = "display: flex; flex-direction: column; margin-bottom: 15px; gap: 6px; padding: 0 4px;";
     headerDiv.innerHTML = `
-        <button id="subBackBtn" class="back-btn" style="padding: 6px 12px; cursor: pointer;">← Tillbaka</button>
-        <h2 style="margin: 0; font-size: 1.2rem;">${categoryIcon} ${categoryName}</h2>
+        <button id="subBackBtn" class="back-link-btn" style="background: none; border: none; color: var(--primary-color, #0066cc); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0; text-align: left;">
+            ← Tillbaka till Hem
+        </button>
+        <h2 style="margin: 0; font-size: 1.4rem; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+            <span>${categoryIcon}</span> ${categoryName}
+        </h2>
     `;
     state.subNav.appendChild(headerDiv);
 
     document.getElementById("subBackBtn").onclick = () => {
         triggerHaptic(20);
-        showHomeView(); // Eller den funktion som visar huvudsidan/hemvyn
+        showHomeView();
     };
+
     // ------------------------------------------------------------------------
 
     const list = (categoryKey === "recent") ? getRecent(): null;
