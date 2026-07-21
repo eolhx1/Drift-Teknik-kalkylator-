@@ -588,7 +588,7 @@ function showSearchModal() {
 
     // Logik för input och X-knappen
     searchInput.addEventListener("input", (e) => {
-        const query = e.target.value.toLowerCase();
+        const query = e.target.value.toLowerCase().trim();
 
         // Visa/dölj X
         clearBtn.style.display = query ? "block": "none";
@@ -596,7 +596,29 @@ function showSearchModal() {
         resultsContainer.innerHTML = "";
         if (!query) return;
 
-        const matches = ALLA_KALKYLER.filter(c => c.namn.toLowerCase().includes(query));
+        // 1. Dela upp söksträngen i enskilda ord
+        const searchWords = query.split(/\s+/);
+
+        // 2. Filtrera kalkyler: Alla sökord måste finnas med i antingen namnet eller info-texten
+        const matches = ALLA_KALKYLER.filter(calc => {
+            // Samla ihop all sökbar text för kalkylen till en enda stor sträng
+            let searchableText = calc.namn.toLowerCase();
+            
+            if (calc.info) {
+                if (typeof calc.info === 'string') {
+                    searchableText += " " + calc.info.toLowerCase();
+                } else {
+                    if (calc.info.beskrivning) searchableText += " " + calc.info.beskrivning.toLowerCase();
+                    if (calc.info.formel) searchableText += " " + (calc.info.formel.namn + " " + calc.info.formel.beskrivning).toLowerCase();
+                    if (calc.info.riktvarden) searchableText += " " + calc.info.riktvarden.toLowerCase();
+                    if (calc.info.tips) searchableText += " " + calc.info.tips.toLowerCase();
+                }
+            }
+
+            // Kontrollera att VARJE ord finns med någonstans i den sökbara texten
+            return searchWords.every(word => searchableText.includes(word));
+        });
+
         matches.forEach(calc => {
             const btn = createButton(calc.namn, "sub-btn", () => {
                 renderCalc(calc.kategorier[0], calc.id);
@@ -604,6 +626,7 @@ function showSearchModal() {
             resultsContainer.appendChild(btn);
         });
     });
+
 
     // Stänger tangentbordet med enter
     searchInput.addEventListener("keypress",
