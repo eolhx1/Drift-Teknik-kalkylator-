@@ -247,8 +247,7 @@ const elKalkyler = [
     }];
 
 const gasKalkyler = [
-    // Beräkning av användningstid (Gasflaskor)
-    {
+    // Beräkning av användningstid (Gasflaskor) {
         id: "gas_anvandningstid",
         namn: "Användningstid gasflaska",
         kategorier: ["gas",
@@ -301,6 +300,7 @@ export const ALLA_KALKYLER = [
     ...ventKalkyler,
     ...vsKalkyler,
     ...elKalkyler,
+    ...gasKalkyler,
     ...teleKalkyler
     // Lägg till fler grupper här
 ];
