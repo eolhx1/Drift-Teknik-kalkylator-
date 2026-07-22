@@ -614,12 +614,26 @@ function renderCalc(category, calcId) {
         const savedValue = (savedData[i.id] !== undefined && savedData[i.id] !== null) ? savedData[i.id]: "";
         const savedUnit = savedData[i.id + "_unit"] || (i.unit ? i.unit[0]: "");
 
+        // Om fältet är en väljare (har flera alternativ i .unit men saknar separat inmatningsfält)
+        if (i.unit && i.unit.length > 1 && !i.requiresInput) {
+            return `
+            <div class="input-group">
+            <label>${i.label}</label>
+            <select data-unit="${i.id}" style="width: 100%; padding-right: 30px; box-sizing: border-box;">
+            ${i.unit.map(u => {
+                const display = UNIT_MAP[u] || u;
+                return `<option value="${u}" ${savedUnit === u ? "selected": ""}>${display}</option>`;
+            }).join("")}
+            </select>
+            </div>`;
+        }
+
         return i.unit ? `
         <div class="input-group">
         <label>${i.label}</label>
         <div style="display:flex; gap:8px;">
         <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
-        <select data-unit="${i.id}">
+        <select data-unit="${i.id}" style="padding-right: 30px;">
         ${i.unit.map(u => {
             const display = UNIT_MAP[u] || u;
             return `<option value="${u}" ${savedUnit === u ? "selected": ""}>${display}</option>`;
