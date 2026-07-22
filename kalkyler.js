@@ -80,11 +80,21 @@ const beraknaKyleffekt = (v) => {
 const beraknaOhmsLag = (v) => {
     if (!valid(v.varde1, v.varde2)) return "Fel";
     const läge = v.lage_unit || "U";
-    
-    if (läge === "U") return v.varde1 * v.varde2;      // U = I * R (Värde 1 * Värde 2)
-    if (läge === "I") return v.varde1 / v.varde2;      // I = U / R (Spänning / Resistans)
-    if (läge === "R") return v.varde1 / v.varde2;      // R = U / I (Spänning / Ström)
+
+    if (läge === "U") return v.varde1 * v.varde2; // U = I * R (Värde 1 * Värde 2)
+    if (läge === "I") return v.varde1 / v.varde2; // I = U / R (Spänning / Resistans)
+    if (läge === "R") return v.varde1 / v.varde2; // R = U / I (Spänning / Ström)
     return "Fel";
+};
+
+// Beräkning av användningstid (Gasflaskor)
+const beraknaAnvandningstidGas = (v) => {
+    // v.volym = flaska (liter), v.tryck = tryck (bar), v.flode = ordinerat flöde (liter/minut)
+    if (!valid(v.volym, v.tryck, v.flode) || v.flode === 0) return "Fel";
+
+    // Formel: (Volym * Tryck) / (Flöde * 60)
+    const tidTimmar = (v.volym * v.tryck) / (v.flode * 60);
+    return tidTimmar;
 };
 
 
@@ -200,18 +210,22 @@ const vsKalkyler = [
 ];
 
 const elKalkyler = [
+    // Ohms lag
     {
         id: "ohms_lag",
         namn: "Ohms lag",
-        kategorier: ["el", "tele"],
+        kategorier: ["el",
+            "tele"],
         decimaler: 2,
-        inputs: [
-            {
-                id: "lage",
-                label: "Vad vill du räkna ut?",
-                unit: ["U", "I", "R"], // Vi sätter korta koder här
-                requiresInput: false
-            },
+        inputs: [{
+            id: "lage",
+            label: "Vad vill du räkna ut?",
+            unit: ["U",
+                "I",
+                "R"],
+            // Vi sätter korta koder här
+            requiresInput: false
+        },
             {
                 id: "varde1",
                 label: "Ström (I) [A]" // Standardetikett
@@ -219,8 +233,7 @@ const elKalkyler = [
             {
                 id: "varde2",
                 label: "Resistans (R) [Ω]" // Standardetikett
-            }
-        ],
+            }],
         calc: beraknaOhmsLag,
         info: {
             beskrivning: "Beräknar spänning, ström eller resistans med Ohms lag.",
@@ -231,12 +244,53 @@ const elKalkyler = [
             riktvarden: "Grundläggande formel för all el- och teknikberäkning.",
             tips: "Kontrollera enheterna så att du räknar i Volt, Ampere och Ohm."
         }
-    }
-];
+    }];
+
+const gasKalkyler = [
+    // Beräkning av användningstid (Gasflaskor)
+    {
+        id: "gas_anvandningstid",
+        namn: "Användningstid gasflaska",
+        kategorier: ["gas",
+            "medicin",
+            "teknik"],
+        decimaler: 1,
+        // Visar t.ex. 3.3 timmar
+        inputs: [{
+            id: "volym",
+            label: "Flaskans volym",
+            unit: ["L"]
+        },
+            {
+                id: "tryck",
+                label: "Tryck",
+                unit: ["bar"]
+            },
+            {
+                id: "flode",
+                label: "Ordinerat flöde",
+                unit: ["L/min"]
+            }],
+        calc: beraknaAnvandningstidGas,
+        info: {
+            beskrivning: "Beräknar hur länge en medicinsk gasflaska räcker vid ett visst flöde.",
+            formel: {
+                namn: "Tid = (Volym × Tryck) / (Flöde × 60)",
+                beskrivning: "Ger den beräknade användningstiden i timmar."
+            },
+            riktvarden: "Observera att denna formel primärt gäller för komprimerad syrgas och medicinsk luft.",
+            tips: "Kontrollera att flödet är angivet i liter per minut och trycket i bar."
+        }
+    }];
 
 const teleKalkyler = [
     // Lägg till tele-kalkyler här efter samma mönster
 ];
+
+
+
+
+
 
 // =================================================================
 // 4. SAMMANSTÄLLNING (Den listan appen använder)
