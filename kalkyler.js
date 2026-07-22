@@ -84,11 +84,21 @@ const beraknaFlodeKontinuitet = (v) => {
 // K-faktor beräkning (Flöde = K × √Δp)
 const beraknaKfaktor = (v) => {
     if (!valid(v.k_faktor, v.delta_p) || v.delta_p < 0) return "Fel";
-    
+
     // Formel: q = k × √Δp_i
     const flode = v.k_faktor * Math.sqrt(v.delta_p);
     return flode;
 };
+
+// Proportionalitetsmetoden (Beräknar kvot och avvikelse eller nytt flöde)
+const beraknaProportionalitet = (v) => {
+    if (!valid(v.q_matt, v.q_proj) || v.q_proj === 0) return "Fel";
+
+    // Kvoten mellan uppmätt och projekterat flöde
+    const kvot = v.q_matt / v.q_proj;
+    return kvot;
+};
+
 
 
 // Elkraft
@@ -97,9 +107,9 @@ const beraknaOhmsLag = (v) => {
     if (!valid(v.varde1, v.varde2)) return "Fel";
     const läge = v.lage_unit || "U";
 
-    if (läge === "U") return v.varde1 * v.varde2; 
-    if (läge === "I") return v.varde1 / v.varde2; 
-    if (läge === "R") return v.varde1 / v.varde2; 
+    if (läge === "U") return v.varde1 * v.varde2;
+    if (läge === "I") return v.varde1 / v.varde2;
+    if (läge === "R") return v.varde1 / v.varde2;
     return "Fel";
 };
 
@@ -124,11 +134,18 @@ const styrKalkyler = [{
     label: "Resultat",
     unit: "",
     decimaler: 2,
-    inputs: [
-        { id: "volt", label: "Uppmätt spänning (V)" },
-        { id: "min", label: "Minvärde" },
-        { id: "max", label: "Maxvärde" }
-    ],
+    inputs: [{
+        id: "volt",
+        label: "Uppmätt spänning (V)"
+    },
+        {
+            id: "min",
+            label: "Minvärde"
+        },
+        {
+            id: "max",
+            label: "Maxvärde"
+        }],
     calc: (v) => !valid(v.volt, v.min, v.max) ? "Fel": beraknaSkalning010V(v),
     info: {
         beskrivning: "Skalar om en 0-10V signal till ett fysiskt mätområde.",
@@ -142,40 +159,56 @@ const styrKalkyler = [{
 }];
 
 // Ventilationskalkyler
-const ventKalkyler = [
-    {
-        id: "vent_luft_omsattning",
-        namn: "Luftomsättning",
-        kategorier: ["vent"],
-        unit: "h⁻¹",
-        label: "Luftomsättning",
-        decimaler: 1,
-        inputs: [
-            { id: "volym", label: "Rumsvolym (m³)" },
-            { id: "flode", label: "Flöde", unit: ["ls", "m3h"], base: "m3h" }
-        ],
-        calc: beraknaOmsattning,
-        info: {
-            beskrivning: "Beräknar hur många gånger per timme rumsvolymen byts ut.",
-            formel: {
-                namn: "Omsättningsformeln",
-                beskrivning: "n = Flöde (m³/h) / Volym (m³)"
-            },
-            riktvarden: "Kontor: 0.5 - 1.5 h⁻¹. Skolor: 2.0 - 4.0 h⁻¹.",
-            tips: "Tänk på att använda faktiskt uppmätt flöde vid kontrollmätning."
-        }
+const ventKalkyler = [{
+    id: "vent_luft_omsattning",
+    namn: "Luftomsättning",
+    kategorier: ["vent"],
+    unit: "h⁻¹",
+    label: "Luftomsättning",
+    decimaler: 1,
+    inputs: [{
+        id: "volym",
+        label: "Rumsvolym (m³)"
     },
+        {
+            id: "flode",
+            label: "Flöde",
+            unit: ["ls",
+                "m3h"],
+            base: "m3h"
+        }],
+    calc: beraknaOmsattning,
+    info: {
+        beskrivning: "Beräknar hur många gånger per timme rumsvolymen byts ut.",
+        formel: {
+            namn: "Omsättningsformeln",
+            beskrivning: "n = Flöde (m³/h) / Volym (m³)"
+        },
+        riktvarden: "Kontor: 0.5 - 1.5 h⁻¹. Skolor: 2.0 - 4.0 h⁻¹.",
+        tips: "Tänk på att använda faktiskt uppmätt flöde vid kontrollmätning."
+    }
+},
     {
         id: "vent_luft_kyleffekt",
         namn: "Kyleffekt luft",
         kategorier: ["vent"],
         unit: "kW",
         decimaler: 2,
-        inputs: [
-            { id: "flode", label: "Flöde", unit: ["ls", "m3h"], base: "ls" },
-            { id: "tRum", label: "Rumstemperatur (°C)" },
-            { id: "tTill", label: "Tilluftstemperatur (°C)" }
-        ],
+        inputs: [{
+            id: "flode",
+            label: "Flöde",
+            unit: ["ls",
+                "m3h"],
+            base: "ls"
+        },
+            {
+                id: "tRum",
+                label: "Rumstemperatur (°C)"
+            },
+            {
+                id: "tTill",
+                label: "Tilluftstemperatur (°C)"
+            }],
         calc: (v) => !valid(v.flode, v.tRum, v.tTill) ? "Fel": beraknaKyleffekt(v),
         info: {
             beskrivning: "Beräknar hur mycket kyleffekt (kW) som tillförs ett rum via tilluften.",
@@ -193,10 +226,16 @@ const ventKalkyler = [
         kategorier: ["vent"],
         unit: "l/s",
         decimaler: 1,
-        inputs: [
-            { id: "hastighet", label: "Lufthastighet", unit: ["m/s"] },
-            { id: "area", label: "Kanalarea", unit: ["m²"] }
-        ],
+        inputs: [{
+            id: "hastighet",
+            label: "Lufthastighet",
+            unit: ["m/s"]
+        },
+            {
+                id: "area",
+                label: "Kanalarea",
+                unit: ["m²"]
+            }],
         calc: beraknaFlodeKontinuitet,
         info: {
             beskrivning: "Beräknar luftflödet genom en kanal baserat på lufthastighet och tvärsnittsarea (kontinuitetsekvationen).",
@@ -208,25 +247,23 @@ const ventKalkyler = [
             tips: "För en rund kanal räknas area ut som π × r² (eller d² × π / 4)."
         }
     },
-    
+
     {
         id: "vent_kfaktor_flode",
         namn: "K-faktor flödesberäkning",
         kategorier: ["vent"],
         unit: "l/s",
         decimaler: 1,
-        inputs: [
-            {
-                id: "k_faktor",
-                label: "K-faktor (k)"
-                // Ingen unit här, vilket gör att app.js ritar ut ett rent inmatningsfält utan select
-            },
+        inputs: [{
+            id: "k_faktor",
+            label: "K-faktor (k)"
+            // Ingen unit här, vilket gör att app.js ritar ut ett rent inmatningsfält utan select
+        },
             {
                 id: "delta_p",
                 label: "Differenstryck (Δp)",
                 unit: ["Pa"]
-            }
-        ],
+            }],
         calc: beraknaKfaktor,
         info: {
             beskrivning: "Beräknar luftflödet genom ett don eller mätuttag baserat på dess tillverkarspecifika K-faktor och uppmätt signaltryck.",
@@ -237,9 +274,42 @@ const ventKalkyler = [
             riktvarden: "K-faktorn finns angiven i tillverkarens produktdokumentation eller på märkskylten på donet.",
             tips: "Kontrollera att mätinstrumentet är anslutet till rätt mätuttag (plus/minus) för att undvika felaktiga tryckvärden."
         }
+    },
+
+    {
+        id: "vent_proportionalitetsmetoden",
+        namn: "Proportionalitetsmetoden",
+        kategorier: ["vent"],
+        unit: "", // Kvot (dimensionslös)
+        decimaler: 2,
+        inputs: [
+            {
+                id: "q_matt",
+                label: "Uppmätt flöde",
+                unit: ["ls", "m3h"],
+                base: "ls"
+            },
+            {
+                id: "q_proj",
+                label: "Projekterat flöde",
+                unit: ["ls", "m3h"],
+                base: "ls"
+            }
+        ],
+        calc: beraknaProportionalitet,
+        info: {
+            beskrivning: "Beräknar kvoten mellan uppmätt och projekterat flöde (injusteringsfaktor) enligt proportionalitetsmetoden.",
+            formel: {
+                namn: "q_mätt / q_projekterat = konstant",
+                beskrivning: "Eftersträva att kvoten är så nära 1,0 som möjligt för god balans i systemet."
+            },
+            riktvarden: "En kvot under 1,0 betyder att flödet är för lågt, och över 1,0 att det är för högt.",
+            tips: "Använd kvoten för att räkna ut hur mycket spjället eller ventilen behöver justeras för att nå det projekterade målet."
+        }
     }
 
-    
+
+
 ];
 
 // VS kalkyler
@@ -248,54 +318,74 @@ const vsKalkyler = [
 ];
 
 // Elkraftkalkyler
-const elKalkyler = [
-    {
-        id: "el_ohms_lag",
-        namn: "Ohms lag",
-        kategorier: ["el", "tele"],
-        decimaler: 2,
-        inputs: [
-            { id: "lage", label: "Vad vill du räkna ut?", unit: ["U", "I", "R"], requiresInput: false },
-            { id: "varde1", label: "Ström (I) [A]" },
-            { id: "varde2", label: "Resistans (R) [Ω]" }
-        ],
-        calc: beraknaOhmsLag,
-        info: {
-            beskrivning: "Beräknar spänning, ström eller resistans med Ohms lag.",
-            formel: {
-                namn: "U = R × I",
-                beskrivning: "Sambandet mellan spänning, ström och resistans."
-            },
-            riktvarden: "Grundläggande formel för all el- och teknikberäkning.",
-            tips: "Kontrollera enheterna så att du räknar i Volt, Ampere och Ohm."
-        }
+const elKalkyler = [{
+    id: "el_ohms_lag",
+    namn: "Ohms lag",
+    kategorier: ["el",
+        "tele"],
+    decimaler: 2,
+    inputs: [{
+        id: "lage",
+        label: "Vad vill du räkna ut?",
+        unit: ["U",
+            "I",
+            "R"],
+        requiresInput: false
+    },
+        {
+            id: "varde1",
+            label: "Ström (I) [A]"
+        },
+        {
+            id: "varde2",
+            label: "Resistans (R) [Ω]"
+        }],
+    calc: beraknaOhmsLag,
+    info: {
+        beskrivning: "Beräknar spänning, ström eller resistans med Ohms lag.",
+        formel: {
+            namn: "U = R × I",
+            beskrivning: "Sambandet mellan spänning, ström och resistans."
+        },
+        riktvarden: "Grundläggande formel för all el- och teknikberäkning.",
+        tips: "Kontrollera enheterna så att du räknar i Volt, Ampere och Ohm."
     }
-];
+}];
 
 // Gas kalkyler
-const gasKalkyler = [
-    {
-        id: "gas_anvandningstid",
-        namn: "Användningstid gasflaska",
-        kategorier: ["gas", "medicin", "teknik"],
-        decimaler: 1,
-        inputs: [
-            { id: "volym", label: "Flaskans volym", unit: ["L"] },
-            { id: "tryck", label: "Tryck", unit: ["bar"] },
-            { id: "flode", label: "Ordinerat flöde", unit: ["L/min"] }
-        ],
-        calc: beraknaAnvandningstidGas,
-        info: {
-            beskrivning: "Beräknar hur länge en medicinsk gasflaska räcker vid ett visst flöde.",
-            formel: {
-                namn: "Tid = (Volym × Tryck) / (Flöde × 60)",
-                beskrivning: "Ger den beräknade användningstiden i timmar."
-            },
-            riktvarden: "Observera att denna formel primärt gäller för komprimerad syrgas och medicinsk luft.",
-            tips: "Kontrollera att flödet är angivet i liter per minut och trycket i bar."
-        }
+const gasKalkyler = [{
+    id: "gas_anvandningstid",
+    namn: "Användningstid gasflaska",
+    kategorier: ["gas",
+        "medicin",
+        "teknik"],
+    decimaler: 1,
+    inputs: [{
+        id: "volym",
+        label: "Flaskans volym",
+        unit: ["L"]
+    },
+        {
+            id: "tryck",
+            label: "Tryck",
+            unit: ["bar"]
+        },
+        {
+            id: "flode",
+            label: "Ordinerat flöde",
+            unit: ["L/min"]
+        }],
+    calc: beraknaAnvandningstidGas,
+    info: {
+        beskrivning: "Beräknar hur länge en medicinsk gasflaska räcker vid ett visst flöde.",
+        formel: {
+            namn: "Tid = (Volym × Tryck) / (Flöde × 60)",
+            beskrivning: "Ger den beräknade användningstiden i timmar."
+        },
+        riktvarden: "Observera att denna formel primärt gäller för komprimerad syrgas och medicinsk luft.",
+        tips: "Kontrollera att flödet är angivet i liter per minut och trycket i bar."
     }
-];
+}];
 
 // Tele och data kalkyler
 const teleKalkyler = [
