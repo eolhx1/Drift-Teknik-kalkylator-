@@ -57,11 +57,12 @@ export const KATEGORIER = {
 // 2. MATEMATISK LOGIK
 // =================================================================
 // Funktionerna returnerar bara råa tal (eller strängar för fel).
-
+// Styr och regler
 const beraknaSkalning010V = (v) => {
     return (v.volt / 10) * (v.max - v.min) + v.min;
 };
 
+// Ventilation
 const beraknaOmsattning = (v) => {
     if (!v.volym || v.volym <= 0 || !v.flode) return "Fel";
     return toM3h(v.flode, v.flode_unit || "m3h") / v.volym;
@@ -80,6 +81,17 @@ const beraknaFlodeKontinuitet = (v) => {
     return flode_m3s * 1000; // Returnerar l/s som standard
 };
 
+// K-faktor beräkning (Flöde = K × √Δp)
+const beraknaKfaktor = (v) => {
+    if (!valid(v.k_faktor, v.delta_p) || v.delta_p < 0) return "Fel";
+    
+    // Formel: q = k × √Δp_i
+    const flode = v.k_faktor * Math.sqrt(v.delta_p);
+    return flode;
+};
+
+
+// Elkraft
 // Ohms lag
 const beraknaOhmsLag = (v) => {
     if (!valid(v.varde1, v.varde2)) return "Fel";
@@ -91,6 +103,7 @@ const beraknaOhmsLag = (v) => {
     return "Fel";
 };
 
+// Gas
 // Beräkning av användningstid (Gasflaskor)
 const beraknaAnvandningstidGas = (v) => {
     if (!valid(v.volym, v.tryck, v.flode) || v.flode === 0) return "Fel";
@@ -194,7 +207,39 @@ const ventKalkyler = [
             riktvarden: "Normal lufthastighet i ventilationskanaler ligger ofta mellan 3-6 m/s för att undvika oljud.",
             tips: "För en rund kanal räknas area ut som π × r² (eller d² × π / 4)."
         }
+    },
+    
+        {
+        id: "vent_kfaktor_flode",
+        namn: "K-faktor flödesberäkning",
+        kategorier: ["vent"],
+        unit: "l/s",
+        decimaler: 1,
+        inputs: [
+            {
+                id: "k_faktor",
+                label: "K-faktor (k)",
+                unit: [""]
+            },
+            {
+                id: "delta_p",
+                label: "Differenstryck (Δp)",
+                unit: ["Pa"]
+            }
+        ],
+        calc: beraknaKfaktor,
+        info: {
+            beskrivning: "Beräknar luftflödet genom ett don eller mätuttag baserat på dess tillverkarspecifika K-faktor och uppmätt signaltryck.",
+            formel: {
+                namn: "q = k × √Δp_i",
+                beskrivning: "Flöde (l/s) = K-faktor × Kvadratroten ur signaltrycket (Pa)"
+            },
+            riktvarden: "K-faktorn finns angiven i tillverkarens produktdokumentation eller på märkskylten på donet.",
+            tips: "Kontrollera att mätinstrumentet är anslutet till rätt mätuttag (plus/minus) för att undvika felaktiga tryckvärden."
+        }
     }
+
+    
 ];
 
 // VS kalkyler
