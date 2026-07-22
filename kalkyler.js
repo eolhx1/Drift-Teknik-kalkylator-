@@ -239,8 +239,6 @@ const ventKalkyler = [
         }
     }
 
-    }
-
     
 ];
 
