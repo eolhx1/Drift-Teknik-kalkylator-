@@ -92,7 +92,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         triggerHaptic(20);
 
-        if (id === "backBtn") showMainMenu();
+        if (id === "backBtn") {
+            const targetCategory = event.target.dataset.category;
+            if (targetCategory && targetCategory !== "undefined" && KATEGORIER[targetCategory]) {
+                showSubMenu(targetCategory);
+            } else {
+                showMainMenu();
+            }
+        }
 
         if (id === "clearDataBtn") {
             showConfirmModal("Är du säker på att du vill rensa all sparad data?", () => {
@@ -266,19 +273,19 @@ function showSubMenu(categoryKey) {
 
     // --- NYTT: Skapa en snygg rubrik och tillbakaknapp för vanliga kategorier ---
     const catData = KATEGORIER[categoryKey] || {};
-    const categoryName = catData.namn || (categoryKey === "recent" ? "Senaste" : "Kategorier");
+    const categoryName = catData.namn || (categoryKey === "recent" ? "Senaste": "Kategorier");
     const categoryIcon = catData.ikon || "";
 
     const headerDiv = document.createElement("div");
     headerDiv.className = "submenu-header-bar";
     headerDiv.style.cssText = "display: flex; flex-direction: column; margin-bottom: 15px; gap: 6px; padding: 0 4px;";
     headerDiv.innerHTML = `
-        <button id="subBackBtn" class="back-link-btn" style="background: none; border: none; color: var(--primary-color, #0066cc); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0; text-align: left;">
-            ← Tillbaka till Hem
-        </button>
-        <h2 style="margin: 0; font-size: 1.4rem; font-weight: bold; display: flex; align-items: center; gap: 8px;">
-            <span>${categoryIcon}</span> ${categoryName}
-        </h2>
+    <button id="subBackBtn" class="back-link-btn" style="background: none; border: none; color: var(--primary-color, #0066cc); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0; text-align: left;">
+    ← Tillbaka till Hem
+    </button>
+    <h2 style="margin: 0; font-size: 1.4rem; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+    <span>${categoryIcon}</span> ${categoryName}
+    </h2>
     `;
     state.subNav.appendChild(headerDiv);
 
@@ -438,7 +445,7 @@ function showSaveJobModal(calcId) {
     </div>
 
     <div style="font-size: 0.9rem; margin-bottom: 15px; background: rgba(0,0,0,0.03); padding: 8px; border-radius: 4px;">
-        ${resultText}
+    ${resultText}
     </div>
 
     <div class="confirm-actions" style="display: flex; gap: 8px;">
@@ -585,72 +592,74 @@ function renderCalc(category, calcId) {
     if (!calc) return;
 
     const catData = KATEGORIER[category];
-    const categoryName = (typeof catData === 'object') ? catData.namn : (catData || "Kalkyl");
+    const categoryName = (typeof catData === 'object') ? catData.namn: (catData || "Kalkyl");
     const savedData = JSON.parse(localStorage.getItem(`calc_${calcId}`) || "{}");
 
     state.container.innerHTML = `
     <div class="calc-page" data-calc-id="${calcId}">
-        <div class="calc-header-nav">
-            <button id="backBtn" class="back-btn">${categoryName}</button>
-        </div>
-        <h2>${calc.namn}
-            <button id="favoriteBtn" class="favorite-btn" data-calc-id="${calcId}">
-                ${isFavorite(calcId) ? "⭐" : "☆"}
-            </button>
-        </h2>
+    <div class="calc-header-nav">
+    <button id="backBtn" class="back-btn" data-category="${category}">${categoryName}</button>
+    </div>
+    <h2>${calc.namn}
+    <button id="favoriteBtn" class="favorite-btn" data-calc-id="${calcId}">
+    ${isFavorite(calcId) ? "⭐": "☆"}
+    </button>
+    </h2>
 
-        ${calc.inputs.map(i => {
-            // FIX: Kontrollera att värdet inte är undefined/null så att nollor (0) sparas och visas korrekt
-            const savedValue = (savedData[i.id] !== undefined && savedData[i.id] !== null) ? savedData[i.id] : "";
-            const savedUnit = savedData[i.id + "_unit"] || (i.unit ? i.unit[0] : "");
+    ${calc.inputs.map(i => {
+        // FIX: Kontrollera att värdet inte är undefined/null så att nollor (0) sparas och visas korrekt
+        const savedValue = (savedData[i.id] !== undefined && savedData[i.id] !== null) ? savedData[i.id]: "";
+        const savedUnit = savedData[i.id + "_unit"] || (i.unit ? i.unit[0]: "");
 
-            return i.unit ? `
-            <div class="input-group">
-                <label>${i.label}</label>
-                <div style="display:flex; gap:8px;">
-                    <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
-                    <select data-unit="${i.id}">
-                        ${i.unit.map(u => {
-                            const display = UNIT_MAP[u] || u;
-                            return `<option value="${u}" ${savedUnit === u ? "selected" : ""}>${display}</option>`;
-                        }).join("")}
-                    </select>
-                </div>
-            </div>` : `
-            <div class="input-group">
-                <label>${i.label}</label>
-                <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
-            </div>`;
+        return i.unit ? `
+        <div class="input-group">
+        <label>${i.label}</label>
+        <div style="display:flex; gap:8px;">
+        <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
+        <select data-unit="${i.id}">
+        ${i.unit.map(u => {
+            const display = UNIT_MAP[u] || u;
+            return `<option value="${u}" ${savedUnit === u ? "selected": ""}>${display}</option>`;
         }).join("")}
-
-        <button id="resetBtn" class="reset-btn" data-calc-id="${calcId}">Nollställ</button>
-
-        <div class="result" id="resultDisplay">
-            <span id="resultText"></span>
-            <button id="copyBtn" class="copy-icon">📋</button>
+        </select>
         </div>
+        </div>`: `
+        <div class="input-group">
+        <label>${i.label}</label>
+        <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
+        </div>`;
+    }).join("")}
 
-        <!-- Spara till fältjobb-knapp -->
-        <button id="saveJobBtn" class="nav-btn" style="background: var(--primary-color); color: white; width: 100%; margin-top: 10px; margin-bottom: 5px;">💾 Spara till jobb</button>
+    <button id="resetBtn" class="reset-btn" data-calc-id="${calcId}">Nollställ</button>
 
-        <div class="calc-info-title" onclick="toggleInfo()">
-            <span>ℹ️ Info om beräkningen</span>
-            <span id="infoIcon">▼</span>
-        </div>
+    <div class="result" id="resultDisplay">
+    <span id="resultText"></span>
+    <button id="copyBtn" class="copy-icon">📋</button>
+    </div>
 
-        <div id="calcInfo" class="calc-info-content">
-            ${typeof calc.info === 'string' ? `<p>${calc.info}</p>` : `
-                ${calc.info?.beskrivning ? `<p>${calc.info.beskrivning}</p>` : ""}
-                ${calc.info?.formel ? `<p><strong>Formel:</strong> ${calc.info.formel.namn} (${calc.info.formel.beskrivning})</p>` : ""}
-                ${calc.info?.riktvarden ? `<p><strong>Riktvärden:</strong> ${calc.info.riktvarden}</p>` : ""}
-                ${calc.info?.tips ? `<p><strong>Tips:</strong> ${calc.info.tips}</p>` : ""}
-            `}
-        </div>
+    <!-- Spara till fältjobb-knapp -->
+    <button id="saveJobBtn" class="nav-btn" style="background: var(--primary-color); color: white; width: 100%; margin-top: 10px; margin-bottom: 5px;">💾 Spara till jobb</button>
+
+    <div class="calc-info-title" onclick="toggleInfo()">
+    <span>ℹ️ Info om beräkningen</span>
+    <span id="infoIcon">▼</span>
+    </div>
+
+    <div id="calcInfo" class="calc-info-content">
+    ${typeof calc.info === 'string' ? `<p>${calc.info}</p>`: `
+    ${calc.info?.beskrivning ? `<p>${calc.info.beskrivning}</p>`: ""}
+    ${calc.info?.formel ? `<p><strong>Formel:</strong> ${calc.info.formel.namn} (${calc.info.formel.beskrivning})</p>`: ""}
+    ${calc.info?.riktvarden ? `<p><strong>Riktvärden:</strong> ${calc.info.riktvarden}</p>`: ""}
+    ${calc.info?.tips ? `<p><strong>Tips:</strong> ${calc.info.tips}</p>`: ""}
+    `}
+    </div>
     </div>`;
 
     const copyBtn = document.getElementById("copyBtn");
     if (copyBtn) {
-        copyBtn.addEventListener("click", () => { copyResult(false); });
+        copyBtn.addEventListener("click", () => {
+            copyResult(false);
+        });
         copyBtn.addEventListener("contextmenu", (e) => {
             e.preventDefault();
             copyResult(true);
