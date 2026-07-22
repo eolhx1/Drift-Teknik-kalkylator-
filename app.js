@@ -647,9 +647,10 @@ function renderCalc(category, calcId) {
             }
         }
 
-        // Om fältet är en väljare (som "Vad vill du räkna ut?")
-        if (i.unit && i.unit.length > 1 && !i.requiresInput) {
-            // Specialmappning för att visa snygga namn i Ohms lags rullista
+
+
+        // Om fältet är en ren väljare utan inmatningsfält (t.ex. Ohms lags lägesväljare)
+        if (i.unit && i.unit.length > 1 && i.requiresInput === false) {
             const getDisplayNames = (u) => {
                 if (u === "U") return "Spänning (U)";
                 if (u === "I") return "Ström (I)";
@@ -667,6 +668,30 @@ function renderCalc(category, calcId) {
             </select>
             </div>`;
         }
+
+        // Om fältet har en eller flera enheter men också kräver inmatningsfält (standard för mätvärden)
+        return i.unit ? `
+        <div class="input-group">
+        <label for-id="${i.id}">${currentLabel}</label>
+        <div style="display:flex; gap:8px;">
+        <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
+        <select data-unit="${i.id}" style="padding-right: 30px;">
+        ${i.unit.map(u => {
+            const display = UNIT_MAP[u] || u;
+            return `<option value="${u}" ${savedUnit === u ? "selected": ""}>${display}</option>`;
+        }).join("")}
+        </select>
+        </div>
+        </div>`: `
+        <div class="input-group">
+        <label for-id="${i.id}">${currentLabel}</label>
+        <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
+        </div>`;
+
+
+
+
+
 
         return i.unit ? `
         <div class="input-group">
