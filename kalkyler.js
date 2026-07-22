@@ -280,23 +280,30 @@ const ventKalkyler = [{
         id: "vent_proportionalitetsmetoden",
         namn: "Proportionalitetsmetoden",
         kategorier: ["vent"],
-        unit: "", // Kvot (dimensionslös)
+        unit: "",
+        // Kvot (dimensionslös)
         decimaler: 2,
-        inputs: [
-            {
-                id: "q_matt",
-                label: "Uppmätt flöde",
-                unit: ["ls", "m3h"],
-                base: "ls"
-            },
+        inputs: [{
+            id: "q_matt",
+            label: "Uppmätt flöde",
+            unit: ["ls",
+                "m3h"],
+            base: "ls"
+        },
             {
                 id: "q_proj",
                 label: "Projekterat flöde",
-                unit: ["ls", "m3h"],
+                unit: ["ls",
+                    "m3h"],
                 base: "ls"
-            }
-        ],
-        calc: beraknaProportionalitet,
+            }],
+        calc: (v) => {
+            if (!valid(v.q_matt, v.q_proj) || v.q_proj === 0) return "Fel";
+            // Konvertera båda till samma enhet (l/s via toLs) för att kvoten ska bli korrekt oavsett vad användaren väljer i rullistan
+            const mattLs = toLs(v.q_matt, v.q_matt_unit || "ls");
+            const projLs = toLs(v.q_proj, v.q_proj_unit || "ls");
+            return mattLs / projLs;
+        },
         info: {
             beskrivning: "Beräknar kvoten mellan uppmätt och projekterat flöde (injusteringsfaktor) enligt proportionalitetsmetoden.",
             formel: {
@@ -306,11 +313,7 @@ const ventKalkyler = [{
             riktvarden: "En kvot under 1,0 betyder att flödet är för lågt, och över 1,0 att det är för högt.",
             tips: "Använd kvoten för att räkna ut hur mycket spjället eller ventilen behöver justeras för att nå det projekterade målet."
         }
-    }
-
-
-
-];
+    }];
 
 // VS kalkyler
 const vsKalkyler = [
