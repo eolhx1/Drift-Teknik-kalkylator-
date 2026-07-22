@@ -209,7 +209,7 @@ const ventKalkyler = [
         }
     },
     
-        {
+    {
         id: "vent_kfaktor_flode",
         namn: "K-faktor flödesberäkning",
         kategorier: ["vent"],
@@ -218,8 +218,8 @@ const ventKalkyler = [
         inputs: [
             {
                 id: "k_faktor",
-                label: "K-faktor (k)",
-                unit: [""]
+                label: "K-faktor (k)"
+                // Ingen unit här, vilket gör att app.js ritar ut ett rent inmatningsfält utan select
             },
             {
                 id: "delta_p",
@@ -237,6 +237,8 @@ const ventKalkyler = [
             riktvarden: "K-faktorn finns angiven i tillverkarens produktdokumentation eller på märkskylten på donet.",
             tips: "Kontrollera att mätinstrumentet är anslutet till rätt mätuttag (plus/minus) för att undvika felaktiga tryckvärden."
         }
+    }
+
     }
 
     
