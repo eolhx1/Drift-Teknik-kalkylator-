@@ -398,50 +398,34 @@ const ventKalkyler = [
         }
     },
     
-        {
-        id: "vent_affinitetslagarna",
-        namn: "Affinitetslagarna (Fläktlagar)",
-        kategorier: ["vent", "styr"],
-        unit: "", // Hanteras i beräkningsfunktionen
-        decimaler: 1,
-        inputs: [
-            {
-                id: "q1",
-                label: "Nuvarande flöde (q₁)",
-                unit: ["l/s", "m³/h"] // Bara för visuell tydlighet
-            },
-            {
-                id: "n1",
-                label: "Nuvarande frekvens/varvtal (n₁)",
-                unit: ["Hz", "rpm"]
-            },
-            {
-                id: "q2",
-                label: "Önskat flöde (q₂)",
-                unit: ["l/s", "m³/h"]
-            },
-             {
-                id: "p1",
-                label: "Nuvarande tryck (p₁) - Frivillig",
-                unit: ["Pa"]
-            },
-             {
-                id: "P1",
-                label: "Nuvarande effekt (P₁) - Frivillig",
-                unit: ["kW"]
-            }
-        ],
-        calc: beraknaAffinitet,
-        info: {
-            beskrivning: "Beräknar nytt varvtal/frekvens för att nå ett önskat flöde. Fyll i tryck och effekt för att även se hur dessa påverkas.",
-            formel: {
-                namn: "Affinitetslagarna",
-                beskrivning: "Flöde: n₂ = n₁ × (q₂ / q₁)\nTryck: p₂ = p₁ × (n₂ / n₁)²\nEffekt: P₂ = P₁ × (n₂ / n₁)³"
-            },
-            riktvarden: "Vid fördubbling av varvtalet: Flödet dubbleras, trycket fyrdubblas, och effektbehovet åttadubblas.",
-            tips: "Säkerställ att den nya beräknade effekten inte överstiger motorns märkeffekt."
-        }
+        // Affinitetslagarna (Fläkt- och pumplagar)
+const beraknaAffinitet = (v) => {
+    // Kräver enbart att de tre obligatoriska fälten är ifyllda och inte noll
+    if (!valid(v.q1, v.n1, v.q2) || v.q1 === 0 || v.n1 === 0) return "Fyll i nuvarande flöde, varvtal och önskat flöde.";
+
+    const n1 = v.n1;
+    const q1 = v.q1;
+    const q2 = v.q2;
+
+    // 1. Beräkna nytt varvtal (n2)
+    const n2 = n1 * (q2 / q1);
+    let resultatText = `Nytt varvtal (n₂): ${formatResult(n2, 1)} Hz/rpm\n`;
+
+    // 2. Beräkna nytt tryck (p2) om p1 är ifyllt (frivilligt)
+    if (v.p1 !== undefined && v.p1 !== null && !isNaN(v.p1) && v.p1 !== '') {
+        const p2 = v.p1 * Math.pow(n2 / n1, 2);
+        resultatText += `Nytt tryck (p₂): ${formatResult(p2, 1)} Pa\n`;
     }
+
+    // 3. Beräkna ny effekt (P2) om P1 är ifyllt (frivilligt)
+    if (v.P1 !== undefined && v.P1 !== null && !isNaN(v.P1) && v.P1 !== '') {
+        const p2_effekt = v.P1 * Math.pow(n2 / n1, 3);
+        resultatText += `Ny effekt (P₂): ${formatResult(p2_effekt, 2)} kW\n`;
+    }
+
+    return resultatText;
+};
+
 
     
     
