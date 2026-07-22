@@ -95,6 +95,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (id === "backBtn") {
             const targetCategory = event.target.dataset.category;
             if (targetCategory && targetCategory !== "undefined" && KATEGORIER[targetCategory]) {
+                state.container.innerHTML = "";
+                state.mainNav.classList.add("hidden");
+                state.subNav.classList.remove("hidden");
                 showSubMenu(targetCategory);
             } else {
                 showMainMenu();
