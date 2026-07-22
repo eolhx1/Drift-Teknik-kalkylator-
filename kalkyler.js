@@ -105,6 +105,7 @@ const beraknaAnvandningstidGas = (v) => {
 // =================================================================
 // 3. KALKYL-GRUPPER (Här ligger kalkylerna)
 // =================================================================
+// Styr och regler kalkyler
 const styrKalkyler = [{
     id: "givar_skalning_0_10v",
     namn: "Givarskalning 0-10V",
@@ -136,7 +137,7 @@ const styrKalkyler = [{
     }
 }];
 
-
+// Ventilationskalkyler
 const ventKalkyler = [
     //
     {
@@ -205,10 +206,12 @@ const ventKalkyler = [
         }
     }];
 
+// VS kalkyler
 const vsKalkyler = [
     // Lägg till vs-kalkyler här efter samma mönster
 ];
 
+// Elkraftkalkyler
 const elKalkyler = [
     // Ohms lag
     {
@@ -246,8 +249,10 @@ const elKalkyler = [
         }
     }];
 
+// Gas kalkyler
 const gasKalkyler = [
-    // Beräkning av användningstid (Gasflaskor) {
+    // Beräkning av användningstid (Gasflaskor) 
+    {
         id: "gas_anvandningstid",
         namn: "Användningstid gasflaska",
         kategorier: ["gas",
@@ -282,6 +287,7 @@ const gasKalkyler = [
         }
     }];
 
+// Tele och data kalkyler
 const teleKalkyler = [
     // Lägg till tele-kalkyler här efter samma mönster
 ];
