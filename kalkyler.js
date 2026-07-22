@@ -79,11 +79,14 @@ const beraknaKyleffekt = (v) => {
 // Ohms lag
 const beraknaOhmsLag = (v) => {
     if (!valid(v.varde1, v.varde2)) return "Fel";
-    if (v.lage === "U") return v.varde1 * v.varde2;      // U = I * R
-    if (v.lage === "I") return v.varde1 / v.varde2;      // I = U / R
-    if (v.lage === "R") return v.varde1 / v.varde2;      // R = U / I
+    const läge = v.lage_unit || "U";
+    
+    if (läge === "U") return v.varde1 * v.varde2;      // U = I * R (Värde 1 * Värde 2)
+    if (läge === "I") return v.varde1 / v.varde2;      // I = U / R (Spänning / Resistans)
+    if (läge === "R") return v.varde1 / v.varde2;      // R = U / I (Spänning / Ström)
     return "Fel";
 };
+
 
 
 // Lägg till fler beräkningar
