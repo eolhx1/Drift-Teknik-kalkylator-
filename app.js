@@ -137,16 +137,39 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         true);
 
-    // 2.5 Lyssna på förändringar i kalkylfälten för att köra direktberäkning
+    // 2.5 Lyssna på förändringar i kalkylfälten för att köra direktberäkning och uppdatera etiketter
     state.container.addEventListener("input",
         (e) => {
             if (e.target.matches("input, select")) {
                 const calcId = state.container.querySelector("[data-calc-id]")?.dataset.calcId;
-                if (calcId) {
-                    debouncedRunCalc(calcId);
+                if (!calcId) return;
+
+                // OM det är Ohms lag (eller liknande kalkyl med lägesväljare) - uppdatera etiketter direkt!
+                if (calcId === "ohms_lag") {
+                    const page = state.container.querySelector(".calc-page");
+                    const valjare = page.querySelector('select[data-unit="lage"]');
+                    const label1 = page.querySelector('label[for-id="varde1"]');
+                    const label2 = page.querySelector('label[for-id="varde2"]');
+
+                    if (valjare && label1 && label2) {
+                        const val = valjare.value;
+                        if (val === "U") {
+                            label1.textContent = "Ström (I) [A]";
+                            label2.textContent = "Resistans (R) [Ω]";
+                        } else if (val === "I") {
+                            label1.textContent = "Spänning (U) [V]";
+                            label2.textContent = "Resistans (R) [Ω]";
+                        } else if (val === "R") {
+                            label1.textContent = "Spänning (U) [V]";
+                            label2.textContent = "Ström (I) [A]";
+                        }
+                    }
                 }
+
+                debouncedRunCalc(calcId);
             }
         });
+
 
     // 2.6 Klick på appens huvudrubrik för att gå till start
     const appTitle = document.getElementById("appTitle");
@@ -610,19 +633,36 @@ function renderCalc(category, calcId) {
     </h2>
 
     ${calc.inputs.map(i => {
-        // FIX: Kontrollera att värdet inte är undefined/null så att nollor (0) sparas och visas korrekt
         const savedValue = (savedData[i.id] !== undefined && savedData[i.id] !== null) ? savedData[i.id]: "";
         const savedUnit = savedData[i.id + "_unit"] || (i.unit ? i.unit[0]: "");
 
-        // Om fältet är en väljare (har flera alternativ i .unit men saknar separat inmatningsfält)
+        // Speciell hantering för Ohms lag för att sätta rätt etiketter direkt vid start
+        let currentLabel = i.label;
+        if (calcId === "ohms_lag") {
+            const currentLage = savedData["lage_unit"] || "U";
+            if (i.id === "varde1") {
+                currentLabel = currentLage === "U" ? "Ström (I) [A]" : "Spänning (U) [V]";
+            } else if (i.id === "varde2") {
+                currentLabel = currentLage === "R" ? "Ström (I) [A]" : "Resistans (R) [Ω]";
+            }
+        }
+
+        // Om fältet är en väljare (som "Vad vill du räkna ut?")
         if (i.unit && i.unit.length > 1 && !i.requiresInput) {
+            // Specialmappning för att visa snygga namn i Ohms lags rullista
+            const getDisplayNames = (u) => {
+                if (u === "U") return "Spänning (U)";
+                if (u === "I") return "Ström (I)";
+                if (u === "R") return "Resistans (R)";
+                return UNIT_MAP[u] || u;
+            };
+
             return `
             <div class="input-group">
             <label>${i.label}</label>
             <select data-unit="${i.id}" style="width: 100%; padding-right: 30px; box-sizing: border-box;">
             ${i.unit.map(u => {
-                const display = UNIT_MAP[u] || u;
-                return `<option value="${u}" ${savedUnit === u ? "selected": ""}>${display}</option>`;
+                return `<option value="${u}" ${savedUnit === u ? "selected": ""}>${getDisplayNames(u)}</option>`;
             }).join("")}
             </select>
             </div>`;
@@ -630,7 +670,7 @@ function renderCalc(category, calcId) {
 
         return i.unit ? `
         <div class="input-group">
-        <label>${i.label}</label>
+        <label for-id="${i.id}">${currentLabel}</label>
         <div style="display:flex; gap:8px;">
         <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
         <select data-unit="${i.id}" style="padding-right: 30px;">
@@ -642,10 +682,11 @@ function renderCalc(category, calcId) {
         </div>
         </div>`: `
         <div class="input-group">
-        <label>${i.label}</label>
+        <label for-id="${i.id}">${currentLabel}</label>
         <input type="number" inputmode="decimal" step="any" data-id="${i.id}" value="${savedValue}">
         </div>`;
     }).join("")}
+
 
     <button id="resetBtn" class="reset-btn" data-calc-id="${calcId}">Nollställ</button>
 

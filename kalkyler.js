@@ -200,22 +200,22 @@ const elKalkyler = [
     {
         id: "ohms_lag",
         namn: "Ohms lag",
-        kategorier: ["el", "tele"], // <-- Tillhör båda kategorierna!
-        unit: "V", // Detta kan dynamiskt anpassas i app.js beroende på läge, eller lämnas öppet
+        kategorier: ["el", "tele"],
         decimaler: 2,
         inputs: [
             {
                 id: "lage",
                 label: "Vad vill du räkna ut?",
-                unit: ["Spänning (U)", "Ström (I)", "Resistans (R)"]
+                unit: ["U", "I", "R"], // Vi sätter korta koder här
+                requiresInput: false
             },
             {
                 id: "varde1",
-                label: "Värde 1"
+                label: "Ström (I) [A]" // Standardetikett
             },
             {
                 id: "varde2",
-                label: "Värde 2"
+                label: "Resistans (R) [Ω]" // Standardetikett
             }
         ],
         calc: beraknaOhmsLag,
@@ -230,6 +230,7 @@ const elKalkyler = [
         }
     }
 ];
+
 const teleKalkyler = [
     // Lägg till tele-kalkyler här efter samma mönster
 ];
