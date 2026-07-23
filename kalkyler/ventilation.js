@@ -1,5 +1,8 @@
+//
 // Fil: js/ventilation.js
-import { valid, toM3h, toLs } from './hjalpmedel.js';
+//
+
+import { valid, formatResult, toM3h, toLs } from './hjalpmedel.js';
 
 // --- Beräkningsfunktioner (Ventilation) ---
 const beraknaOmsattning = (v) => {

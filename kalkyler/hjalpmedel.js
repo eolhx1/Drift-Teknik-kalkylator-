@@ -44,3 +44,11 @@ export const KATEGORIER = {
         ikon: "🧱"
     }
 };
+
+export const formatResult = (value, precision = 2) => {
+    if (isNaN(value)) return "0";
+    return new Intl.NumberFormat('sv-SE', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: precision
+    }).format(value);
+};
