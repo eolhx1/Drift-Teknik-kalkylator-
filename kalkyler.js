@@ -52,19 +52,25 @@ export const KATEGORIER = {
 // 2. MATEMATISK LOGIK
 // =================================================================
 
-// ---------------------------------------------
+// -----------------------------------------------------------------
 // Styr kalkyler
-// ---------------------------------------------
+// -----------------------------------------------------------------
+// 0-10 voltsgivarens värde vid en Uppmätt spänning
 const beraknaSkalning010V = (v) => (v.volt / 10) * (v.max - v.min) + v.min;
 
+
+// TODO: Fortsätt hä med styr kalkyler
+
+// -----------------------------------------------------------------
+// Ventilations kalkyler
+// -----------------------------------------------------------------
+// Luftomsättning i ett rum vid ett givet tilluftsflöde
 const beraknaOmsattning = (v) => {
     if (!v.volym || v.volym <= 0 || !v.flode) return "Fel";
     return toM3h(v.flode, v.flode_unit || "m3h") / v.volym;
 };
 
-// ---------------------------------------------
-// Ventilations kalkyler
-// ---------------------------------------------
+
 const beraknaKyleffekt = (v) => {
     const flode_ls = toLs(v.flode, v.flode_unit || "ls");
     const dT = v.tRum - v.tTill;
@@ -151,18 +157,18 @@ const beraknaBlandningstemperatur = (v) => {
     return t_bland;
 };
 
-// ---------------------------------------------
+// -----------------------------------------------------------------
 // VS kalkyler
-// ---------------------------------------------
+// -----------------------------------------------------------------
 // 1. Grundläggande Effekt- och Flödesformel (VS)
 const beraknaVsFlode = (v) => {
     if (!valid(v.effekt, v.dt)) return "Fel";
     if (v.dt === 0) return "Fel (0-division)";
-    
+
     // Omvandlar effekt (W) och ΔT till l/h via formeln: q_lh = P * faktor (0.86 vid ΔT=10, 0.43 vid ΔT=20, annars allmän beräkning)
     // Standardformel: q (m³/s) = P / (4180 * 1000 * ΔT) => omvandlat till l/h: q (l/h) = (P / (4180 * 1000 * ΔT)) * 3600 * 1000 = P / (4180 * ΔT) * 3600 = P * 0.8612 / ΔT
     const flode_lh = (v.effekt / (4180 * v.dt)) * 3600;
-    
+
     let resultatText = `Flöde: ${formatResult(flode_lh, 1)} l/h\n`;
     resultatText += `Flöde: ${formatResult(flode_lh / 3600, 4)} l/s`;
     return resultatText;
@@ -190,11 +196,68 @@ const beraknaVsProportionalitet = (v) => {
     return v.q_matt / v.q_proj;
 };
 
+// 5. Tryckfall i rör (Darcy-Weisbachs förenkling / linjärt tryckfall)
+const beraknaTryckfallRor = (v) => {
+    if (!valid(v.R, v.L)) return "Fel";
+    // Formel: Δp_rör = R * L (Resultat i Pa, omvandlar gärna till kPa för tydlighet)
+    const delta_p_pa = v.R * v.L;
+
+    // Lägg till 40% tillägg för kopplingar/böjar (medelvärde av 30-50%)
+    const delta_p_total = delta_p_pa * 1.4;
+
+    let resultatText = `Rörns tryckfall: ${formatResult(delta_p_total, 0)} Pa\n`;
+    resultatText += `Inkl. kopplingar (~40%): ${formatResult(delta_p_total / 1000, 2)} kPa`;
+    return resultatText;
+};
+
+// 6. Pumplagarna / Affinitetslagarna för cirkulationspumpar
+const beraknaPumplagar = (v) => {
+    if (!valid(v.q1, v.n1, v.n2) || v.n1 === 0) return "Fel";
+
+    const q1 = v.q1;
+    const n1 = v.n1;
+    const n2 = v.n2;
+
+    // 1. Nytt flöde: q2 = q1 * (n2 / n1)
+    const q2 = q1 * (n2 / n1);
+    let resultatText = `Nytt flöde (q₂): ${formatResult(q2, 1)}\n`;
+
+    // 2. Nytt tryck (H) om H1 är angivet (frivillig)
+    if (v.H1 !== undefined && v.H1 !== null && !isNaN(v.H1) && v.H1 !== '') {
+        const H2 = v.H1 * Math.pow(n2 / n1, 2);
+        resultatText += `Nytt tryck (H₂): ${formatResult(H2, 1)} kPa\n`;
+    }
+
+    // 3. Ny effekt (P) om P1 är angivet (frivillig)
+    if (v.P1 !== undefined && v.P1 !== null && !isNaN(v.P1) && v.P1 !== '') {
+        const P2 = v.P1 * Math.pow(n2 / n1, 3);
+        resultatText += `Ny effekt (P₂): ${formatResult(P2, 2)} kW\n`;
+    }
+
+    return resultatText;
+};
+
+// 7. Framledningstemperatur i ettrörssystem
+const beraknaEttrorTemp = (v) => {
+    if (!valid(v.t_fram, v.effekt, v.q_slinga) || v.q_slinga === 0) return "Fel";
+
+    // Vattnets värmekapacitet c_p ≈ 4180 J/(kg·K), densitet ρ ≈ 1000 kg/m³
+    // q_slinga i l/h omvandlas till m³/s genom delning med (3600 * 1000)
+    const flode_m3s = v.q_slinga / 3600000;
+    const namnare = flode_m3s * 4180 * 1000;
+
+    if (namnare === 0) return "Fel (0-division)";
+
+    // T_fram,nästa = T_fram - (P / (q * c_p * ρ))
+    const t_nasta = v.t_fram - (v.effekt / namnare);
+    return t_nasta;
+};
 
 
-// ---------------------------------------------
+
+// -----------------------------------------------------------------
 // El kalkyler
-// ---------------------------------------------
+// -----------------------------------------------------------------
 const beraknaOhmsLag = (v) => {
     if (!valid(v.varde1, v.varde2)) return "Fel";
     const läge = v.lage_unit || "U";
@@ -204,9 +267,9 @@ const beraknaOhmsLag = (v) => {
 };
 
 
-// ---------------------------------------------
+// -----------------------------------------------------------------
 // Gas kalkyler
-// ---------------------------------------------
+// -----------------------------------------------------------------
 const beraknaAnvandningstidGas = (v) => {
     if (!valid(v.volym, v.tryck, v.flode) || v.flode === 0) return "Fel";
     return (v.volym * v.tryck) / (v.flode * 60);
@@ -215,9 +278,9 @@ const beraknaAnvandningstidGas = (v) => {
 // =================================================================
 // 3. KALKYL-GRUPPER
 // =================================================================
-// ---------------------------------------------
+// -----------------------------------------------------------------
 // Sty kalkyler
-// ---------------------------------------------
+// -----------------------------------------------------------------
 const styrKalkyler = [{
     id: "styr_givar_skalning_0_10v",
     namn: "Givarskalning 0-10V",
@@ -247,9 +310,9 @@ const styrKalkyler = [{
     }
 }];
 
-// ---------------------------------------------
+// -----------------------------------------------------------------
 // Ventilations kalkyler
-// ---------------------------------------------
+// -----------------------------------------------------------------
 const ventKalkyler = [{
     id: "vent_luft_omsattning",
     namn: "Luftomsättning",
@@ -399,8 +462,7 @@ const ventKalkyler = [{
         id: "vent_affinitetslagarna",
         namn: "Affinitetslagarna (Fläktlagar)",
         kategorier: ["vent",
-            "styr",
-            "vs"],
+            "styr"],
         unit: "",
         decimaler: 1,
         inputs: [{
@@ -580,58 +642,53 @@ const ventKalkyler = [{
             tips: "Kontrollera att flödesenheterna (l/s eller m³/h) är konsekvent ifyllda i alla tre flödesfälten."
         }
     }];
-    
-// ---------------------------------------------
+
+// -----------------------------------------------------------------
 // VS kalkyler
-// ---------------------------------------------
-const vsKalkyler = [
-    {
-        id: "vs_effekt_flode",
-        namn: "Radiatorflöde & Effekt (VS)",
-        kategorier: ["vs"],
-        unit: "l/h",
-        decimaler: 1,
-        inputs: [
-            {
-                id: "effekt",
-                label: "Radiatoreffekt (P)",
-                unit: ["W"]
-            },
-            {
-                id: "dt",
-                label: "Temperaturskillnad (ΔT)",
-                unit: ["°C"]
-            }
-        ],
-        calc: beraknaVsFlode,
-        info: {
-            beskrivning: "Beräknar det erforderliga vattenflödet för en given radiatoreffekt och temperaturdifferens.",
-            formel: {
-                namn: "q = P / (c_p × ρ × ΔT)",
-                beskrivning: "Flöde baserat på vattnets värmekapacitet och densitet."
-            },
-            riktvarden: "Vanliga system har ΔT 10°C (t.ex. 50/40) eller ΔT 20°C (t.ex. 60/40).",
-            tips: "Vid ΔT 10°C kan du tumregelsmässigt multiplicera effekten i Watt med 0,86 för att få l/h."
-        }
+// -----------------------------------------------------------------
+const vsKalkyler = [{
+    id: "vs_effekt_flode",
+    namn: "Radiatorflöde & Effekt (VS)",
+    kategorier: ["vs"],
+    unit: "l/h",
+    decimaler: 1,
+    inputs: [{
+        id: "effekt",
+        label: "Radiatoreffekt (P)",
+        unit: ["W"]
     },
+        {
+            id: "dt",
+            label: "Temperaturskillnad (ΔT)",
+            unit: ["°C"]
+        }],
+    calc: beraknaVsFlode,
+    info: {
+        beskrivning: "Beräknar det erforderliga vattenflödet för en given radiatoreffekt och temperaturdifferens.",
+        formel: {
+            namn: "q = P / (c_p × ρ × ΔT)",
+            beskrivning: "Flöde baserat på vattnets värmekapacitet och densitet."
+        },
+        riktvarden: "Vanliga system har ΔT 10°C (t.ex. 50/40) eller ΔT 20°C (t.ex. 60/40).",
+        tips: "Vid ΔT 10°C kan du tumregelsmässigt multiplicera effekten i Watt med 0,86 för att få l/h."
+    }
+},
     {
         id: "vs_kv_varde",
         namn: "K_v-värde (Ventilinställning)",
         kategorier: ["vs"],
         unit: "",
         decimaler: 2,
-        inputs: [
-            {
-                id: "flode_m3h",
-                label: "Flöde (q)",
-                unit: ["m³/h"]
-            },
+        inputs: [{
+            id: "flode_m3h",
+            label: "Flöde (q)",
+            unit: ["m³/h"]
+        },
             {
                 id: "tryckfall",
                 label: "Tryckfall över ventil (Δp)",
                 unit: ["bar"]
-            }
-        ],
+            }],
         calc: beraknaKvVarde,
         info: {
             beskrivning: "Beräknar ventilens K_v-värde för inställning av rätt flöde vid ett specifikt tryckfall.",
@@ -649,12 +706,11 @@ const vsKalkyler = [
         kategorier: ["vs"],
         unit: "W",
         decimaler: 0,
-        inputs: [
-            {
-                id: "p_proj",
-                label: "Projekterad effekt",
-                unit: ["W"]
-            },
+        inputs: [{
+            id: "p_proj",
+            label: "Projekterad effekt",
+            unit: ["W"]
+        },
             {
                 id: "dt_ny",
                 label: "Ny övertemperatur (ΔT_ny)",
@@ -669,8 +725,7 @@ const vsKalkyler = [
                 id: "exponent",
                 label: "Radiatorexponent (n)",
                 // Ingen enhet, standardvärde kan användas
-            }
-        ],
+            }],
         calc: beraknaNyRadiatoreffekt,
         info: {
             beskrivning: "Beräknar hur mycket effekten på en radiator förändras om man sänker framledningstemperaturen (t.ex. vid värmepumpskonvertering).",
@@ -688,18 +743,18 @@ const vsKalkyler = [
         kategorier: ["vs"],
         unit: "",
         decimaler: 2,
-        inputs: [
-            {
-                id: "q_matt",
-                label: "Uppmätt flöde",
-                unit: ["l/h", "m³/h"]
-            },
+        inputs: [{
+            id: "q_matt",
+            label: "Uppmätt flöde",
+            unit: ["l/h",
+                "m³/h"]
+        },
             {
                 id: "q_proj",
                 label: "Projekterat flöde",
-                unit: ["l/h", "m³/h"]
-            }
-        ],
+                unit: ["l/h",
+                    "m³/h"]
+            }],
         calc: beraknaVsProportionalitet,
         info: {
             beskrivning: "Beräknar injusteringskvoten för stammar och radiatorer för att säkerställa proportionell balans.",
@@ -710,16 +765,73 @@ const vsKalkyler = [
             riktvarden: "Sträva efter en kvot på 1,0 för samtliga terminaler i stammen.",
             tips: "Justera alltid huvudstammar i ordning från sämst balanserad till bäst balanserad."
         }
-    }
+    },
+
+    // Tryckfall i rör (Darcy-Weisbachs förenkling / linjärt tryckfall)
+    const beraknaTryckfallRor = (v) => {
+        if (!valid(v.R, v.L)) return "Fel";
+        // Formel: Δp_rör = R * L (Resultat i Pa, omvandlar gärna till kPa för tydlighet)
+        const delta_p_pa = v.R * v.L;
+
+        // Lägg till 40% tillägg för kopplingar/böjar (medelvärde av 30-50%)
+        const delta_p_total = delta_p_pa * 1.4;
+
+        let resultatText = `Rörns tryckfall: ${formatResult(delta_p_total, 0)} Pa\n`;
+        resultatText += `Inkl. kopplingar (~40%): ${formatResult(delta_p_total / 1000, 2)} kPa`;
+        return resultatText;
+    };
+
+    // Pumplagarna / Affinitetslagarna för cirkulationspumpar
+    const beraknaPumplagar = (v) => {
+        if (!valid(v.q1, v.n1, v.n2) || v.n1 === 0) return "Fel";
+
+        const q1 = v.q1;
+        const n1 = v.n1;
+        const n2 = v.n2;
+
+        // 1. Nytt flöde: q2 = q1 * (n2 / n1)
+        const q2 = q1 * (n2 / n1);
+        let resultatText = `Nytt flöde (q₂): ${formatResult(q2, 1)}\n`;
+
+        // 2. Nytt tryck (H) om H1 är angivet (frivillig)
+        if (v.H1 !== undefined && v.H1 !== null && !isNaN(v.H1) && v.H1 !== '') {
+            const H2 = v.H1 * Math.pow(n2 / n1, 2);
+            resultatText += `Nytt tryck (H₂): ${formatResult(H2, 1)} kPa\n`;
+        }
+
+        // 3. Ny effekt (P) om P1 är angivet (frivillig)
+        if (v.P1 !== undefined && v.P1 !== null && !isNaN(v.P1) && v.P1 !== '') {
+            const P2 = v.P1 * Math.pow(n2 / n1, 3);
+            resultatText += `Ny effekt (P₂): ${formatResult(P2, 2)} kW\n`;
+        }
+
+        return resultatText;
+    };
+
+    // Framledningstemperatur i ettrörssystem
+    const beraknaEttrorTemp = (v) => {
+        if (!valid(v.t_fram, v.effekt, v.q_slinga) || v.q_slinga === 0) return "Fel";
+
+        // Vattnets värmekapacitet c_p ≈ 4180 J/(kg·K), densitet ρ ≈ 1000 kg/m³
+        // q_slinga i l/h omvandlas till m³/s genom delning med (3600 * 1000)
+        const flode_m3s = v.q_slinga / 3600000;
+        const namnare = flode_m3s * 4180 * 1000;
+
+        if (namnare === 0) return "Fel (0-division)";
+
+        // T_fram,nästa = T_fram - (P / (q * c_p * ρ))
+        const t_nasta = v.t_fram - (v.effekt / namnare);
+        return t_nasta;
+    };
 ];
-   
-    
-    
 
 
-// ---------------------------------------------
+
+
+
+// -----------------------------------------------------------------
 // El kalkyler
-// ---------------------------------------------
+// -----------------------------------------------------------------
 const elKalkyler = [{
     id: "el_ohms_lag",
     namn: "Ohms lag",
@@ -748,9 +860,9 @@ const elKalkyler = [{
     }
 }];
 
-// ---------------------------------------------
+// -----------------------------------------------------------------
 // Gas kalkyler
-// ---------------------------------------------
+// -----------------------------------------------------------------
 const gasKalkyler = [{
     id: "gas_anvandningstid",
     namn: "Användningstid gasflaska",
@@ -777,9 +889,9 @@ const gasKalkyler = [{
     }
 }];
 
-// ---------------------------------------------
+// -----------------------------------------------------------------
 // Tele Data kalkyler
-// ---------------------------------------------
+// -----------------------------------------------------------------
 const teleKalkyler = [];
 
 
