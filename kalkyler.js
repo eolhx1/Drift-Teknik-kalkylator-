@@ -1,587 +1,554 @@
+//
 // Fil: kalkyler.js
+//
 
-// 1. HJÄLPFUNKTIONER
+// =================================================================
+// 1. HJÄLPFUNKTIONER (Verktyg för beräkningar)
+// =================================================================
 const valid = (...values) => values.every(v => v !== undefined && v !== null && !isNaN(v) && v !== '');
-const calcKyleffektLuft = (flode_ls, dT) => (1.2 * flode_ls * dT) / 1000;
-const calcFlodeFranEffekt = (effekt_kW, dT) => (effekt_kW * 1000) / (1.2 * dT);
 const toM3h = (val, unit) => (unit === "ls" ? val * 3.6: val);
 const toLs = (val, unit) => (unit === "m3h" ? val / 3.6: val);
 
-// 2. KATEGORIER
-export const KATEGORIER = {
-    vent: "Ventilation",
-    vs: "VS & Värme",
-    el: "Elkraft",
-    tele: "Tele & Data",
-    gas: "Gas",
-    styr: "Styr & Regler",
-    bygg: "Bygg & Energi"
+export const UNIT_MAP = {
+    "ls": "l/s",
+    "m3h": "m³/h",
+    "kw": "kW",
+    "kpa": "kPa",
+    "pa": "Pa",
+    "mm": "mm",
+    "celsius": "°C"
 };
 
-// 3. LOGIKFUNKTIONER
+export const KATEGORIER = {
+    styr: {
+        namn: "Styr & Regler",
+        ikon: "⚙️"
+    },
+    vent: {
+        namn: "Ventilation",
+        ikon: "💨"
+    },
+    vs: {
+        namn: "VS & Värme",
+        ikon: "💧"
+    },
+    el: {
+        namn: "Elkraft",
+        ikon: "⚡"
+    },
+    tele: {
+        namn: "Tele & Data",
+        ikon: "📡"
+    },
+    gas: {
+        namn: "Gas",
+        ikon: "🔥"
+    },
+    bygg: {
+        namn: "Bygg & Energi",
+        ikon: "🧱"
+    }
+};
+
+// =================================================================
+// 2. MATEMATISK LOGIK
+// =================================================================
+
+// -----------------------------------------------------------------
+// Styr kalkyler
+// -----------------------------------------------------------------
+const beraknaSkalning010V = (v) => (v.volt / 10) * (v.max - v.min) + v.min;
+
+// -----------------------------------------------------------------
+// Ventilations kalkyler
+// -----------------------------------------------------------------
 const beraknaOmsattning = (v) => {
-    const unit = v.flode_unit || "m3h";
-    const flode_m3h = toM3h(v.flode, unit);
-    const oms = flode_m3h / v.volym;
-    return `Luftomsättning: ${oms.toFixed(2)} h⁻¹`;
+    if (!v.volym || v.volym <= 0 || !v.flode) return "Fel";
+    return toM3h(v.flode, v.flode_unit || "m3h") / v.volym;
 };
 
 const beraknaKyleffekt = (v) => {
-    const unit = v.flode_unit || "ls";
-    const flode_ls = toLs(v.flode, unit);
+    const flode_ls = toLs(v.flode, v.flode_unit || "ls");
     const dT = v.tRum - v.tTill;
-    const effekt_kW = calcKyleffektLuft(flode_ls, dT);
-    return `Kyleffekt: ${effekt_kW.toFixed(2)} kW\nΔT: ${dT.toFixed(1)} °C`;
+    return (1.2 * flode_ls * dT) / 1000;
 };
 
-const beraknaFlodeFranKyla = (v) => {
-    const dT = v.tRum - v.tTill;
-    if (dT <= 0) return "Tilluften måste vara kallare än rumsluften";
-
-    const flode_ls = calcFlodeFranEffekt(v.effekt, dT);
-    return `Luftflöde: ${flode_ls.toFixed(1)} l/s\nLuftflöde: ${(flode_ls * 3.6).toFixed(0)} m³/h`;
+const beraknaFlodeKontinuitet = (v) => {
+    if (!valid(v.hastighet, v.area)) return "Fel";
+    return (v.hastighet * v.area) * 1000;
 };
 
-const beraknaVerkningsgrad = (v) => {
-    const diff = v.tFran - v.tUte;
-    if (diff === 0) return "Kan ej beräknas (ΔT är 0)";
-
-    const eta = ((v.tTill - v.tUte) / diff) * 100;
-    return `Verkningsgrad: ${eta.toFixed(1)}%`;
+const beraknaKfaktor = (v) => {
+    if (!valid(v.k_faktor, v.delta_p) || v.delta_p < 0) return "Fel";
+    return v.k_faktor * Math.sqrt(v.delta_p);
 };
 
-const beraknaTryckfall = (v) => {
-    // 1. Konvertera flöde till m³/s
-    const unit = v.flode_unit || "m3h";
-    const flode_m3s = (unit === "ls") ? (v.flode / 1000): (v.flode / 3600);
-
-    // 2. Beräkna area i m² (A = π * r²)
-    const radie = (v.diameter / 1000) / 2;
-    const area = Math.PI * Math.pow(radie, 2);
-
-    // 3. Beräkna lufthastighet (v = Q / A)
-    const hastighet = flode_m3s / area;
-
-    // 4. Uppskattat tryckfall per meter
-    const dp_per_meter = 0.02 * (Math.pow(hastighet, 2) / (v.diameter / 1000));
-
-    return `Lufthastighet: ${hastighet.toFixed(1)} m/s\nTryckfall: ${dp_per_meter.toFixed(2)} Pa/m`;
+const beraknaSFP = (v) => {
+    if (!valid(v.p_tot, v.flode) || v.flode === 0) return "Fel";
+    const enhet = v.flode_unit || "ls";
+    let flode_m3s = enhet === "ls" ? v.flode / 1000: v.flode / 3600;
+    return v.p_tot / flode_m3s;
 };
 
-const beraknaFlodeFranOms = (v) => {
-    const flode_m3h = v.volym * v.oms;
-    const flode_ls = flode_m3h / 3.6;
-    return `Flöde: ${flode_m3h.toFixed(0)} m³/h\nFlöde: ${flode_ls.toFixed(1)} l/s`;
+const beraknaAffinitet = (v) => {
+    if (!valid(v.q1, v.n1, v.q2) || v.q1 === 0 || v.n1 === 0) return "Fyll i nuvarande flöde, varvtal och önskat flöde.";
+
+    const n1 = v.n1;
+    const q1 = v.q1;
+    const q2 = v.q2;
+
+    const n2 = n1 * (q2 / q1);
+    let resultatText = `Nytt varvtal (n₂): ${n2.toFixed(1)} Hz/rpm\n`;
+
+    if (v.p1 !== undefined && v.p1 !== null && !isNaN(v.p1) && v.p1 !== '') {
+        const p2 = v.p1 * Math.pow(n2 / n1, 2);
+        resultatText += `Nytt tryck (p₂): ${p2.toFixed(1)} Pa\n`;
+    }
+
+    if (v.P1 !== undefined && v.P1 !== null && !isNaN(v.P1) && v.P1 !== '') {
+        const p2_effekt = v.P1 * Math.pow(n2 / n1, 3);
+        resultatText += `Ny effekt (P₂): ${p2_effekt.toFixed(2)} kW\n`;
+    }
+
+    return resultatText;
 };
 
-const beraknaSpecFlode = (v) => {
-    // Använd enheten som skickas med i v (fallback till 'ls')
-    const unit = v.flode_unit || "ls";
-    const flode_ls = toLs(v.flode, unit);
-
-    const specFlode = flode_ls / v.area;
-    return `Specifikt flöde: ${specFlode.toFixed(2)} l/s·m²`;
+const beraknaEkvivalentDiameter = (v) => {
+    if (!valid(v.bredd, v.hojd) || (v.bredd + v.hojd) === 0) return "Fel";
+    const de = (2 * v.bredd * v.hojd) / (v.bredd + v.hojd);
+    return de;
 };
 
-const beraknaCo2Flode = (v) => `Rekommenderat flöde: ${(v.antal * 7).toFixed(0)} l/s`;
-
-const beraknaTryckfallKanal = (v) => {
-    const unit = v.flode_unit || "m3h";
-    const flode_m3s = (unit === "ls") ? (v.flode / 1000): (v.flode / 3600);
-    const radie = (v.diameter / 1000) / 2;
-    const area = Math.PI * Math.pow(radie, 2);
-    const hastighet = flode_m3s / area;
-    const dp_per_meter = 0.02 * (Math.pow(hastighet, 2) / (v.diameter / 1000));
-    return `Lufthastighet: ${hastighet.toFixed(1)} m/s\nTotalt tryckfall: ${(dp_per_meter * v.langd).toFixed(1)} Pa`;
+const beraknaGallerFlode = (v) => {
+    if (!valid(v.hastighet, v.a_eff)) return "Fel";
+    const flode_m3s = v.hastighet * v.a_eff;
+    const flode_ls = flode_m3s * 1000;
+    return flode_ls;
 };
 
-const beraknaSfp = (v) => {
-    const unit = v.flode_unit || "m3s";
-    const flode_m3s = (unit === "ls") ? (v.flode / 1000): (unit === "m3h") ? (v.flode / 3600): v.flode;
-    return `SFP-tal: ${(v.effekt / flode_m3s).toFixed(2)} kW/(m³/s)`;
+const beraknaTemperaturverkningsgrad = (v) => {
+    if (!valid(v.t_till, v.t_ute, v.t_fran)) return "Fel";
+    const nämnare = v.t_fran - v.t_ute;
+    if (nämnare === 0) return "Fel (0-division)";
+    const verkningsgrad = (v.t_till - v.t_ute) / nämnare;
+    return verkningsgrad;
 };
 
-const beraknaFlodePerPerson = (v) => {
-    const unit = v.flode_unit || "ls";
-    return `Flöde per person: ${(toLs(v.flode, unit) / v.antal).toFixed(1)} l/s·person`;
+const beraknaBlandningstemperatur = (v) => {
+    if (!valid(v.q_ute, v.t_ute, v.q_ater, v.t_ater, v.q_total) || v.q_total === 0) return "Fel";
+    const t_bland = ((v.q_ute * v.t_ute) + (v.q_ater * v.t_ater)) / v.q_total;
+    return t_bland;
 };
 
-const beraknaBlandning = (v) => {
-    const t_mix = (v.flode1 * v.temp1 + v.flode2 * v.temp2) / (v.flode1 + v.flode2);
-    return `Blandningstemperatur: ${t_mix.toFixed(1)} °C`;
+// -----------------------------------------------------------------
+// VS kalkyler
+// -----------------------------------------------------------------
+const beraknaVsFlode = (v) => {
+    if (!valid(v.effekt, v.dt)) return "Fel";
+    if (v.dt === 0) return "Fel (0-division)";
+    const flode_lh = (v.effekt / (4180 * v.dt)) * 3600;
+    
+    let resultatText = `Flöde: ${formatResult(flode_lh, 1)} l/h\n`;
+    resultatText += `Flöde: ${formatResult(flode_lh / 3600, 4)} l/s`;
+    return resultatText;
 };
 
-const beraknaFlaktLagar = (v) => {
-    const ratio = v.varv2 / v.varv1;
-    return `Nytt flöde: ${(v.flode1 * ratio).toFixed(1)}\nNytt tryck: ${(v.tryck1 * Math.pow(ratio, 2)).toFixed(1)}`;
+const beraknaKvVarde = (v) => {
+    if (!valid(v.flode_m3h, v.tryckfall) || v.tryckfall <= 0) return "Fel";
+    const kv = v.flode_m3h / Math.sqrt(v.tryckfall);
+    return kv;
 };
 
-const beraknaVarmeeffekt = (v) => {
-    const unit = v.flode_unit || "m3h";
-    const flode_m3h = toM3h(v.flode, unit);
-    const effekt_kW = 1.16 * flode_m3h * v.dT;
-    return `Värmeeffekt: ${effekt_kW.toFixed(2)} kW`;
+const beraknaNyRadiatoreffekt = (v) => {
+    if (!valid(v.p_proj, v.dt_ny, v.dt_gammal, v.exponent) || v.dt_gammal === 0) return "Fel";
+    const p_ny = v.p_proj * Math.pow(v.dt_ny / v.dt_gammal, v.exponent);
+    return p_ny;
 };
 
-const beraknaOhmsLag = (v) => `Effekt: ${(v.volt * v.ampere).toFixed(0)} W`;
-
-const beraknaTrefasEffekt = (v) => `Effekt: ${(Math.sqrt(3) * v.volt * v.ampere / 1000).toFixed(2)} kW`;
-
-const beraknaTransmissionsforlust = (v) => `Förlust: ${(v.uVarde * v.area * v.dT).toFixed(0)} W`;
-
-const beraknaSkalning010V = (v) => {
-    const resultat = (v.volt / 10) * (v.max - v.min) + v.min;
-    return `Värde: ${resultat.toFixed(2)}`;
+const beraknaVsProportionalitet = (v) => {
+    if (!valid(v.q_matt, v.q_proj) || v.q_proj === 0) return "Fel";
+    return v.q_matt / v.q_proj;
 };
 
-const beraknaSkalning420mA = (v) => `Värde: ${(((v.ma - 4) / 16) * (v.max - v.min) + v.min).toFixed(2)}`;
+const beraknaTryckfallRor = (v) => {
+    if (!valid(v.R, v.L)) return "Fel";
+    const delta_p_pa = v.R * v.L;
+    const delta_p_total = delta_p_pa * 1.4;
 
-const beraknaPband = (v) => `P-band (Xp): ${(v.utgang / v.fel).toFixed(2)}`;
-
-const beraknaTidskonstant = (v) => `Tidskonstant: ${((v.volym / v.flode) * 60).toFixed(1)} minuter`;
-
-const beraknaOmvandling020Till420 = (v) => {
-    if (v.input_ma < 4) return "Värde under 4mA (Fel/Kabelbrott)";
-    return `Värde: ${(((v.input_ma - 4) / 16) * (v.max - v.min) + v.min).toFixed(2)}`;
+    let resultatText = `Rörns tryckfall: ${formatResult(delta_p_total, 0)} Pa\n`;
+    resultatText += `Inkl. kopplingar (~40%): ${formatResult(delta_p_total / 1000, 2)} kPa`;
+    return resultatText;
 };
 
-const beraknaPlcSkalning420 = (v) => {
-    let res = ((v.input_ma - 4) / 16) * 100;
-    return `Skalat värde i PLC: ${Math.max(0, Math.min(100, res)).toFixed(1)} %`;
+const beraknaPumplagar = (v) => {
+    if (!valid(v.q1, v.n1, v.n2) || v.n1 === 0) return "Fel";
+
+    const q1 = v.q1;
+    const n1 = v.n1;
+    const n2 = v.n2;
+
+    const q2 = q1 * (n2 / n1);
+    let resultatText = `Nytt flöde (q₂): ${formatResult(q2, 1)}\n`;
+
+    if (v.H1 !== undefined && v.H1 !== null && !isNaN(v.H1) && v.H1 !== '') {
+        const H2 = v.H1 * Math.pow(n2 / n1, 2);
+        resultatText += `Nytt tryck (H₂): ${formatResult(H2, 1)} kPa\n`;
+    }
+
+    if (v.P1 !== undefined && v.P1 !== null && !isNaN(v.P1) && v.P1 !== '') {
+        const P2 = v.P1 * Math.pow(n2 / n1, 3);
+        resultatText += `Ny effekt (P₂): ${formatResult(P2, 2)} kW\n`;
+    }
+
+    return resultatText;
 };
 
-// Hjälpfunktion för att räkna ut teoretiskt värde vid 0 för alla skalningsverktyg
-const getTeoretisktNoll = (inMin, inMax, fysMin, fysMax) => {
-    return ((0 - inMin) / (inMax - inMin)) * (fysMax - fysMin) + fysMin;
+const beraknaEttrorTemp = (v) => {
+    if (!valid(v.t_fram, v.effekt, v.q_slinga) || v.q_slinga === 0) return "Fel";
+    const flode_m3s = v.q_slinga / 3600000;
+    const namnare = flode_m3s * 4180 * 1000;
+
+    if (namnare === 0) return "Fel (0-division)";
+    const t_nasta = v.t_fram - (v.effekt / namnare);
+    return t_nasta;
 };
 
+// -----------------------------------------------------------------
+// El & Gas kalkyler
+// -----------------------------------------------------------------
+const beraknaOhmsLag = (v) => {
+    if (!valid(v.varde1, v.varde2)) return "Fel";
+    const läge = v.lage_unit || "U";
+    if (läge === "U") return v.varde1 * v.varde2;
+    if (läge === "I" || läge === "R") return v.varde1 / v.varde2;
+    return "Fel";
+};
 
+const beraknaAnvandningstidGas = (v) => {
+    if (!valid(v.volym, v.tryck, v.flode) || v.flode === 0) return "Fel";
+    return (v.volym * v.tryck) / (v.flode * 60);
+};
 
+// =================================================================
+// 3. KALKYL-GRUPPER
+// =================================================================
+const styrKalkyler = [{
+    id: "styr_givar_skalning_0_10v",
+    namn: "Givarskalning 0-10V",
+    kategorier: ["styr"],
+    label: "Resultat",
+    unit: "",
+    decimaler: 2,
+    inputs: [
+        { id: "volt", label: "Uppmätt spänning (V)" },
+        { id: "min", label: "Minvärde" },
+        { id: "max", label: "Maxvärde" }
+    ],
+    calc: (v) => !valid(v.volt, v.min, v.max) ? "Fel": beraknaSkalning010V(v),
+    info: {
+        beskrivning: "Skalar om en 0-10V signal till ett fysiskt mätområde.",
+        formel: { namn: "Linjär skalning", beskrivning: "Värde = (Volt / 10) * (Max - Min) + Min" }
+    }
+}];
 
-
-
-
-
-
-
-
-// 4. ALLA KALKYLER
-export const ALLA_KALKYLER = [
-    //
+const ventKalkyler = [
     {
-        id: "omsattning",
+        id: "vent_luft_omsattning",
         namn: "Luftomsättning",
         kategorier: ["vent"],
-        inputs: [{
-            id: "volym",
-            label: "Rumsvolym (m³)"
-        },
-            {
-                id: "flode",
-                label: "Flöde",
-                unit: ["ls",
-                    "m3h"],
-                base: "m3h"
-            }],
-        calc: (v) => (!valid(v.volym, v.flode) || v.volym <= 0) ? "Fel": beraknaOmsattning(v),
-        info: `Används för att kontrollera hur många gånger per timme luften i ett rum byts ut.`
+        unit: "h⁻¹",
+        label: "Luftomsättning",
+        decimaler: 1,
+        inputs: [
+            { id: "volym", label: "Rumsvolym (m³)" },
+            { id: "flode", label: "Flöde", unit: ["ls", "m3h"], base: "m3h" }
+        ],
+        calc: beraknaOmsattning,
+        info: { beskrivning: "Beräknar hur många gånger per timme rumsvolymen byts ut." }
     },
-
     {
-        id: "kyleffekt_luft",
+        id: "vent_luft_kyleffekt",
         namn: "Kyleffekt luft",
         kategorier: ["vent"],
-        inputs: [{
-            id: "flode",
-            label: "Flöde",
-            unit: ["ls",
-                "m3h"],
-            base: "ls"
-        },
-            {
-                id: "tRum",
-                label: "Rumstemperatur (°C)"
-            },
-            {
-                id: "tTill",
-                label: "Tilluftstemperatur (°C)"
-            }],
-        calc: (v) => !valid(v.flode, v.tRum, v.tTill) ? "Felaktiga värden": beraknaKyleffekt(v),
-        info: "Kyleffekt (kW) = (1,2 × Flöde (l/s) × ΔT) / 1000"
+        unit: "kW",
+        decimaler: 2,
+        inputs: [
+            { id: "flode", label: "Flöde", unit: ["ls", "m3h"], base: "ls" },
+            { id: "tRum", label: "Rumstemperatur (°C)" },
+            { id: "tTill", label: "Tilluftstemperatur (°C)" }
+        ],
+        calc: (v) => !valid(v.flode, v.tRum, v.tTill) ? "Fel": beraknaKyleffekt(v),
+        info: { beskrivning: "Beräknar kyleffekt i tilluft." }
     },
-
     {
-        id: "flode_fran_kyla",
-        namn: "Luftflöde från kyleffekt",
+        id: "vent_kontinuitet_flode",
+        namn: "Flöde & Lufthastighet",
         kategorier: ["vent"],
-        inputs: [{
-            id: "effekt",
-            label: "Kyleffekt (kW)"
-        },
-            {
-                id: "tRum",
-                label: "Rumstemperatur (°C)"
-            },
-            {
-                id: "tTill",
-                label: "Tilluftstemperatur (°C)"
-            }],
-        calc: (v) => !valid(v.effekt, v.tRum, v.tTill) ? "Felaktiga värden": beraknaFlodeFranKyla(v),
-        info: `Flödesbehovet utifrån kylbehovet.`
+        unit: "l/s",
+        decimaler: 1,
+        inputs: [
+            { id: "hastighet", label: "Lufthastighet", unit: ["m/s"] },
+            { id: "area", label: "Kanalarea", unit: ["m²"] }
+        ],
+        calc: beraknaFlodeKontinuitet,
+        info: { beskrivning: "Flöde = Hastighet × Area." }
     },
-
     {
-        id: "verkningsgrad",
-        namn: "Temperaturverkningsgrad",
+        id: "vent_kfaktor_flode",
+        namn: "K-faktor flödesberäkning",
         kategorier: ["vent"],
-        inputs: [{
-            id: "tUte",
-            label: "Utetemp (°C)"
-        },
-            {
-                id: "tTill",
-                label: "Tilluft (°C)"
-            },
-            {
-                id: "tFran",
-                label: "Frånluft (°C)"
-            }],
-        calc: (v) => !valid(v.tUte, v.tTill, v.tFran) ? "Felaktiga värden": beraknaVerkningsgrad(v),
-        info: `Temperaturverkningsgrad för värmeåtervinnare (FTX).`
+        unit: "l/s",
+        decimaler: 1,
+        inputs: [
+            { id: "k_faktor", label: "K-faktor (k)" },
+            { id: "delta_p", label: "Differenstryck (Δp)", unit: ["Pa"] }
+        ],
+        calc: beraknaKfaktor,
+        info: { beskrivning: "Flöde = K × √Δp" }
     },
-
     {
-        id: "tryckfall",
-        namn: "Tryckfall",
+        id: "vent_proportionalitetsmetoden",
+        namn: "Proportionalitetsmetoden",
         kategorier: ["vent"],
-        inputs: [{
-            id: "flode",
-            label: "Flöde",
-            unit: ["ls",
-                "m3h"],
-            base: "m3h"
+        unit: "",
+        decimaler: 2,
+        inputs: [
+            { id: "q_matt", label: "Uppmätt flöde", unit: ["ls", "m3h"], base: "ls" },
+            { id: "q_proj", label: "Projekterat flöde", unit: ["ls", "m3h"], base: "ls" }
+        ],
+        calc: (v) => {
+            if (!valid(v.q_matt, v.q_proj) || v.q_proj === 0) return "Fel";
+            const mattLs = toLs(v.q_matt, v.q_matt_unit || "ls");
+            const projLs = toLs(v.q_proj, v.q_proj_unit || "ls");
+            return mattLs / projLs;
         },
-            {
-                id: "diameter",
-                label: "Diameter (mm)"
-            }],
-        calc: (v) => (!valid(v.flode, v.diameter) || v.diameter <= 0) ? "Fyll i giltiga värden": beraknaTryckfall(v),
-        info: `Beräknar ungefärligt tryckfall per meter kanal baserat på lufthastighet. Gäller för släta cirkulära stålplåtskanaler.`
+        info: { beskrivning: "Injusteringskvot." }
     },
-
     {
-        id: "flode_fran_oms",
-        namn: "Luftflöde från omsättning",
+        id: "vent_sfp",
+        namn: "Specifik Fläkteffekt (SFP)",
+        kategorier: ["vent", "bygg"],
+        unit: "kW/(m³/s)",
+        decimaler: 1,
+        inputs: [
+            { id: "p_tot", label: "Total tillförd effekt (P_tot)", unit: ["kW"] },
+            { id: "flode", label: "Största flöde", unit: ["ls", "m3h"], base: "ls" }
+        ],
+        calc: beraknaSFP,
+        info: { beskrivning: "Energiaspekt för fläktar." }
+    },
+    {
+        id: "vent_affinitetslagarna",
+        namn: "Affinitetslagarna (Fläktlagar)",
+        kategorier: ["vent", "styr"],
+        unit: "",
+        decimaler: 1,
+        inputs: [
+            { id: "q1", label: "Nuvarande flöde (q₁)", unit: ["l/s", "m³/h"] },
+            { id: "n1", label: "Nuvarande frekvens/varvtal (n₁)", unit: ["Hz", "rpm"] },
+            { id: "q2", label: "Önskat flöde (q₂)", unit: ["l/s", "m³/h"] },
+            { id: "p1", label: "Nuvarande tryck (p₁) - Frivillig", unit: ["Pa"], optional: true },
+            { id: "P1", label: "Nuvarande effekt (P₁) - Frivillig", unit: ["kW"], optional: true }
+        ],
+        calc: beraknaAffinitet,
+        info: { beskrivning: "Fläkt- och pumplagar." }
+    },
+    {
+        id: "vent_ekvivalent_diameter",
+        namn: "Ekvivalent kanaldiameter",
         kategorier: ["vent"],
-        inputs: [{
-            id: "volym",
-            label: "Rumsvolym (m³)"
-        },
-            {
-                id: "oms",
-                label: "Omsättning (h⁻¹)"
-            }],
-        calc: (v) => (!valid(v.volym, v.oms) || v.volym <= 0 || v.oms <= 0) ? "Felaktiga värden": beraknaFlodeFranOms(v),
-        info: `Totalt luftflöde baserat på volym och önskad omsättning.`
+        unit: "mm",
+        decimaler: 0,
+        inputs: [
+            { id: "bredd", label: "Kanalens bredd (a)", unit: ["mm", "m"] },
+            { id: "hojd", label: "Kanalens höjd (b)", unit: ["mm", "m"] }
+        ],
+        calc: beraknaEkvivalentDiameter,
+        info: {
+            beskrivning: "Beräknar den ekvivalenta (hydrauliska) diametern för en rektangulär kanal.",
+            formel: { namn: "Ekvivalent diameter", beskrivning: "d_e = (2 × a × b) / (a + b)" }
+        }
     },
-
     {
-        id: "spec_flode",
-        namn: "Specifikt flöde (l/s per m²)",
-        kategorier: ["vent",
-            "energi"],
-        inputs: [{
-            id: "flode",
-            label: "Flöde",
-            unit: ["ls",
-                "m3h"],
-            base: "ls"
-        },
-            {
-                id: "area",
-                label: "Area (m²)"
-            }],
-        calc: (v) => (!valid(v.flode, v.area) || v.area <= 0 || v.flode <= 0) ? "Felaktiga värden": beraknaSpecFlode(v),
-        info: `Kontrollera BBR-krav.`
-    },
-
-    {
-        id: "co2_flode",
-        namn: "CO₂ luftflödesbehov",
+        id: "vent_galler_effektiv_area",
+        namn: "Flöde via effektiv area (Don/Galler)",
         kategorier: ["vent"],
-        inputs: [{
-            id: "antal",
-            label: "Antal personer"
-        }],
-        calc: (v) => !valid(v.antal) || v.antal < 0 ? "Felaktiga värden": beraknaCo2Flode(v),
-        info: "Schablon: 7 l/s per person."
+        unit: "l/s",
+        decimaler: 1,
+        inputs: [
+            { id: "hastighet", label: "Uppmätt medelhastighet (v_medel)", unit: ["m/s"] },
+            { id: "a_eff", label: "Effektiv area (A_eff)", unit: ["m²"] }
+        ],
+        calc: beraknaGallerFlode,
+        info: { beskrivning: "Beräknar luftflödet genom ett don eller galler baserat på uppmätt lufthastighet." }
     },
     {
-        id: "tryckfall_kanal",
-        namn: "Tryckfall kanal",
+        id: "vent_temperaturverkningsgrad",
+        namn: "Temperaturverkningsgrad (Värmeväxlare)",
         kategorier: ["vent"],
-        inputs: [{
-            id: "flode",
-            label: "Flöde",
-            unit: ["ls",
-                "m3h"],
-            base: "m3h"
-        },
-            {
-                id: "diameter",
-                label: "Diameter (mm)"
-            },
-            {
-                id: "langd",
-                label: "Längd (m)"
-            }],
-        calc: (v) => !valid(v.flode, v.diameter, v.langd) || v.diameter <= 0 ? "Fyll i giltiga värden": beraknaTryckfallKanal(v),
-        info: "Beräknar det totala friktionstryckfallet i en rak cirkulär kanal."
+        unit: "",
+        decimaler: 2,
+        inputs: [
+            { id: "t_till", label: "Tilluft efter växlare (t_till)", unit: ["celsius"] },
+            { id: "t_ute", label: "Uteluft före växlare (t_ute)", unit: ["celsius"] },
+            { id: "t_fran", label: "Frånluft före växlare (t_från)", unit: ["celsius"] }
+        ],
+        calc: beraknaTemperaturverkningsgrad,
+        info: { beskrivning: "Beräknar värmeväxlarens temperaturverkningsgrad." }
     },
     {
-        id: "sfp_tal",
-        namn: "SFP-tal",
-        kategorier: ["vent",
-            "energi"],
-        inputs: [{
-            id: "effekt",
-            label: "Eleffekt (kW)"
-        },
-            {
-                id: "flode",
-                label: "Flöde",
-                unit: ["m3s",
-                    "ls",
-                    "m3h"],
-                base: "m3s"
-            }],
-        calc: (v) => !valid(v.effekt, v.flode) ? "Fyll i alla fält": beraknaSfp(v),
-        info: "SFP (Specific Fan Power) anger energieffektivitet."
-    },
-    {
-        id: "flode_person",
-        namn: "Flöde per person",
-        kategorier: ["vent"],
-        inputs: [{
-            id: "flode",
-            label: "Totalt flöde",
-            unit: ["ls",
-                "m3h"],
-            base: "ls"
-        },
-            {
-                id: "antal",
-                label: "Antal personer"
-            }],
-        calc: (v) => !valid(v.flode, v.antal) || v.antal <= 0 ? "Felaktiga värden": beraknaFlodePerPerson(v),
-        info: "Flöde per person = Totalt friskluftsflöde / Antal personer"
-    },
-    {
-        id: "blandningstemperatur",
-        namn: "Blandningstemperatur",
-        kategorier: ["vent",
-            "vs"],
-        inputs: [{
-            id: "flode1",
-            label: "Flöde 1"
-        },
-            {
-                id: "temp1",
-                label: "Temperatur 1"
-            },
-            {
-                id: "flode2",
-                label: "Flöde 2"
-            },
-            {
-                id: "temp2",
-                label: "Temperatur 2"
-            }],
-        calc: (v) => !valid(v.flode1, v.temp1, v.flode2, v.temp2) ? "Fyll i alla fält": beraknaBlandning(v),
-        info: "Resultat när två flöden blandas."
-    },
-    {
-        id: "flakt_pumplagar",
-        namn: "Fläkt- & Pumplagarna",
-        kategorier: ["vent",
-            "vs"],
-        inputs: [{
-            id: "flode1",
-            label: "Nuvarande flöde"
-        },
-            {
-                id: "tryck1",
-                label: "Nuvarande tryck"
-            },
-            {
-                id: "varv1",
-                label: "Nuvarande Hz"
-            },
-            {
-                id: "varv2",
-                label: "Nytt Hz"
-            }],
-        calc: (v) => !valid(v.flode1, v.tryck1, v.varv1, v.varv2) || v.varv1 === 0 ? "Felaktiga värden": beraknaFlaktLagar(v),
-        info: "Ändra flöde/tryck via varvtal."
-    },
+        id: "vent_blandningstemperatur",
+        namn: "Blandningstemperatur (Recirkulation)",
+        kategorier: ["vent", "styr"],
+        unit: "°C",
+        decimaler: 1,
+        inputs: [
+            { id: "q_ute", label: "Uteluftsflöde (q_ute)", unit: ["ls", "m3h"], base: "ls" },
+            { id: "t_ute", label: "Uteluftstemperatur (t_ute)", unit: ["celsius"] },
+            { id: "q_ater", label: "Återluftsflöde (q_åter)", unit: ["ls", "m3h"], base: "ls" },
+            { id: "t_ater", label: "Återluftstemperatur (t_ater)", unit: ["celsius"] },
+            { id: "q_total", label: "Totalt blandningsflöde (q_total)", unit: ["ls", "m3h"], base: "ls" }
+        ],
+        calc: beraknaBlandningstemperatur,
+        info: { beskrivning: "Beräknar sluttemperaturen när uteluft blandas med återluft." }
+    }
+];
 
+const vsKalkyler = [
     {
-        id: "effekt",
-        namn: "Värmeeffekt",
+        id: "vs_effekt_flode",
+        namn: "Radiatorflöde & Effekt (VS)",
         kategorier: ["vs"],
-        inputs: [{
-            id: "flode",
-            label: "Flöde",
-            unit: ["ls",
-                "m3h"],
-            base: "m3h"
-        },
-            {
-                id: "dT",
-                label: "ΔT (°C)"
-            }],
-        calc: (v) => !valid(v.flode, v.dT) ? "Fyll i alla fält": beraknaVarmeeffekt(v),
-        info: "Formel: Effekt (kW) = 1,16 × Flöde (m³/h) × ΔT."
+        unit: "l/h",
+        decimaler: 1,
+        inputs: [
+            { id: "effekt", label: "Radiatoreffekt (P)", unit: ["W"] },
+            { id: "dt", label: "Temperaturskillnad (ΔT)", unit: ["°C"] }
+        ],
+        calc: beraknaVsFlode,
+        info: { beskrivning: "Beräknar det erforderliga vattenflödet för en given radiatoreffekt." }
     },
     {
-        id: "ohms_lag",
-        namn: "Ohms lag & Effekt (1-fas)",
-        kategorier: ["el"],
-        inputs: [{
-            id: "volt",
-            label: "Volt"
-        },
-            {
-                id: "ampere",
-                label: "Ampere"
-            }],
-        calc: (v) => !valid(v.volt, v.ampere) ? "Fyll i alla fält": beraknaOhmsLag(v),
-        info: "P = U * I"
+        id: "vs_kv_varde",
+        namn: "K_v-värde (Ventilinställning)",
+        kategorier: ["vs"],
+        unit: "",
+        decimaler: 2,
+        inputs: [
+            { id: "flode_m3h", label: "Flöde (q)", unit: ["m³/h"] },
+            { id: "tryckfall", label: "Tryckfall över ventil (Δp)", unit: ["bar"] }
+        ],
+        calc: beraknaKvVarde,
+        info: { beskrivning: "Beräknar ventilens K_v-värde för inställning av rätt flöde." }
     },
     {
-        id: "trefaseffekt",
-        namn: "Trefaseffekt (3-fas)",
-        kategorier: ["el"],
-        inputs: [{
-            id: "volt",
-            label: "Volt (L-L)"
-        },
-            {
-                id: "ampere",
-                label: "Ampere"
-            }],
-        calc: (v) => !valid(v.volt, v.ampere) ? "Fyll i alla fält": beraknaTrefasEffekt(v),
-        info: "P = √3 * U * I"
+        id: "vs_radiator_ny_temp",
+        namn: "Radiatoreffekt vid ny temperatur",
+        kategorier: ["vs"],
+        unit: "W",
+        decimaler: 0,
+        inputs: [
+            { id: "p_proj", label: "Projekterad effekt", unit: ["W"] },
+            { id: "dt_ny", label: "Ny övertemperatur (ΔT_ny)", unit: ["°C"] },
+            { id: "dt_gammal", label: "Gammal övertemperatur (ΔT_gammal)", unit: ["°C"] },
+            { id: "exponent", label: "Radiatorexponent (n)" }
+        ],
+        calc: beraknaNyRadiatoreffekt,
+        info: { beskrivning: "Beräknar hur mycket effekten på en radiator förändras." }
     },
     {
-        id: "transmissionsforlust",
-        namn: "Transmissionsförlust",
-        kategorier: ["energi",
-            "bygg"],
-        inputs: [{
-            id: "uVarde",
-            label: "U-värde"
-        },
-            {
-                id: "area",
-                label: "Area"
-            },
-            {
-                id: "dT",
-                label: "ΔT"
-            }],
-        calc: (v) => !valid(v.uVarde, v.area, v.dT) ? "Fyll i alla fält": beraknaTransmissionsforlust(v),
-        info: "Q = U * A * ΔT"
+        id: "vs_proportionalitetsmetoden",
+        namn: "Proportionalitetsmetoden (VS)",
+        kategorier: ["vs"],
+        unit: "",
+        decimaler: 2,
+        inputs: [
+            { id: "q_matt", label: "Uppmätt flöde", unit: ["l/h", "m³/h"] },
+            { id: "q_proj", label: "Projekterat flöde", unit: ["l/h", "m³/h"] }
+        ],
+        calc: beraknaVsProportionalitet,
+        info: { beskrivning: "Beräknar injusteringskvoten för stammar och radiatorer." }
     },
     {
-        id: "skalning_0_10v",
-        namn: "Givarskalning 0-10V",
-        kategorier: ["styr"],
-        inputs: [{
-            id: "volt",
-            label: "Uppmätt volt (V)"
-        },
-            {
-                id: "min",
-                label: "Minvärde"
-            },
-            {
-                id: "max",
-                label: "Maxvärde"
-            }],
-        calc: (v) => !valid(v.volt, v.min, v.max) ? "Fyll i alla fält": beraknaSkalning010V(v),
-        info: "Skalar om 0-10V till ett mätområde.\nFormel: (U/10) * (Max - Min) + Min"
+        id: "vs_tryckfall_ror",
+        namn: "Tryckfall i rör (VS)",
+        kategorier: ["vs"],
+        unit: "",
+        decimaler: 0,
+        inputs: [
+            { id: "R", label: "Friktionsmotstånd (R) [Pa/m]", unit: ["Pa/m"] },
+            { id: "L", label: "Rörsatsens totala längd (fram + retur)", unit: ["m"] }
+        ],
+        calc: beraknaTryckfallRor,
+        info: { beskrivning: "Beräknar tryckfallet i rörnätet inklusive tillägg för kopplingar." }
     },
     {
-        id: "skalning_4_20ma",
-        namn: "Givarskalning 4-20mA",
-        kategorier: ["styr"],
-        inputs: [{
-            id: "ma",
-            label: "mA"
-        },
-            {
-                id: "min",
-                label: "Min"
-            },
-            {
-                id: "max",
-                label: "Max"
-            }],
-        calc: (v) => !valid(v.ma, v.min, v.max) ? "Fyll i alla fält": beraknaSkalning420mA(v),
-        info: "4mA motsvarar minvärdet, 20mA maxvärdet."
+        id: "vs_pumplagar",
+        namn: "Pumplagarna (Affinitetslagarna)",
+        kategorier: ["vs", "styr"],
+        unit: "",
+        decimaler: 1,
+        inputs: [
+            { id: "q1", label: "Nuvarande flöde (q₁)", unit: ["l/h", "m³/h"] },
+            { id: "n1", label: "Nuvarande varvtal / frekvens (n₁)", unit: ["Hz", "rpm"] },
+            { id: "n2", label: "Önskat nytt varvtal / frekvens (n₂)", unit: ["Hz", "rpm"] },
+            { id: "H1", label: "Nuvarande tryck (H₁) - Frivillig", unit: ["kPa", "bar"], optional: true },
+            { id: "P1", label: "Nuvarande effekt (P₁) - Frivillig", unit: ["kW"], optional: true }
+        ],
+        calc: beraknaPumplagar,
+        info: { beskrivning: "Beräknar hur flöde, tryck och effekt förändras för cirkulationspumpar." }
     },
     {
-        id: "p_band",
-        namn: "P-bandsberäkning (Xp)",
-        kategorier: ["styr"],
-        inputs: [{
-            id: "utgang",
-            label: "% Utsignal"
-        },
-            {
-                id: "fel",
-                label: "Δ Ärvärde"
-            }],
-        calc: (v) => !valid(v.utgang, v.fel) || v.fel === 0 ? "Felaktiga värden": beraknaPband(v),
-        info: "P-bandet (Xp) anger proportionalitetsområdet."
-    },
-    {
-        id: "tidskonstant",
-        namn: "Tidskonstant (Värme)",
-        kategorier: ["styr"],
-        inputs: [{
-            id: "volym",
-            label: "Volym (m³)"
-        },
-            {
-                id: "flode",
-                label: "Flöde (m³/h)"
-            }],
-        calc: (v) => !valid(v.volym, v.flode) || v.flode === 0 ? "Fel": beraknaTidskonstant(v),
-        info: "Tumregel för systemrespons."
-    },
-    {
-        id: "plc_skalning_proffs",
-        namn: "PLC Skalningsverktyg",
-        kategorier: ["styr"],
-        inputs: [{
-            id: "givar_min_ma",
-            label: "In Min (mA)"
-        },
-            {
-                id: "givar_max_ma",
-                label: "In Max (mA)"
-            },
-            {
-                id: "fys_min",
-                label: "Fys Min"
-            },
-            {
-                id: "fys_max",
-                label: "Fys Max"
-            }],
-        calc: (v) => !valid(v.givar_min_ma, v.givar_max_ma, v.fys_min, v.fys_max) ? "Fyll i fält":
-        `PLC KONFIGURATION:\nIn: ${v.givar_min_ma}-${v.givar_max_ma}mA\nUt: ${v.fys_min}-${v.fys_max}\n\nDIAGNOS VID 0mA:\nPLC visar: ${getTeoretisktNoll(v.givar_min_ma, v.givar_max_ma, v.fys_min, v.fys_max).toFixed(2)}`,
-        info: "Mappar givarens område till fysiska enheter med inbyggd larmdiagnos."
-    }];
+        id: "vs_ettror_temp",
+        namn: "Framledningstemperatur Ettrörssystem",
+        kategorier: ["vs"],
+        unit: "°C",
+        decimaler: 1,
+        inputs: [
+            { id: "t_fram", label: "Ingående framledningstemp (T_fram)", unit: ["celsius"] },
+            { id: "effekt", label: "Radiatoreffekt (P)", unit: ["W"] },
+            { id: "q_slinga", label: "Slingans totala vattenflöde", unit: ["l/h"] }
+        ],
+        calc: beraknaEttrorTemp,
+        info: { beskrivning: "Beräknar avkylningen per radiator i en seriekopplad slinga." }
+    }
+];
+
+const elKalkyler = [{
+    id: "el_ohms_lag",
+    namn: "Ohms lag",
+    kategorier: ["el", "tele"],
+    decimaler: 2,
+    inputs: [
+        { id: "lage", label: "Vad vill du räkna ut?", unit: ["U", "I", "R"], requiresInput: false },
+        { id: "varde1", label: "Ström (I) [A]" },
+        { id: "varde2", label: "Resistans (R) [Ω]" }
+    ],
+    calc: beraknaOhmsLag,
+    info: { beskrivning: "Ohms lag." }
+}];
+
+const gasKalkyler = [{
+    id: "gas_anvandningstid",
+    namn: "Användningstid gasflaska",
+    kategorier: ["gas"],
+    decimaler: 1,
+    inputs: [
+        { id: "volym", label: "Flaskans volym", unit: ["L"] },
+        { id: "tryck", label: "Tryck", unit: ["bar"] },
+        { id: "flode", label: "Ordinerat flöde", unit: ["L/min"] }
+    ],
+    calc: beraknaAnvandningstidGas,
+    info: { beskrivning: "Gasflaskberäkning." }
+}];
+
+const teleKalkyler = [];
+
+export const ALLA_KALKYLER = [
+    ...styrKalkyler,
+    ...ventKalkyler,
+    ...vsKalkyler,
+    ...elKalkyler,
+    ...gasKalkyler,
+    ...teleKalkyler
+];

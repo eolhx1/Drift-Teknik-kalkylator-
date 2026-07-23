@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#ffffff">
-    
-<link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="style.css">
-    
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0066cc">
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0066cc">
 
     <title>Drift Teknik</title>
 
@@ -19,27 +19,26 @@
 
 <body>
     <div class="wrapper">
-        
-    <header class="app-header">
-    <h1 class="app-title">Drift Teknik</h1>
-    <button id="settingsBtn" class="settings-btn">⚙️</button>
-</header>
-
-    <div class="wrapper">
-    </div>
-    <script type="module" src="app.js"></script>
-
-        <input
-        id="searchBox"
-        type="text"
-        placeholder="🔍 Sök beräkning..."
-        aria-label="Sök efter beräkning">
+        <header class="app-header">
+            <h1 id="appTitle" class="app-title" translate="no" style="cursor: pointer;">Drift Teknik</h1>
+            <button id="settingsBtn" class="settings-btn">⚙️</button>
+        </header>
 
         <nav id="mainNav" class="main-nav" aria-label="Huvudkategorier"></nav>
         <nav id="subNav" class="sub-nav" aria-label="Underkategorier"></nav>
         <div id="calcContainer"></div>
     </div>
 
+    <!-- Bottenmenyn -->
+    <nav id="bottomNav" class="bottom-nav">
+        <button id="navHome" class="nav-item active">🏠 Hem</button>
+        <button id="navFav" class="nav-item">⭐ Favoriter</button>
+        <button id="navJobs" class="nav-item">💼 Jobb</button> <!-- NY KNNAPP -->
+        <button id="navRecent" class="nav-item">🕒 Senaste</button>
+        <button id="navSearch" class="nav-item">🔍 Sök</button>
+    </nav>
+
     <script type="module" src="app.js"></script>
 </body>
+
 </html>
