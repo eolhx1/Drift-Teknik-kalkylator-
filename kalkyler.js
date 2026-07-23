@@ -822,8 +822,7 @@ const vsKalkyler = [{
         // T_fram,nästa = T_fram - (P / (q * c_p * ρ))
         const t_nasta = v.t_fram - (v.effekt / namnare);
         return t_nasta;
-    };
-];
+    }];
 
 
 
