@@ -42,27 +42,18 @@ const beraknaTryckfallRor = (v) => {
     return resultatText;
 };
 
-const beraknaPumplagar = (v) => {
-    if (!valid(v.q1, v.n1, v.n2) || v.n1 === 0) return "Fel";
-
-    const q1 = v.q1;
-    const n1 = v.n1;
-    const n2 = v.n2;
-
-    const q2 = q1 * (n2 / n1);
-    let resultatText = `Nytt flöde (q₂): ${formatResult(q2, 1)}\n`;
-
-    if (v.H1 !== undefined && v.H1 !== null && !isNaN(v.H1) && v.H1 !== '') {
-        const H2 = v.H1 * Math.pow(n2 / n1, 2);
-        resultatText += `Nytt tryck (H₂): ${formatResult(H2, 1)} kPa\n`;
-    }
-
-    if (v.P1 !== undefined && v.P1 !== null && !isNaN(v.P1) && v.P1 !== '') {
-        const P2 = v.P1 * Math.pow(n2 / n1, 3);
-        resultatText += `Ny effekt (P₂): ${formatResult(P2, 2)} kW\n`;
-    }
-
-    return resultatText;
+// Affinitetslagar för Pumpar
+const beraknaPumpAffinitet = (v) => {
+    if (!valid(v.n1, v.n2, v.q1, v.p1, v.e1)) return "Fel";
+    
+    const kvot = v.n2 / v.n1;
+    const q2 = v.q1 * kvot;
+    const p2 = v.p1 * Math.pow(kvot, 2);
+    const e2 = v.e1 * Math.pow(kvot, 3);
+    
+    return `Nytt flöde (Q2): ${q2.toFixed(2)} l/s\n` +
+           `Nytt tryck / uppfordringshöjd (p2): ${p2.toFixed(1)} kPa\n` +
+           `Ny effekt (P2): ${e2.toFixed(2)} kW`;
 };
 
 const beraknaEttrorTemp = (v) => {
@@ -145,20 +136,22 @@ export const vsKalkyler = [
         info: { beskrivning: "Beräknar tryckfallet i rörnätet inklusive tillägg för kopplingar." }
     },
     {
-        id: "vs_pumplagar",
-        namn: "Pumplagarna (Affinitetslagarna)",
-        kategorier: ["vs", "styr"],
-        unit: "",
-        decimaler: 1,
+        idid: "vs_affinitet_pump",
+        namn: "Affinitetslagar (Pump)",
+        kategorier: ["vs"],
+        decimaler: 2,
         inputs: [
-            { id: "q1", label: "Nuvarande flöde (q₁)", unit: ["l/h", "m³/h"] },
-            { id: "n1", label: "Nuvarande varvtal / frekvens (n₁)", unit: ["Hz", "rpm"] },
-            { id: "n2", label: "Önskat nytt varvtal / frekvens (n₂)", unit: ["Hz", "rpm"] },
-            { id: "H1", label: "Nuvarande tryck (H₁) - Frivillig", unit: ["kPa", "bar"], optional: true },
-            { id: "P1", label: "Nuvarande effekt (P₁) - Frivillig", unit: ["kW"], optional: true }
+            { id: "n1", label: "Nuvarande varvtal / frekvens [varv/min eller Hz]" },
+            { id: "n2", label: "Nytt varvtal / frekvens [varv/min eller Hz]" },
+            { id: "q1", label: "Nuvarande flöde [l/s]" },
+            { id: "p1", label: "Nuvarande tryck [kPa]" },
+            { id: "e1", label: "Nuvarande effekt [kW]" }
         ],
-        calc: beraknaPumplagar,
-        info: { beskrivning: "Beräknar hur flöde, tryck och effekt förändras för cirkulationspumpar." }
+        calc: beraknaPumpAffinitet,
+        info: {
+            beskrivning: "Beräknar nytt flöde, tryck och effekt vid ändrat varvtal för pumpar.",
+            formel: { namn: "Affinitetslagarna", beskrivning: "Q2 = Q1*(n2/n1), p2 = p1*(n2/n1)², P2 = P1*(n2/n1)³" }
+        }
     },
     {
         id: "vs_ettror_temp",
