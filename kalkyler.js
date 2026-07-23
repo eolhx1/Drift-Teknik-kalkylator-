@@ -1,41 +1,15 @@
-//
-// Fil: kalkyler.js
-//
-
 // =================================================================
-// ?. IMPORTER
+// 1. IMPORTER
 // =================================================================
-import { UNIT_MAP, KATEGORIER } from './kalkyler/hjalpmedel.js';
+import { valid, formatResult, UNIT_MAP, KATEGORIER } from './kalkyler/hjalpmedel.js';
 import { ventKalkyler } from './kalkyler/ventilation.js';
 import { vsKalkyler } from './kalkyler/vs.js';
 
-
 // =================================================================
-// 1. HJÄLPFUNKTIONER (Verktyg för beräkningar)
+// 2. MATEMATISK LOGIK & BERÄKNINGAR
 // =================================================================
-
-
-// =================================================================
-// 2. MATEMATISK LOGIK
-// =================================================================
-
-// -----------------------------------------------------------------
-// Styr kalkyler
-// -----------------------------------------------------------------
 const beraknaSkalning010V = (v) => (v.volt / 10) * (v.max - v.min) + v.min;
 
-// -----------------------------------------------------------------
-// Ventilations kalkyler
-// -----------------------------------------------------------------
-// flyttat till ./kalkyler/ventilation.js
-// -----------------------------------------------------------------
-// VS kalkyler
-// -----------------------------------------------------------------
-
-
-// -----------------------------------------------------------------
-// El & Gas kalkyler
-// -----------------------------------------------------------------
 const beraknaOhmsLag = (v) => {
     if (!valid(v.varde1, v.varde2)) return "Fel";
     const läge = v.lage_unit || "U";
@@ -64,13 +38,12 @@ const styrKalkyler = [{
         { id: "min", label: "Minvärde" },
         { id: "max", label: "Maxvärde" }
     ],
-    calc: (v) => !valid(v.volt, v.min, v.max) ? "Fel": beraknaSkalning010V(v),
+    calc: (v) => !valid(v.volt, v.min, v.max) ? "Fel" : beraknaSkalning010V(v),
     info: {
         beskrivning: "Skalar om en 0-10V signal till ett fysiskt mätområde.",
         formel: { namn: "Linjär skalning", beskrivning: "Värde = (Volt / 10) * (Max - Min) + Min" }
     }
 }];
-
 
 const elKalkyler = [{
     id: "el_ohms_lag",
@@ -110,3 +83,6 @@ export const ALLA_KALKYLER = [
     ...gasKalkyler,
     ...teleKalkyler
 ];
+
+// Exportera vidare så att app.js kommer åt dem via kalkyler.js
+export { UNIT_MAP, KATEGORIER };
