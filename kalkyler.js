@@ -115,13 +115,37 @@ const beraknaEkvivalentDiameter = (v) => {
 // Strömningshastighet över don och galler (Effektiv area)
 const beraknaGallerFlode = (v) => {
     if (!valid(v.hastighet, v.a_eff)) return "Fel";
-    
+
     // Formel: q = v_medel * A_eff (Resultat i m³/s, omvandlar till l/s genom att multiplicera med 1000)
     const flode_m3s = v.hastighet * v.a_eff;
     const flode_ls = flode_m3s * 1000;
-    
+
     return flode_ls;
 };
+
+// Temperaturverkningsgrad på värmeväxlare
+const beraknaTemperaturverkningsgrad = (v) => {
+    if (!valid(v.t_till, v.t_ute, v.t_fran)) return "Fel";
+    const nämnare = v.t_fran - v.t_ute;
+    if (nämnare === 0) return "Fel (0-division)";
+
+    // Formel: η_t = (t_till - t_ute) / (t_från - t_ute)
+    const verkningsgrad = (v.t_till - v.t_ute) / nämnare;
+    return verkningsgrad;
+};
+
+// Blandningstemperatur vid recirkulation (Shuntluft)
+const beraknaBlandningstemperatur = (v) => {
+    if (!valid(v.q_ute, v.t_ute, v.q_ater, v.t_ater, v.q_total) || v.q_total === 0) return "Fel";
+
+    // Konvertera flöden till samma enhet om de skiljer sig åt, eller använd direkt eftersom kvoten behåller proportionen
+    // Formel: t_bland = ((q_ute * t_ute) + (q_åter * t_åter)) / q_total
+    const t_bland = ((v.q_ute * v.t_ute) + (v.q_ater * v.t_ater)) / v.q_total;
+    return t_bland;
+};
+
+
+
 
 
 
@@ -240,7 +264,7 @@ const ventKalkyler = [{
             beskrivning: "Flöde = Hastighet × Area."
         }
     },
-    
+
     {
         id: "vent_kfaktor_flode",
         namn: "K-faktor flödesberäkning",
@@ -389,25 +413,23 @@ const ventKalkyler = [{
             tips: "Se till att båda måtten anges i samma enhet (både i mm eller båda i m)."
         }
     },
-    
-        {
+
+    {
         id: "vent_galler_effektiv_area",
         namn: "Flöde via effektiv area (Don/Galler)",
         kategorier: ["vent"],
         unit: "l/s",
         decimaler: 1,
-        inputs: [
-            {
-                id: "hastighet",
-                label: "Uppmätt medelhastighet (v_medel)",
-                unit: ["m/s"]
-            },
+        inputs: [{
+            id: "hastighet",
+            label: "Uppmätt medelhastighet (v_medel)",
+            unit: ["m/s"]
+        },
             {
                 id: "a_eff",
                 label: "Effektiv area (A_eff)",
                 unit: ["m²"]
-            }
-        ],
+            }],
         calc: beraknaGallerFlode,
         info: {
             beskrivning: "Beräknar luftflödet genom ett don eller galler baserat på uppmätt lufthastighet och tillverkarens effektiva area.",
@@ -418,9 +440,90 @@ const ventKalkyler = [{
             riktvarden: "Den effektiva arean är alltid mindre än gallrets yttermått och hämtas från tillverkarens produktblad eller tryckfallstabell.",
             tips: "Försök att föra mätinstrumentet jämnt över hela gallrets yta (sökmetoden) för att få ett korrekt medelvärde."
         }
-    }
+    },
 
-    ];
+    {
+        id: "vent_temperaturverkningsgrad",
+        namn: "Temperaturverkningsgrad (Värmeväxlare)",
+        kategorier: ["vent"],
+        unit: "",
+        // Visas i procent eller decimal via formatering, vi sätter decimaler till 2 (t.ex. 0,80 eller 80%)
+        decimaler: 2,
+        inputs: [{
+            id: "t_till",
+            label: "Tilluft efter växlare (t_till)",
+            unit: ["celsius"]
+        },
+            {
+                id: "t_ute",
+                label: "Uteluft före växlare (t_ute)",
+                unit: ["celsius"]
+            },
+            {
+                id: "t_fran",
+                label: "Frånluft före växlare (t_från)",
+                unit: ["celsius"]
+            }],
+        calc: beraknaTemperaturverkningsgrad,
+        info: {
+            beskrivning: "Beräknar värmeväxlarens temperaturverkningsgrad baserat på uppmätta temperaturer.",
+            formel: {
+                namn: "η_t = (t_till - t_ute) / (t_från - t_ute)",
+                beskrivning: "Visar andelen av frånluftens värme som återvinns till tilluften."
+            },
+            riktvarden: "Roterande växlare brukar ligga kring 70-85%, plattväxlare runt 50-75%.",
+            tips: "Mät när aggregatet är i stabil drift och uteluftstemperaturen är markant lägre än frånluftstemperaturen."
+        }
+    },
+    {
+        id: "vent_blandningstemperatur",
+        namn: "Blandningstemperatur (Recirkulation)",
+        kategorier: ["vent",
+            "styr"],
+        unit: "°C",
+        decimaler: 1,
+        inputs: [{
+            id: "q_ute",
+            label: "Uteluftsflöde (q_ute)",
+            unit: ["ls",
+                "m3h"],
+            base: "ls"
+        },
+            {
+                id: "t_ute",
+                label: "Uteluftstemperatur (t_ute)",
+                unit: ["celsius"]
+            },
+            {
+                id: "q_ater",
+                label: "Återluftsflöde (q_åter)",
+                unit: ["ls",
+                    "m3h"],
+                base: "ls"
+            },
+            {
+                id: "t_ater",
+                label: "Återluftstemperatur (t_åter)",
+                unit: ["celsius"]
+            },
+            {
+                id: "q_total",
+                label: "Totalt blandningsflöde (q_total)",
+                unit: ["ls",
+                    "m3h"],
+                base: "ls"
+            }],
+        calc: beraknaBlandningstemperatur,
+        info: {
+            beskrivning: "Beräknar sluttemperaturen när uteluft blandas med återluft (shuntluft) före värmebatteriet.",
+            formel: {
+                namn: "t_bland = ((q_ute × t_ute) + (q_åter × t_åter)) / q_total",
+                beskrivning: "Viktad medelvärdesberäkning av temperatur och flöden."
+            },
+            riktvarden: "Används för att säkerställa att luften inte blir för kall så att risken för frysning i efterföljande batterier minimeras.",
+            tips: "Kontrollera att flödesenheterna (l/s eller m³/h) är konsekvent ifyllda i alla tre flödesfälten."
+        }
+    }];
 
 const vsKalkyler = [];
 
