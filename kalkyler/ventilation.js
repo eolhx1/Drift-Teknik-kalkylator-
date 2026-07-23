@@ -33,27 +33,18 @@ const beraknaSFP = (v) => {
     return v.p_tot / flode_m3s;
 };
 
-const beraknaAffinitet = (v) => {
-    if (!valid(v.q1, v.n1, v.q2) || v.q1 === 0 || v.n1 === 0) return "Fyll i nuvarande flöde, varvtal och önskat flöde.";
-
-    const n1 = v.n1;
-    const q1 = v.q1;
-    const q2 = v.q2;
-
-    const n2 = n1 * (q2 / q1);
-    let resultatText = `Nytt varvtal (n₂): ${n2.toFixed(1)} Hz/rpm\n`;
-
-    if (v.p1 !== undefined && v.p1 !== null && !isNaN(v.p1) && v.p1 !== '') {
-        const p2 = v.p1 * Math.pow(n2 / n1, 2);
-        resultatText += `Nytt tryck (p₂): ${p2.toFixed(1)} Pa\n`;
-    }
-
-    if (v.P1 !== undefined && v.P1 !== null && !isNaN(v.P1) && v.P1 !== '') {
-        const p2_effekt = v.P1 * Math.pow(n2 / n1, 3);
-        resultatText += `Ny effekt (P₂): ${p2_effekt.toFixed(2)} kW\n`;
-    }
-
-    return resultatText;
+// Affinitetslagar för Fläktar
+const beraknaFlaktAffinitet = (v) => {
+    if (!valid(v.n1, v.n2, v.q1, v.p1, v.e1)) return "Fel";
+    
+    const kvot = v.n2 / v.n1;
+    const q2 = v.q1 * kvot;
+    const p2 = v.p1 * Math.pow(kvot, 2);
+    const e2 = v.e1 * Math.pow(kvot, 3);
+    
+    return `Nytt flöde (Q2): ${q2.toFixed(2)} m³/s\n` +
+           `Nytt tryck (p2): ${p2.toFixed(1)} Pa\n` +
+           `Ny effekt (P2): ${e2.toFixed(2)} kW`;
 };
 
 const beraknaEkvivalentDiameter = (v) => {
@@ -166,20 +157,22 @@ export const ventKalkyler = [
         info: { beskrivning: "Energiaspekt för fläktar." }
     },
     {
-        id: "vent_affinitetslagarna",
-        namn: "Affinitetslagarna (Fläktlagar)",
-        kategorier: ["vent", "styr"],
-        unit: "",
-        decimaler: 1,
+        id: "vent_affinitet_flakt",
+        namn: "Affinitetslagar (Fläkt)",
+        kategorier: ["ventilation"],
+        decimaler: 2,
         inputs: [
-            { id: "q1", label: "Nuvarande flöde (q₁)", unit: ["l/s", "m³/h"] },
-            { id: "n1", label: "Nuvarande frekvens/varvtal (n₁)", unit: ["Hz", "rpm"] },
-            { id: "q2", label: "Önskat flöde (q₂)", unit: ["l/s", "m³/h"] },
-            { id: "p1", label: "Nuvarande tryck (p₁) - Frivillig", unit: ["Pa"], optional: true },
-            { id: "P1", label: "Nuvarande effekt (P₁) - Frivillig", unit: ["kW"], optional: true }
+            { id: "n1", label: "Nuvarande varvtal / frekvens [varv/min eller Hz]" },
+            { id: "n2", label: "Nytt varvtal / frekvens [varv/min eller Hz]" },
+            { id: "q1", label: "Nuvarande flöde [m³/s]" },
+            { id: "p1", label: "Nuvarande tryck [Pa]" },
+            { id: "e1", label: "Nuvarande effekt [kW]" }
         ],
-        calc: beraknaAffinitet,
-        info: { beskrivning: "Fläkt- och pumplagar." }
+        calc: beraknaFlaktAffinitet,
+        info: {
+            beskrivning: "Beräknar nytt flöde, tryck och effekt vid ändrat varvtal för fläktar.",
+            formel: { namn: "Affinitetslagarna", beskrivning: "Q2 = Q1*(n2/n1), p2 = p1*(n2/n1)², P2 = P1*(n2/n1)³" }
+        }
     },
     {
         id: "vent_ekvivalent_diameter",
