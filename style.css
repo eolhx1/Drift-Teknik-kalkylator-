@@ -680,3 +680,12 @@ input:checked + .slider:before {
     border-color: #28a745;
     /* Grön ram */
 }
+
+/* Säkerhetsmarginal så att innehåll inte döljs av den fixerade bottenmenyn */
+.wrapper {
+    padding-bottom: 90px;
+}
+
+.calc-page {
+    padding-bottom: 30px;
+}
