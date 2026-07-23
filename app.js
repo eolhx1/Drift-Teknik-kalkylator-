@@ -781,14 +781,6 @@ function toggleHaptic() {
     triggerHaptic(50);
 }
 
-function formatResult(value, precision = 2) {
-    if (isNaN(value)) return "0";
-    return new Intl.NumberFormat('sv-SE', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: precision
-    }).format(value);
-}
-
 function setActiveNav(id) {
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     const target = document.getElementById(id);
