@@ -8,11 +8,9 @@ import { vsKalkyler } from './kalkyler/vs.js';
 import { elKalkyler } from './kalkyler/el.js';
 import { gasKalkyler } from './kalkyler/gas.js';
 import { byggKalkyler } from './kalkyler/bygg.js';
-import { energiKalkyler } from './kalkyler/energi.js'; // <-- Ny import
+import { energiKalkyler } from './kalkyler/energi.js';
 
 const teleKalkyler = [];
-const energiKalkyler = [];
-
 
 export const ALLA_KALKYLER = [
     ...styrKalkyler,
@@ -20,7 +18,9 @@ export const ALLA_KALKYLER = [
     ...vsKalkyler,
     ...elKalkyler,
     ...gasKalkyler,
-    ...byggKalkyler
+    ...teleKalkyler,
+    ...byggKalkyler,
+    ...energiKalkyler
 ];
 
 export { UNIT_MAP, KATEGORIER };
