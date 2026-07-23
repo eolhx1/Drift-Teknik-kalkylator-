@@ -51,6 +51,10 @@ export const KATEGORIER = {
 // =================================================================
 // 2. MATEMATISK LOGIK
 // =================================================================
+
+// ---------------------------------------------
+// Styr kalkyler
+// ---------------------------------------------
 const beraknaSkalning010V = (v) => (v.volt / 10) * (v.max - v.min) + v.min;
 
 const beraknaOmsattning = (v) => {
@@ -58,6 +62,9 @@ const beraknaOmsattning = (v) => {
     return toM3h(v.flode, v.flode_unit || "m3h") / v.volym;
 };
 
+// ---------------------------------------------
+// Ventilations kalkyler
+// ---------------------------------------------
 const beraknaKyleffekt = (v) => {
     const flode_ls = toLs(v.flode, v.flode_unit || "ls");
     const dT = v.tRum - v.tTill;
@@ -144,11 +151,50 @@ const beraknaBlandningstemperatur = (v) => {
     return t_bland;
 };
 
+// ---------------------------------------------
+// VS kalkyler
+// ---------------------------------------------
+// 1. Grundläggande Effekt- och Flödesformel (VS)
+const beraknaVsFlode = (v) => {
+    if (!valid(v.effekt, v.dt)) return "Fel";
+    if (v.dt === 0) return "Fel (0-division)";
+    
+    // Omvandlar effekt (W) och ΔT till l/h via formeln: q_lh = P * faktor (0.86 vid ΔT=10, 0.43 vid ΔT=20, annars allmän beräkning)
+    // Standardformel: q (m³/s) = P / (4180 * 1000 * ΔT) => omvandlat till l/h: q (l/h) = (P / (4180 * 1000 * ΔT)) * 3600 * 1000 = P / (4180 * ΔT) * 3600 = P * 0.8612 / ΔT
+    const flode_lh = (v.effekt / (4180 * v.dt)) * 3600;
+    
+    let resultatText = `Flöde: ${formatResult(flode_lh, 1)} l/h\n`;
+    resultatText += `Flöde: ${formatResult(flode_lh / 3600, 4)} l/s`;
+    return resultatText;
+};
+
+// 2. Beräkning av K-värde (Ventilinställning)
+const beraknaKvVarde = (v) => {
+    if (!valid(v.flode_m3h, v.tryckfall) || v.tryckfall <= 0) return "Fel";
+    // Formel: kv = q / √Δp (q i m³/h, Δp i bar)
+    const kv = v.flode_m3h / Math.sqrt(v.tryckfall);
+    return kv;
+};
+
+// 3. Värmeavgivning vid andra temperaturer
+const beraknaNyRadiatoreffekt = (v) => {
+    if (!valid(v.p_proj, v.dt_ny, v.dt_gammal, v.exponent) || v.dt_gammal === 0) return "Fel";
+    // Formel: P_ny = P_projekterad * (ΔT_ny / ΔT_gammal)^n
+    const p_ny = v.p_proj * Math.pow(v.dt_ny / v.dt_gammal, v.exponent);
+    return p_ny;
+};
+
+// 4. Proportionalitetsmetoden (VS-stammar)
+const beraknaVsProportionalitet = (v) => {
+    if (!valid(v.q_matt, v.q_proj) || v.q_proj === 0) return "Fel";
+    return v.q_matt / v.q_proj;
+};
 
 
 
-
-
+// ---------------------------------------------
+// El kalkyler
+// ---------------------------------------------
 const beraknaOhmsLag = (v) => {
     if (!valid(v.varde1, v.varde2)) return "Fel";
     const läge = v.lage_unit || "U";
@@ -157,6 +203,10 @@ const beraknaOhmsLag = (v) => {
     return "Fel";
 };
 
+
+// ---------------------------------------------
+// Gas kalkyler
+// ---------------------------------------------
 const beraknaAnvandningstidGas = (v) => {
     if (!valid(v.volym, v.tryck, v.flode) || v.flode === 0) return "Fel";
     return (v.volym * v.tryck) / (v.flode * 60);
@@ -165,6 +215,9 @@ const beraknaAnvandningstidGas = (v) => {
 // =================================================================
 // 3. KALKYL-GRUPPER
 // =================================================================
+// ---------------------------------------------
+// Sty kalkyler
+// ---------------------------------------------
 const styrKalkyler = [{
     id: "styr_givar_skalning_0_10v",
     namn: "Givarskalning 0-10V",
@@ -194,6 +247,9 @@ const styrKalkyler = [{
     }
 }];
 
+// ---------------------------------------------
+// Ventilations kalkyler
+// ---------------------------------------------
 const ventKalkyler = [{
     id: "vent_luft_omsattning",
     namn: "Luftomsättning",
@@ -524,9 +580,146 @@ const ventKalkyler = [{
             tips: "Kontrollera att flödesenheterna (l/s eller m³/h) är konsekvent ifyllda i alla tre flödesfälten."
         }
     }];
+    
+// ---------------------------------------------
+// VS kalkyler
+// ---------------------------------------------
+const vsKalkyler = [
+    {
+        id: "vs_effekt_flode",
+        namn: "Radiatorflöde & Effekt (VS)",
+        kategorier: ["vs"],
+        unit: "l/h",
+        decimaler: 1,
+        inputs: [
+            {
+                id: "effekt",
+                label: "Radiatoreffekt (P)",
+                unit: ["W"]
+            },
+            {
+                id: "dt",
+                label: "Temperaturskillnad (ΔT)",
+                unit: ["°C"]
+            }
+        ],
+        calc: beraknaVsFlode,
+        info: {
+            beskrivning: "Beräknar det erforderliga vattenflödet för en given radiatoreffekt och temperaturdifferens.",
+            formel: {
+                namn: "q = P / (c_p × ρ × ΔT)",
+                beskrivning: "Flöde baserat på vattnets värmekapacitet och densitet."
+            },
+            riktvarden: "Vanliga system har ΔT 10°C (t.ex. 50/40) eller ΔT 20°C (t.ex. 60/40).",
+            tips: "Vid ΔT 10°C kan du tumregelsmässigt multiplicera effekten i Watt med 0,86 för att få l/h."
+        }
+    },
+    {
+        id: "vs_kv_varde",
+        namn: "K_v-värde (Ventilinställning)",
+        kategorier: ["vs"],
+        unit: "",
+        decimaler: 2,
+        inputs: [
+            {
+                id: "flode_m3h",
+                label: "Flöde (q)",
+                unit: ["m³/h"]
+            },
+            {
+                id: "tryckfall",
+                label: "Tryckfall över ventil (Δp)",
+                unit: ["bar"]
+            }
+        ],
+        calc: beraknaKvVarde,
+        info: {
+            beskrivning: "Beräknar ventilens K_v-värde för inställning av rätt flöde vid ett specifikt tryckfall.",
+            formel: {
+                namn: "k_v = q / √Δp",
+                beskrivning: "Kapacitetsfaktor vid 1 bars tryckfall."
+            },
+            riktvarden: "Jämför det framräknade K_v-värdet med ventilfabrikantens förinställningstabell.",
+            tips: "Se till att enheten för tryckfallet är omvandlad till bar (t.ex. 10 kPa = 0,1 bar)."
+        }
+    },
+    {
+        id: "vs_radiator_ny_temp",
+        namn: "Radiatoreffekt vid ny temperatur",
+        kategorier: ["vs"],
+        unit: "W",
+        decimaler: 0,
+        inputs: [
+            {
+                id: "p_proj",
+                label: "Projekterad effekt",
+                unit: ["W"]
+            },
+            {
+                id: "dt_ny",
+                label: "Ny övertemperatur (ΔT_ny)",
+                unit: ["°C"]
+            },
+            {
+                id: "dt_gammal",
+                label: "Gammal övertemperatur (ΔT_gammal)",
+                unit: ["°C"]
+            },
+            {
+                id: "exponent",
+                label: "Radiatorexponent (n)",
+                // Ingen enhet, standardvärde kan användas
+            }
+        ],
+        calc: beraknaNyRadiatoreffekt,
+        info: {
+            beskrivning: "Beräknar hur mycket effekten på en radiator förändras om man sänker framledningstemperaturen (t.ex. vid värmepumpskonvertering).",
+            formel: {
+                namn: "P_ny = P_proj × (ΔT_ny / ΔT_gammal)ⁿ",
+                beskrivning: "Overtemperatur är medel vattentemperatur minus rumstemperatur."
+            },
+            riktvarden: "Moderna panelradiatorer har ofta en exponent n ≈ 1,3.",
+            tips: "Om effekten inte räcker till vid lägre temperatur kan man behöva komplettera med fläktkonvektorer eller större radiatorer."
+        }
+    },
+    {
+        id: "vs_proportionalitetsmetoden",
+        namn: "Proportionalitetsmetoden (VS)",
+        kategorier: ["vs"],
+        unit: "",
+        decimaler: 2,
+        inputs: [
+            {
+                id: "q_matt",
+                label: "Uppmätt flöde",
+                unit: ["l/h", "m³/h"]
+            },
+            {
+                id: "q_proj",
+                label: "Projekterat flöde",
+                unit: ["l/h", "m³/h"]
+            }
+        ],
+        calc: beraknaVsProportionalitet,
+        info: {
+            beskrivning: "Beräknar injusteringskvoten för stammar och radiatorer för att säkerställa proportionell balans.",
+            formel: {
+                namn: "q_mätt / q_projekterat = konstant",
+                beskrivning: "Kvoten används för att justera in kretsarna i rätt ordning."
+            },
+            riktvarden: "Sträva efter en kvot på 1,0 för samtliga terminaler i stammen.",
+            tips: "Justera alltid huvudstammar i ordning från sämst balanserad till bäst balanserad."
+        }
+    }
+];
+   
+    
+    
 
-const vsKalkyler = [];
 
+// ---------------------------------------------
+// El kalkyler
+// ---------------------------------------------
 const elKalkyler = [{
     id: "el_ohms_lag",
     namn: "Ohms lag",
@@ -555,6 +748,9 @@ const elKalkyler = [{
     }
 }];
 
+// ---------------------------------------------
+// Gas kalkyler
+// ---------------------------------------------
 const gasKalkyler = [{
     id: "gas_anvandningstid",
     namn: "Användningstid gasflaska",
@@ -581,7 +777,12 @@ const gasKalkyler = [{
     }
 }];
 
+// ---------------------------------------------
+// Tele Data kalkyler
+// ---------------------------------------------
 const teleKalkyler = [];
+
+
 
 export const ALLA_KALKYLER = [
     ...styrKalkyler,
