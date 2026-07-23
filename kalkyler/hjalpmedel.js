@@ -40,10 +40,15 @@ export const KATEGORIER = {
         ikon: "🔥"
     },
     bygg: {
-        namn: "Bygg & Energi",
+        namn: "Bygg",
         ikon: "🧱"
+    },
+    energi: {
+        namn: "Energi",
+        ikon: "🔋"
     }
 };
+
 
 export const formatResult = (value, precision = 2) => {
     if (isNaN(value)) return "0";

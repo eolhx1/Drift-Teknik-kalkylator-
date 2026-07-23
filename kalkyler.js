@@ -8,6 +8,7 @@ import { vsKalkyler } from './kalkyler/vs.js';
 import { elKalkyler } from './kalkyler/el.js';
 import { gasKalkyler } from './kalkyler/gas.js';
 import { byggKalkyler } from './kalkyler/bygg.js';
+import { energiKalkyler } from './kalkyler/energi.js'; // <-- Ny import
 
 const teleKalkyler = [];
 
@@ -18,7 +19,8 @@ export const ALLA_KALKYLER = [
     ...elKalkyler,
     ...gasKalkyler,
     ...teleKalkyler,
-    ...byggKalkyler
+    ...byggKalkyler,
+    ...energiKalkyler // <-- Inkludera i listan
 ];
 
 export { UNIT_MAP, KATEGORIER };
