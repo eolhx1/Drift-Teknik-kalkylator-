@@ -20,7 +20,6 @@ export const ALLA_KALKYLER = [
     ...vsKalkyler,
     ...elKalkyler,
     ...gasKalkyler,
-    ...teleKalkyler,
     ...byggKalkyler,
 ];
 
