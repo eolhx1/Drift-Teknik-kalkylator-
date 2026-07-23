@@ -159,7 +159,7 @@ export const ventKalkyler = [
     {
         id: "vent_affinitet_flakt",
         namn: "Affinitetslagar (Fläkt)",
-        kategorier: ["ventilation"],
+        kategorier: ["vent"],
         decimaler: 2,
         inputs: [
             { id: "n1", label: "Nuvarande varvtal / frekvens [varv/min eller Hz]" },
