@@ -11,6 +11,8 @@ import { byggKalkyler } from './kalkyler/bygg.js';
 import { energiKalkyler } from './kalkyler/energi.js'; // <-- Ny import
 
 const teleKalkyler = [];
+const energiKalkyler = [];
+
 
 export const ALLA_KALKYLER = [
     ...styrKalkyler,
@@ -20,7 +22,6 @@ export const ALLA_KALKYLER = [
     ...gasKalkyler,
     ...teleKalkyler,
     ...byggKalkyler,
-    ...energiKalkyler // <-- Inkludera i listan
 ];
 
 export { UNIT_MAP, KATEGORIER };
