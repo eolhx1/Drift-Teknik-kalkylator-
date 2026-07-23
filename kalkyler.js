@@ -9,8 +9,7 @@ import { elKalkyler } from './kalkyler/el.js';
 import { gasKalkyler } from './kalkyler/gas.js';
 import { byggKalkyler } from './kalkyler/bygg.js';
 import { energiKalkyler } from './kalkyler/energi.js';
-
-const teleKalkyler = [];
+import { teleKalkyler } from './kalkyler/tele.js'; // <-- Ny import för tele
 
 export const ALLA_KALKYLER = [
     ...styrKalkyler,
@@ -18,7 +17,7 @@ export const ALLA_KALKYLER = [
     ...vsKalkyler,
     ...elKalkyler,
     ...gasKalkyler,
-    ...teleKalkyler,
+    ...teleKalkyler, // <-- Inkludera tele här
     ...byggKalkyler,
     ...energiKalkyler
 ];
