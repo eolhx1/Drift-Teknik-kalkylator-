@@ -1,6 +1,6 @@
-//
-//Fil: kalkyler/vs.js
-//
+// =================================================================
+// Fil: kalkyler/vs.js
+// =================================================================
 
 import { valid, formatResult } from './hjalpmedel.js';
 
@@ -66,6 +66,26 @@ const beraknaEttrorTemp = (v) => {
     return t_nasta;
 };
 
+// Ny kalkyl: Värmeeffekt från flöde och ΔT (bra för kulvert/värmeväxlare)
+const beraknaVasteffektFlode = (v) => {
+    if (!valid(v.flode_ls, v.dt)) return "Fel";
+    // P = q * 4.19 * dT (kW)
+    const effekt_kw = v.flode_ls * 4.19 * v.dt;
+    return `Överförd effekt: ${effekt_kw.toFixed(2)} kW`;
+};
+
+// Ny kalkyl: Vattenexpansion vid uppvärmning
+const beraknaVattenexpansion = (v) => {
+    if (!valid(v.volym_m3, v.t_kall, v.t_varm)) return "Fel";
+    // Ungefärlig volymutvidgningskoefficient för vatten mellan t_kall och t_varm
+    // Förenklat schablonvärde baserat på densitetsskillnad (~0.02 till 0.03 beroende på temp)
+    const expansion_procent = (v.t_varm - v.t_kall) * 0.00035; 
+    const expansionsvolym_liter = v.volym_m3 * 1000 * expansion_procent;
+    
+    return `Volymökning: ${expansionsvolym_liter.toFixed(1)} liter\n` +
+           `Total ny volym: ${(v.volym_m3 * 1000 + expansionsvolym_liter).toFixed(1)} liter`;
+};
+
 // --- Kalkyl-array (VS) ---
 export const vsKalkyler = [
     {
@@ -107,7 +127,7 @@ export const vsKalkyler = [
             { id: "exponent", label: "Radiatorexponent (n)" }
         ],
         calc: beraknaNyRadiatoreffekt,
-        info: { beskrivning: "Beräknar hur mycket effekten på en radiator förändras." }
+        info: { beskrivning: "Beräknar hur mycket effekten på en radiator förändras vid sänkt framledningstemp." }
     },
     {
         id: "vs_proportionalitetsmetoden",
@@ -136,7 +156,7 @@ export const vsKalkyler = [
         info: { beskrivning: "Beräknar tryckfallet i rörnätet inklusive tillägg för kopplingar." }
     },
     {
-        idid: "vs_affinitet_pump",
+        id: "vs_affinitet_pump", // <-- FIXAT ID HÄR!
         namn: "Affinitetslagar (Pump)",
         kategorier: ["vs"],
         decimaler: 2,
@@ -166,5 +186,32 @@ export const vsKalkyler = [
         ],
         calc: beraknaEttrorTemp,
         info: { beskrivning: "Beräknar avkylningen per radiator i en seriekopplad slinga." }
+    },
+    {
+        id: "vs_vasteffekt_flode",
+        namn: "Värmeeffekt från Flöde & ΔT",
+        kategorier: ["vs"],
+        unit: "kW",
+        decimaler: 2,
+        inputs: [
+            { id: "flode_ls", label: "Vattenflöde [l/s]", unit: ["l/s"] },
+            { id: "dt", label: "Temperaturskillnad (fram - retur) [°C]", unit: ["°C"] }
+        ],
+        calc: beraknaVasteffektFlode,
+        info: { beskrivning: "Beräknar överförd värmeeffekt i kW baserat på uppmätt flöde och temperaturskillnad." }
+    },
+    {
+        id: "vs_vattenexpansion",
+        namn: "Vattenexpansion i system",
+        kategorier: ["vs"],
+        unit: "liter",
+        decimaler: 1,
+        inputs: [
+            { id: "volym_m3", label: "Systemets totala vattenvolym [m³]", unit: ["m³"] },
+            { id: "t_kall", label: "Kallvattentemperatur (fyllning) [°C]", unit: ["°C"] },
+            { id: "t_varm", label: "Max drifttemperatur [°C]", unit: ["°C"] }
+        ],
+        calc: beraknaVattenexpansion,
+        info: { beskrivning: "Beräknar hur många liter vattnet expanderar när systemet värms upp från fyllningstemperatur till drifttemperatur." }
     }
 ];
