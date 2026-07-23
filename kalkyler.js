@@ -112,6 +112,17 @@ const beraknaEkvivalentDiameter = (v) => {
     return de;
 };
 
+// Strömningshastighet över don och galler (Effektiv area)
+const beraknaGallerFlode = (v) => {
+    if (!valid(v.hastighet, v.a_eff)) return "Fel";
+    
+    // Formel: q = v_medel * A_eff (Resultat i m³/s, omvandlar till l/s genom att multiplicera med 1000)
+    const flode_m3s = v.hastighet * v.a_eff;
+    const flode_ls = flode_m3s * 1000;
+    
+    return flode_ls;
+};
+
 
 
 const beraknaOhmsLag = (v) => {
@@ -377,7 +388,39 @@ const ventKalkyler = [{
             riktvarden: "Används för att bestämma tryckfall och lufthastighet i rektangulära kanaler via diagram för cirkulära kanaler.",
             tips: "Se till att båda måtten anges i samma enhet (både i mm eller båda i m)."
         }
-    }];
+    },
+    
+        {
+        id: "vent_galler_effektiv_area",
+        namn: "Flöde via effektiv area (Don/Galler)",
+        kategorier: ["vent"],
+        unit: "l/s",
+        decimaler: 1,
+        inputs: [
+            {
+                id: "hastighet",
+                label: "Uppmätt medelhastighet (v_medel)",
+                unit: ["m/s"]
+            },
+            {
+                id: "a_eff",
+                label: "Effektiv area (A_eff)",
+                unit: ["m²"]
+            }
+        ],
+        calc: beraknaGallerFlode,
+        info: {
+            beskrivning: "Beräknar luftflödet genom ett don eller galler baserat på uppmätt lufthastighet och tillverkarens effektiva area.",
+            formel: {
+                namn: "q = v_medel × A_eff",
+                beskrivning: "Flöde (m³/s) = Medelhastighet (m/s) × Effektiv area (m²)"
+            },
+            riktvarden: "Den effektiva arean är alltid mindre än gallrets yttermått och hämtas från tillverkarens produktblad eller tryckfallstabell.",
+            tips: "Försök att föra mätinstrumentet jämnt över hela gallrets yta (sökmetoden) för att få ett korrekt medelvärde."
+        }
+    }
+
+    ];
 
 const vsKalkyler = [];
 
