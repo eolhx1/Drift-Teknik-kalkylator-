@@ -20,7 +20,7 @@ export const ALLA_KALKYLER = [
     ...vsKalkyler,
     ...elKalkyler,
     ...gasKalkyler,
-    ...byggKalkyler,
+    ...byggKalkyler
 ];
 
 export { UNIT_MAP, KATEGORIER };
