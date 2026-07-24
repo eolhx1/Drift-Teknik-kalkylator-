@@ -86,6 +86,14 @@ const beraknaVattenexpansion = (v) => {
            `Total ny volym: ${(v.volym_m3 * 1000 + expansionsvolym_liter).toFixed(1)} liter`;
 };
 
+// 4. Kyleffekt för köldbärare (t.ex. glykolvatten)
+const beraknaKoldbarareEffekt = (v) => {
+    if (!valid(v.flode_ls, v.dt)) return "Fel";
+    // P = q * c * rho * dT (Förenklat för vatten/glykolblandning ca 4.0 kJ/(kg·K))
+    const effekt_kw = v.flode_ls * 4.0 * v.dt;
+    return `Kyl- / Värmebärareeffekt: ${effekt_kw.toFixed(2)} kW`;
+};
+
 // --- Kalkyl-array (VS) ---
 export const vsKalkyler = [
     {
@@ -213,5 +221,21 @@ export const vsKalkyler = [
         ],
         calc: beraknaVattenexpansion,
         info: { beskrivning: "Beräknar hur många liter vattnet expanderar när systemet värms upp från fyllningstemperatur till drifttemperatur." }
+    },
+    
+    {
+        id: "energi_koldbarare_effekt",
+        namn: "Effekt köldbärare (Flöde & ΔT)",
+        kategorier: ["energi", "vs"],
+        decimaler: 2,
+        inputs: [
+            { id: "flode_ls", label: "Köldbärarens flöde [l/s]" },
+            { id: "dt", label: "Temperaturskillnad (In - Ut) [°C]" }
+        ],
+        calc: beraknaKoldbarareEffekt,
+        info: {
+            beskrivning: "Beräknar kyleffekt eller värmeeffekt i köld-/värmebärarsystem baserat på flöde och ΔT.",
+            formel: { namn: "Effekt köldbärare", beskrivning: "P = q × c × ρ × ΔT" }
+        }
     }
 ];

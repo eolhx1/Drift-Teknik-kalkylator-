@@ -22,6 +22,14 @@ const beraknaCOP = (v) => {
            `Snabbkoll: För varje kW el får du ut ${cop.toFixed(1)} kW värme.`;
 };
 
+// 3. EER (Verkningsgrad för kylmaskin / AC)
+const beraknaEER = (v) => {
+    if (!valid(v.kyleffekt, v.tillford_eleffekt) || v.tillford_eleffekt === 0) return "Fel";
+    const eer = v.kyleffekt / v.tillford_eleffekt;
+    return `Kylfaktor (EER): ${eer.toFixed(2)}\n` +
+           `Snabbkoll: För varje kW el får ut ${eer.toFixed(1)} kW kyla.`;
+};
+
 export const energiKalkyler = [
     {
         id: "energi_transmission",
@@ -53,6 +61,22 @@ export const energiKalkyler = [
         info: {
             beskrivning: "Beräknar värmepumpens eller kylmaskinens aktuella verkningsgrad (Coefficient of Performance).",
             formel: { namn: "COP", beskrivning: "COP = Avgiven värmeeffekt / Tillförd eleffekt" }
+        }
+    },
+    
+    {
+        id: "energi_eer",
+        namn: "Kylmaskinens Verkningsgrad (EER)",
+        kategorier: ["energi"],
+        decimaler: 2,
+        inputs: [
+            { id: "kyleffekt", label: "Avgiven kyleffekt [kW]" },
+            { id: "tillford_eleffekt", label: "Tillförd eleffekt [kW]" }
+        ],
+        calc: beraknaEER,
+        info: {
+            beskrivning: "Beräknar kylmaskinens aktuella verkningsgrad (Energy Efficiency Ratio).",
+            formel: { namn: "EER", beskrivning: "EER = Avgiven kyleffekt / Tillförd eleffekt" }
         }
     }
 ];
