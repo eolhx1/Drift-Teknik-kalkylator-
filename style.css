@@ -682,10 +682,10 @@ input:checked + .slider:before {
 }
 
 /* Säkerhetsmarginal så att innehåll inte döljs av den fixerade bottenmenyn */
-.wrapper {
-    padding-bottom: 90px;
-}
+/* .wrapper { */
+/*     padding-bottom: 90px; */
+/* }  */
 
-.calc-page {
-    padding-bottom: 30px;
-}
+/* .calc-page { */
+/*     padding-bottom: 30px; */
+/* } */
