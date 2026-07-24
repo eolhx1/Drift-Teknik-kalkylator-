@@ -111,7 +111,7 @@ export const vsKalkyler = [
     },
     {
         id: "vs_kv_varde",
-        namn: "K_v-värde (Ventilinställning)",
+        namn: "K<sub>v</sub>-värde (Ventilinställning)",
         kategorier: ["vs"],
         unit: "",
         decimaler: 2,
