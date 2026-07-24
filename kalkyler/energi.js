@@ -3,7 +3,6 @@
 // =================================================================
 import { valid } from './hjalpmedel.js';
 
-// 1. Transmissionsförlust (Värmeförlust genom yta)
 const beraknaTransmissionsforlust = (v) => {
     if (!valid(v.u_varde, v.area, v.inne_temp, v.ute_temp)) return "Fel";
     const deltaT = v.inne_temp - v.ute_temp;
@@ -14,7 +13,6 @@ const beraknaTransmissionsforlust = (v) => {
            `Vilket motsvarar: ${effekt_kW.toFixed(2)} kW`;
 };
 
-// 2. COP (Värmefaktor för värmepump)
 const beraknaCOP = (v) => {
     if (!valid(v.avgiven_effekt, v.tillford_eleffekt) || v.tillford_eleffekt === 0) return "Fel";
     const cop = v.avgiven_effekt / v.tillford_eleffekt;
@@ -22,7 +20,6 @@ const beraknaCOP = (v) => {
            `Snabbkoll: För varje kW el får du ut ${cop.toFixed(1)} kW värme.`;
 };
 
-// 3. EER (Verkningsgrad för kylmaskin / AC)
 const beraknaEER = (v) => {
     if (!valid(v.kyleffekt, v.tillford_eleffekt) || v.tillford_eleffekt === 0) return "Fel";
     const eer = v.kyleffekt / v.tillford_eleffekt;
@@ -44,7 +41,8 @@ export const energiKalkyler = [
         ],
         calc: beraknaTransmissionsforlust,
         info: {
-            beskrivning: "Beräknar hur mycket värmeeffekt som läcker ut genom en specifik byggnadsdel (t.ex. en vägg eller ett fönster).",
+            beskrivning: "Beräknar värmeeffekt som läcker ut genom byggnadsdelar.",
+            detaljer: "Används för att uppskatta transmissionsförluster genom väggar, tak och fönster baserat på materialets U-värde, ytarea och temperaturskillnad.",
             formel: { namn: "Transmissionsförlust", beskrivning: "P = U × A × ΔT" }
         }
     },
@@ -59,11 +57,11 @@ export const energiKalkyler = [
         ],
         calc: beraknaCOP,
         info: {
-            beskrivning: "Beräknar värmepumpens eller kylmaskinens aktuella verkningsgrad (Coefficient of Performance).",
+            beskrivning: "Beräknar värmepumpens aktuella verkningsgrad (COP).",
+            detaljer: "Visar förhållandet mellan producerad värmeenergi och tillförd elektrisk energi under driftförhållanden.",
             formel: { namn: "COP", beskrivning: "COP = Avgiven värmeeffekt / Tillförd eleffekt" }
         }
     },
-    
     {
         id: "energi_eer",
         namn: "Kylmaskinens Verkningsgrad (EER)",
@@ -75,7 +73,8 @@ export const energiKalkyler = [
         ],
         calc: beraknaEER,
         info: {
-            beskrivning: "Beräknar kylmaskinens aktuella verkningsgrad (Energy Efficiency Ratio).",
+            beskrivning: "Beräknar kylmaskinens aktuella verkningsgrad (EER).",
+            detaljer: "Visar effektiviteten för kylanläggningar genom att ställa levererad kyleffekt i relation till tillförd driftel.",
             formel: { namn: "EER", beskrivning: "EER = Avgiven kyleffekt / Tillförd eleffekt" }
         }
     }

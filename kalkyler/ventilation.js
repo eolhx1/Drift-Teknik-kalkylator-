@@ -1,10 +1,8 @@
-//
-// Fil: js/ventilation.js
-//
-
+// =================================================================
+// VENTILATION KALKYLER (js/ventilation.js)
+// =================================================================
 import { valid, formatResult, toM3h, toLs } from './hjalpmedel.js';
 
-// --- Beräkningsfunktioner (Ventilation) ---
 const beraknaOmsattning = (v) => {
     if (!v.volym || v.volym <= 0 || !v.flode) return "Fel";
     return toM3h(v.flode, v.flode_unit || "m3h") / v.volym;
@@ -33,7 +31,6 @@ const beraknaSFP = (v) => {
     return v.p_tot / flode_m3s;
 };
 
-// Affinitetslagar för Fläktar
 const beraknaFlaktAffinitet = (v) => {
     if (!valid(v.n1, v.n2, v.q1, v.p1, v.e1)) return "Fel";
     
@@ -69,7 +66,6 @@ const beraknaBlandningstemperatur = (v) => {
     return ((v.q_ute * v.t_ute) + (v.q_ater * v.t_ater)) / v.q_total;
 };
 
-// --- Kalkyl-array (Ventilation) ---
 export const ventKalkyler = [
     {
         id: "vent_luft_omsattning",
@@ -83,7 +79,10 @@ export const ventKalkyler = [
             { id: "flode", label: "Flöde", unit: ["ls", "m3h"], base: "m3h" }
         ],
         calc: beraknaOmsattning,
-        info: { beskrivning: "Beräknar hur många gånger per timme rumsvolymen byts ut." }
+        info: {
+            beskrivning: "Beräknar hur många gånger per timme rumsvolymen byts ut.",
+            detaljer: "Används för att kontrollera att ett rum eller utrymme uppfyller gällande krav på luftväxling per timme."
+        }
     },
     {
         id: "vent_luft_kyleffekt",
@@ -97,7 +96,10 @@ export const ventKalkyler = [
             { id: "tTill", label: "Tilluftstemperatur (°C)" }
         ],
         calc: (v) => !valid(v.flode, v.tRum, v.tTill) ? "Fel" : beraknaKyleffekt(v),
-        info: { beskrivning: "Beräknar kyleffekt i tilluft." }
+        info: {
+            beskrivning: "Beräknar tilluftsventilationens kyleffekt baserat på flöde och ΔT.",
+            detaljer: "Visar hur mycket kyla som tillförs lokalen via tilluften vid en viss temperaturskillnad mellan rum och tilluft."
+        }
     },
     {
         id: "vent_kontinuitet_flode",
@@ -110,7 +112,10 @@ export const ventKalkyler = [
             { id: "area", label: "Kanalarea", unit: ["m²"] }
         ],
         calc: beraknaFlodeKontinuitet,
-        info: { beskrivning: "Flöde = Hastighet × Area." }
+        info: {
+            beskrivning: "Beräknar luftflöde utifrån lufthastighet och kanalarea.",
+            detaljer: "Används vid injustering och flödesmätningar i kanaler baserat på kontinuitetsekvationen (Flöde = Hastighet × Area)."
+        }
     },
     {
         id: "vent_kfaktor_flode",
@@ -123,7 +128,11 @@ export const ventKalkyler = [
             { id: "delta_p", label: "Differenstryck (Δp)", unit: ["Pa"] }
         ],
         calc: beraknaKfaktor,
-        info: { beskrivning: "Flöde = K × √Δp" }
+        info: {
+            beskrivning: "Beräknar luftflöde genom don med känd K-faktor och mätt tryck.",
+            detaljer: "Standardberäkning vid mätning på mätuttag i ventilationsdon.",
+            formel: { namn: "K-faktor", beskrivning: "Flöde = K × √Δp" }
+        }
     },
     {
         id: "vent_proportionalitetsmetoden",
@@ -141,7 +150,10 @@ export const ventKalkyler = [
             const projLs = toLs(v.q_proj, v.q_proj_unit || "ls");
             return mattLs / projLs;
         },
-        info: { beskrivning: "Injusteringskvot." }
+        info: {
+            beskrivning: "Beräknar injusteringskvot för ventilationsgrenar.",
+            detaljer: "Används vid injustering av ventilationssystem för att beräkna flödesförhållanden mellan uppmätta och projekterade värden."
+        }
     },
     {
         id: "vent_sfp",
@@ -154,7 +166,11 @@ export const ventKalkyler = [
             { id: "flode", label: "Största flöde", unit: ["ls", "m3h"], base: "ls" }
         ],
         calc: beraknaSFP,
-        info: { beskrivning: "Energiaspekt för fläktar." }
+        info: {
+            beskrivning: "Beräknar fläktarnas specifika energianvändning (SFP-tal).",
+            detaljer: "Visar hur mycket eleffekt fläktarna kräver per flödesenhet, vilket är en viktig energiparameter vid OVK och dimensionering.",
+            formel: { namn: "SFP", beskrivning: "SFP = P_tot / Flöde (m³/s)" }
+        }
     },
     {
         id: "vent_affinitet_flakt",
@@ -171,7 +187,8 @@ export const ventKalkyler = [
         calc: beraknaFlaktAffinitet,
         info: {
             beskrivning: "Beräknar nytt flöde, tryck och effekt vid ändrat varvtal för fläktar.",
-            formel: { namn: "Affinitetslagarna", beskrivning: "Q2 = Q1*(n2/n1), p2 = p1*(n2/n1)², P2 = P1*(n2/n1)³" }
+            detaljer: "Baserat på fläktarnas affinitetslagar vid varvtalsändring (t.ex. via frekvensomriktare).",
+            formel: { namn: "Affinitetslagarna", beskrivning: "Q2 = Q1×(n2/n1), p2 = p1×(n2/n1)², P2 = P1×(n2/n1)³" }
         }
     },
     {
@@ -185,7 +202,10 @@ export const ventKalkyler = [
             { id: "hojd", label: "Kanalens höjd (b)", unit: ["mm", "m"] }
         ],
         calc: beraknaEkvivalentDiameter,
-        info: { beskrivning: "Beräknar den ekvivalenta (hydrauliska) diametern för en rektangulär kanal." }
+        info: {
+            beskrivning: "Beräknar hydraulisk/ekvivalent diameter för rektangulära kanaler.",
+            detaljer: "Används för att omvandla rektangulära kanaldimensioner till motsvarande cirkulär diameter vid tryckfallsberäkningar."
+        }
     },
     {
         id: "vent_galler_effektiv_area",
@@ -198,7 +218,10 @@ export const ventKalkyler = [
             { id: "a_eff", label: "Effektiv area (A_eff)", unit: ["m²"] }
         ],
         calc: beraknaGallerFlode,
-        info: { beskrivning: "Beräknar luftflödet genom ett don eller galler baserat på uppmätt lufthastighet." }
+        info: {
+            beskrivning: "Beräknar flöde genom don/galler baserat på mätt hastighet och area.",
+            detaljer: "Används vid mätning med mätvinge eller tratt direkt mot donets effektiva area."
+        }
     },
     {
         id: "vent_temperaturverkningsgrad",
@@ -212,7 +235,11 @@ export const ventKalkyler = [
             { id: "t_fran", label: "Frånluft före växlare (t_från)", unit: ["celsius"] }
         ],
         calc: beraknaTemperaturverkningsgrad,
-        info: { beskrivning: "Beräknar värmeväxlarens temperaturverkningsgrad." }
+        info: {
+            beskrivning: "Beräknar värmeväxlarens temperaturverkningsgrad.",
+            detaljer: "Visar hur effektivt värmeåtervinningsaggregatet överför värme från frånluften till uteluften.",
+            formel: { namn: "Verkningsgrad", beskrivning: "η = (t_till - t_ute) / (t_från - t_ute)" }
+        }
     },
     {
         id: "ventil_blandningstemperatur",
@@ -228,6 +255,9 @@ export const ventKalkyler = [
             { id: "q_total", label: "Totalt blandningsflöde (q_total)", unit: ["ls", "m3h"], base: "ls" }
         ],
         calc: beraknaBlandningstemperatur,
-        info: { beskrivning: "Beräknar sluttemperaturen när uteluft blandas med återluft." }
+        info: {
+            beskrivning: "Beräknar sluttemperatur vid blandning av uteluft och återluft.",
+            detaljer: "Används i ventilationssammanhang för att beräkna temperaturen efter spjäll eller återluftskammare."
+        }
     }
 ];

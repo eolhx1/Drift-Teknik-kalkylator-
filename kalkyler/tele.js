@@ -3,7 +3,6 @@
 // =================================================================
 import { valid } from './hjalpmedel.js';
 
-// 1. Dämpningsbudget Fiberlänk
 const beraknaFiberDampning = (v) => {
     if (!valid(v.langd_km, v.antal_svetsar, v.antal_kontakter)) return "Fel";
     
@@ -18,16 +17,11 @@ const beraknaFiberDampning = (v) => {
            `- Kontakter (${v.antal_kontakter} st): ${dampningKontakter.toFixed(2)} dB`;
 };
 
-// 2. PoE Spänningsfall och Effektkoll (Kopparkabel AWG24)
 const beraknaPoE = (v) => {
     if (!valid(v.kabellangd_m, v.effekt_w)) return "Fel";
     
-    // Standard switch-spänning = 48V. 
-    // Enkel uppskattning av resistans för standard nätverkskabel (AWG24, dubbla par): ca 0.1 ohm per meter tur och retur.
     const utspänningV = 48;
     const resistansOhm = v.kabellangd_m * 0.1;
-    
-    // Beräkna ström (I = P / U) ungefärligt baserat på utspänning
     const stromA = v.effekt_w / utspänningV;
     const spanningsfallV = resistansOhm * stromA;
     const slutSpanningV = utspänningV - spanningsfallV;
@@ -57,7 +51,8 @@ export const teleKalkyler = [
         ],
         calc: beraknaFiberDampning,
         info: {
-            beskrivning: "Beräknar maximalt tillåten dämpning för en fiberlänk baserat på standardriktlinjer (0.4 dB/km, 0.05 dB/svets, 0.5 dB/kontakt).",
+            beskrivning: "Beräknar maximalt tillåten dämpning för en fiberlänk.",
+            detaljer: "Används för att säkerställa att optiska länkar klarar dämpningskraven baserat på standardvärden för fiberkablar, svetsar och anslutningskontakter.",
             formel: { namn: "Loss Budget", beskrivning: "Totalt = (Längd × 0.4) + (Svetsar × 0.05) + (Kontakter × 0.5)" }
         }
     },
@@ -72,7 +67,8 @@ export const teleKalkyler = [
         ],
         calc: beraknaPoE,
         info: {
-            beskrivning: "Kollar om spänningen räcker fram till en PoE-enhet (t.ex. kamera eller accesspunkt) utan att sjunka för mycket på vägen.",
+            beskrivning: "Kollar spänning och kabellängd för PoE-matade nätverksenheter.",
+            detaljer: "Beräknar spänningsfallet i kopparkabeln (AWG24) för att säkerställa att spänningen framme vid enheten (t.ex. IP-kamera eller accesspunkt) inte understiger kritiska nivåer.",
             formel: { namn: "Spänningsfall i tråd", beskrivning: "U_fall = R × (P / U_ut)" }
         }
     }

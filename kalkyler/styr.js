@@ -19,7 +19,8 @@ export const styrKalkyler = [{
     ],
     calc: (v) => !valid(v.volt, v.min, v.max) ? "Fel" : beraknaSkalning010V(v),
     info: {
-        beskrivning: "Skalar om en 0-10V signal till ett fysiskt mätområde.",
+        beskrivning: "Skalar om en 0-10V styrsignal till fysiskt mätvärde.",
+        detaljer: "Används vid felsökning och injustering av styr- och reglersystem för att översätta insignaler från givare till korrekta fysiska storheter.",
         formel: { namn: "Linjär skalning", beskrivning: "Värde = (Volt / 10) * (Max - Min) + Min" }
     }
 }];

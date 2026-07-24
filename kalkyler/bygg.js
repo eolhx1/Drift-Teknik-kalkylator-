@@ -30,7 +30,7 @@ Status: ${komfort}`;
 export const byggKalkyler = [{
     id: "bygg_trappa",
     namn: "Trappberäkning (Stigning & Steg)",
-    kategorier: ["bygg"], // Endast Bygg här!
+    kategorier: ["bygg"],
     decimaler: 1,
     inputs: [
         { id: "totalhojd", label: "Total höjd (golv till golv) [mm]" },
@@ -38,7 +38,8 @@ export const byggKalkyler = [{
     ],
     calc: beraknaTrappa,
     info: {
-        beskrivning: "Beräknar lämplig steghöjd och kontrollerar gångkomforten enligt Blondels formel (2H + B = 600-630 mm).",
-        formel: { namn: "Blondels formel", beskrivning: "2 * Steghöjd (H) + Stegdjup (B) bör ligga mellan 600 och 630 mm." }
+        beskrivning: "Beräknar steghöjd och komfort för trappor enligt Blondels formel.",
+        detaljer: "Hjälper till att dimensionera bekväma och säkra trappor genom att beräkna antal steg, exakt stigningshöjd och kontrollera mot ergonomiska standarder.",
+        formel: { namn: "Blondels formel", beskrivning: "2 × Steghöjd (H) + Stegdjup (B) bör ligga mellan 600 och 630 mm." }
     }
 }];

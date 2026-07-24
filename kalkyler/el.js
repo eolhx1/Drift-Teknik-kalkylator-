@@ -22,5 +22,8 @@ export const elKalkyler = [{
         { id: "varde2", label: "Resistans (R) [Ω]" }
     ],
     calc: beraknaOhmsLag,
-    info: { beskrivning: "Ohms lag." }
+    info: {
+        beskrivning: "Räknar ut spänning, ström eller resistans med Ohms lag.",
+        detaljer: "Grundläggande el-beräkning för att snabbt ta reda på saknade värden i en elektrisk krets."
+    }
 }];
