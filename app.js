@@ -280,16 +280,20 @@ function showSubMenu(categoryKey) {
     const categoryName = catData.namn || (categoryKey === "recent" ? "Senaste" : "Kategorier");
     const categoryIcon = catData.ikon || "";
 
+    // 1. Bygg header med sökfält och rubrik
     const headerDiv = document.createElement("div");
     headerDiv.className = "submenu-header-bar";
-    headerDiv.style.cssText = "display: flex; flex-direction: column; margin-bottom: 15px; gap: 6px; padding: 0 4px;";
+    headerDiv.style.cssText = "display: flex; flex-direction: column; margin-bottom: 15px; gap: 10px; padding: 0 4px;";
     headerDiv.innerHTML = `
     <button id="subBackBtn" class="back-link-btn" style="background: none; border: none; color: var(--primary-color, #0066cc); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0; text-align: left;">
-    ← Tillbaka till Hem
+        ← Tillbaka till Hem
     </button>
     <h2 style="margin: 0; font-size: 1.4rem; font-weight: bold; display: flex; align-items: center; gap: 8px;">
-    <span>${categoryIcon}</span> ${categoryName}
+        <span>${categoryIcon}</span> ${categoryName}
     </h2>
+    <div class="search-input-wrapper" style="position: relative; margin-top: 5px;">
+        <input type="text" id="categorySearch" placeholder="Sök i ${categoryName.toLowerCase()}..." style="width: 100%; padding: 10px 12px; box-sizing: border-box; border: 1px solid var(--border-color, #ccc); border-radius: 6px; font-size: 0.95rem; background: var(--card-bg, #fff); color: var(--text-color);">
+    </div>
     `;
     state.subNav.appendChild(headerDiv);
 
@@ -298,26 +302,81 @@ function showSubMenu(categoryKey) {
         showMainMenu();
     };
 
+    // 2. Hämta kalkyler för denna kategori
     const list = (categoryKey === "recent") ? getRecent() : null;
+    let kalkylerAttVisa = [];
 
     if (list) {
-        if (list.length === 0) {
-            const emptyMsg = document.createElement("p");
-            emptyMsg.style.cssText = "padding:14px; color:var(--text-muted);";
-            emptyMsg.textContent = "Ingen data hittades.";
-            state.subNav.appendChild(emptyMsg);
+        kalkylerAttVisa = list.map(calcId => findCalc(calcId)).filter(Boolean);
+    } else {
+        kalkylerAttVisa = ALLA_KALKYLER.filter(c => c.kategorier.includes(categoryKey));
+    }
+
+    // Container för själva kalkylkorten
+    const listContainer = document.createElement("div");
+    listContainer.id = "calcListContainer";
+    listContainer.style.cssText = "display: flex; flex-direction: column; gap: 8px; padding: 4px;";
+    state.subNav.appendChild(listContainer);
+
+    // Funktion för att rita ut listan (används även vid sökning)
+    const renderListItems = (items) => {
+        listContainer.innerHTML = "";
+        if (items.length === 0) {
+            listContainer.innerHTML = "<p style='padding:14px; color:var(--text-muted); text-align: center;'>Inga kalkyler hittades.</p>";
             return;
         }
-        list.forEach(calcId => {
-            const calc = findCalc(calcId);
-            if (calc) state.subNav.appendChild(createButton(calc.namn, "sub-btn", () => renderCalc(categoryKey, calc.id)));
+
+        items.forEach(calc => {
+            // Hämta beskrivning från info om den finns
+            let beskrivning = "";
+            if (calc.info) {
+                if (typeof calc.info === 'string') beskrivning = calc.info;
+                else if (calc.info.beskrivning) beskrivning = calc.info.beskrivning;
+            }
+
+            const card = document.createElement("button");
+            card.className = "sub-btn";
+            card.style.cssText = "display: flex; flex-direction: column; align-items: flex-start; text-align: left; background: var(--card-bg, #fff); border: 1px solid var(--border-color, #ccc); border-radius: 8px; padding: 12px; cursor: pointer; width: 100%; transition: background 0.2s;";
+            
+            card.innerHTML = `
+                <span style="font-weight: bold; font-size: 1rem; color: var(--text-color);">${calc.namn}</span>
+                ${beskrivning ? `<span style="font-size: 0.8rem; color: var(--text-muted, #666); margin-top: 3px; line-height: 1.2;">${beskrivning}</span>` : ""}
+            `;
+
+            card.onclick = () => {
+                triggerHaptic(20);
+                renderCalc(categoryKey, calc.id);
+            };
+
+            listContainer.appendChild(card);
         });
-    } else {
-        ALLA_KALKYLER.filter(c => c.kategorier.includes(categoryKey)).forEach(calc => {
-            state.subNav.appendChild(createButton(calc.namn, "sub-btn", () => renderCalc(categoryKey, calc.id)));
+    };
+
+    // Rita ut från början
+    renderListItems(kalkylerAttVisa);
+
+    // 3. Koppla sökfältets händelselyssnare
+    const searchInput = document.getElementById("categorySearch");
+    searchInput.addEventListener("input", (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        if (!query) {
+            renderListItems(kalkylerAttVisa);
+            return;
+        }
+
+        const filtered = kalkylerAttVisa.filter(calc => {
+            let searchableText = calc.namn.toLowerCase();
+            if (calc.info) {
+                if (typeof calc.info === 'string') searchableText += " " + calc.info.toLowerCase();
+                else if (calc.info.beskrivning) searchableText += " " + calc.info.beskrivning.toLowerCase();
+            }
+            return query.split(/\s+/).every(word => searchableText.includes(word));
         });
-    }
+
+        renderListItems(filtered);
+    });
 }
+
 
 function renderSavedJobsList() {
     const jobs = getSavedJobs();
