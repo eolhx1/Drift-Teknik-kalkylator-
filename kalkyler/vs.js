@@ -37,7 +37,7 @@ const beraknaTryckfallRor = (v) => {
     const delta_p_pa = v.R * v.L;
     const delta_p_total = delta_p_pa * 1.4;
 
-    let resultatText = `Rörns tryckfall: ${formatResult(delta_p_total, 0)} Pa\n`;
+    let resultatText = `Rörnätets tryckfall: ${formatResult(delta_p_total, 0)} Pa\n`;
     resultatText += `Inkl. kopplingar (~40%): ${formatResult(delta_p_total / 1000, 2)} kPa`;
     return resultatText;
 };
@@ -66,19 +66,14 @@ const beraknaEttrorTemp = (v) => {
     return t_nasta;
 };
 
-// Ny kalkyl: Värmeeffekt från flöde och ΔT (bra för kulvert/värmeväxlare)
 const beraknaVasteffektFlode = (v) => {
     if (!valid(v.flode_ls, v.dt)) return "Fel";
-    // P = q * 4.19 * dT (kW)
     const effekt_kw = v.flode_ls * 4.19 * v.dt;
     return `Överförd effekt: ${effekt_kw.toFixed(2)} kW`;
 };
 
-// Ny kalkyl: Vattenexpansion vid uppvärmning
 const beraknaVattenexpansion = (v) => {
     if (!valid(v.volym_m3, v.t_kall, v.t_varm)) return "Fel";
-    // Ungefärlig volymutvidgningskoefficient för vatten mellan t_kall och t_varm
-    // Förenklat schablonvärde baserat på densitetsskillnad (~0.02 till 0.03 beroende på temp)
     const expansion_procent = (v.t_varm - v.t_kall) * 0.00035; 
     const expansionsvolym_liter = v.volym_m3 * 1000 * expansion_procent;
     
@@ -86,10 +81,8 @@ const beraknaVattenexpansion = (v) => {
            `Total ny volym: ${(v.volym_m3 * 1000 + expansionsvolym_liter).toFixed(1)} liter`;
 };
 
-// 4. Kyleffekt för köldbärare (t.ex. glykolvatten)
 const beraknaKoldbarareEffekt = (v) => {
     if (!valid(v.flode_ls, v.dt)) return "Fel";
-    // P = q * c * rho * dT (Förenklat för vatten/glykolblandning ca 4.0 kJ/(kg·K))
     const effekt_kw = v.flode_ls * 4.0 * v.dt;
     return `Kyl- / Värmebärareeffekt: ${effekt_kw.toFixed(2)} kW`;
 };
@@ -107,7 +100,10 @@ export const vsKalkyler = [
             { id: "dt", label: "Temperaturskillnad (ΔT)", unit: ["°C"] }
         ],
         calc: beraknaVsFlode,
-        info: { beskrivning: "Beräknar det erforderliga vattenflödet för en given radiatoreffekt." }
+        info: {
+            beskrivning: "Beräknar erforderligt vattenflöde för en given radiatoreffekt.",
+            detaljer: "Används för att bestämma det flöde i l/h eller l/s som krävs för att avge en specifik effekt vid vald temperaturskillnad (ΔT). Bygger på vattnets specifika värmekapacitet."
+        }
     },
     {
         id: "vs_kv_varde",
@@ -120,7 +116,10 @@ export const vsKalkyler = [
             { id: "tryckfall", label: "Tryckfall över ventil (Δp)", unit: ["bar"] }
         ],
         calc: beraknaKvVarde,
-        info: { beskrivning: "Beräknar ventilens K_v-värde för inställning av rätt flöde." }
+        info: {
+            beskrivning: "Beräknar ventilens K<sub>v</sub>-värde för flödesinställning.",
+            detaljer: "K<sub>v</sub>-värdet definieras som det flöde i m³/h som passerar ventilen vid ett tryckfall på 1 bar. Viktigt verktyg vid injustering av stam- och radiatordon."
+        }
     },
     {
         id: "vs_radiator_ny_temp",
@@ -135,7 +134,10 @@ export const vsKalkyler = [
             { id: "exponent", label: "Radiatorexponent (n)" }
         ],
         calc: beraknaNyRadiatoreffekt,
-        info: { beskrivning: "Beräknar hur mycket effekten på en radiator förändras vid sänkt framledningstemp." }
+        info: {
+            beskrivning: "Beräknar förändrad radiatoreffekt vid sänkt framledningstemperatur.",
+            detaljer: "Hjälper till att utreda om befintliga radiatorer klarar att hålla värmen vid övergång till lågtemperatursystem (t.ex. konvertering från direktverkande el eller olja till värmepump)."
+        }
     },
     {
         id: "vs_proportionalitetsmetoden",
@@ -148,7 +150,10 @@ export const vsKalkyler = [
             { id: "q_proj", label: "Projekterat flöde", unit: ["l/h", "m³/h"] }
         ],
         calc: beraknaVsProportionalitet,
-        info: { beskrivning: "Beräknar injusteringskvoten för stammar och radiatorer." }
+        info: {
+            beskrivning: "Beräknar injusteringskvoten för stammar och ventiler.",
+            detaljer: "Används vid injustering enligt proportionalitetsmetoden för att snabbt räkna ut inställningsvärden baserat på förhållandet mellan uppmätt och projekterat flöde."
+        }
     },
     {
         id: "vs_tryckfall_ror",
@@ -161,10 +166,13 @@ export const vsKalkyler = [
             { id: "L", label: "Rörsatsens totala längd (fram + retur)", unit: ["m"] }
         ],
         calc: beraknaTryckfallRor,
-        info: { beskrivning: "Beräknar tryckfallet i rörnätet inklusive tillägg för kopplingar." }
+        info: {
+            beskrivning: "Beräknar tryckfall i rörnätet inklusive schablon för kopplingar.",
+            detaljer: "Multiplicerar rörlängden med friktionsmotståndet och lägger schablonmässigt till 40 % extra tryckfall för att kompensera för rördelar, ventiler och kopplingar."
+        }
     },
     {
-        id: "vs_affinitet_pump", // <-- FIXAT ID HÄR!
+        id: "vs_affinitet_pump",
         namn: "Affinitetslagar (Pump)",
         kategorier: ["vs"],
         decimaler: 2,
@@ -177,8 +185,8 @@ export const vsKalkyler = [
         ],
         calc: beraknaPumpAffinitet,
         info: {
-            beskrivning: "Beräknar nytt flöde, tryck och effekt vid ändrat varvtal för pumpar.",
-            formel: { namn: "Affinitetslagarna", beskrivning: "Q2 = Q1*(n2/n1), p2 = p1*(n2/n1)², P2 = P1*(n2/n1)³" }
+            beskrivning: "Beräknar nytt flöde, tryck och effekt vid ändrat pumpvarvtal.",
+            detaljer: "Baserat på affinitetslagarna: flödet är direkt proportionellt mot varvtalet, trycket mot kvadraten och effekten mot kubiken på varvtalsändringen."
         }
     },
     {
@@ -193,7 +201,10 @@ export const vsKalkyler = [
             { id: "q_slinga", label: "Slingans totala vattenflöde", unit: ["l/h"] }
         ],
         calc: beraknaEttrorTemp,
-        info: { beskrivning: "Beräknar avkylningen per radiator i en seriekopplad slinga." }
+        info: {
+            beskrivning: "Beräknar avkylningen per radiator i en seriekopplad ettrörsslinga.",
+            detaljer: "Visar hur mycket framledningstemperaturen sjunker efter en radiator beroende på dess effektuttag och slingans totala vattenflöde."
+        }
     },
     {
         id: "vs_vasteffekt_flode",
@@ -206,7 +217,10 @@ export const vsKalkyler = [
             { id: "dt", label: "Temperaturskillnad (fram - retur) [°C]", unit: ["°C"] }
         ],
         calc: beraknaVasteffektFlode,
-        info: { beskrivning: "Beräknar överförd värmeeffekt i kW baserat på uppmätt flöde och temperaturskillnad." }
+        info: {
+            beskrivning: "Beräknar överförd värmeeffekt i kW baserat på flöde och ΔT.",
+            detaljer: "Används ofta vid mätning eller verifiering av effekten i kulvertar, värmeväxlare eller större värmekretsar."
+        }
     },
     {
         id: "vs_vattenexpansion",
@@ -220,9 +234,11 @@ export const vsKalkyler = [
             { id: "t_varm", label: "Max drifttemperatur [°C]", unit: ["°C"] }
         ],
         calc: beraknaVattenexpansion,
-        info: { beskrivning: "Beräknar hur många liter vattnet expanderar när systemet värms upp från fyllningstemperatur till drifttemperatur." }
+        info: {
+            beskrivning: "Beräknar vattenexpansion vid uppvärmning från fyll- till drifttemperatur.",
+            detaljer: "Hjälper till att bestämma volymökningen i ett slutet värmesystem, vilket är grundläggande vid dimensionering eller kontroll av expansionskärl."
+        }
     },
-    
     {
         id: "energi_koldbarare_effekt",
         namn: "Effekt köldbärare (Flöde & ΔT)",
@@ -234,8 +250,8 @@ export const vsKalkyler = [
         ],
         calc: beraknaKoldbarareEffekt,
         info: {
-            beskrivning: "Beräknar kyleffekt eller värmeeffekt i köld-/värmebärarsystem baserat på flöde och ΔT.",
-            formel: { namn: "Effekt köldbärare", beskrivning: "P = q × c × ρ × ΔT" }
+            beskrivning: "Beräknar kyleffekt eller värmeeffekt i köld-/värmebärarsystem.",
+            detaljer: "Anpassad för system med köldbärare (t.ex. glykolblandningar) där värmekapaciteten avviker något från rent vatten."
         }
     }
 ];
